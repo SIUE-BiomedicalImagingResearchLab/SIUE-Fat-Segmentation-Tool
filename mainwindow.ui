@@ -18,23 +18,12 @@
     <item>
      <layout class="QVBoxLayout" name="verticalLayout">
       <item>
-       <widget class="QOpenGLWidget" name="openGLWidget"/>
-      </item>
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_2">
+       <layout class="QHBoxLayout" name="horizontalLayout">
         <item>
-         <widget class="QToolButton" name="toolButton">
-          <property name="text">
-           <string>...</string>
-          </property>
-         </widget>
+         <widget class="QOpenGLWidget" name="glWidgetWater"/>
         </item>
         <item>
-         <widget class="QPushButton" name="pushButton">
-          <property name="text">
-           <string>PushButton</string>
-          </property>
-         </widget>
+         <widget class="AxialFatSliceWidget" name="glWidgetFat"/>
         </item>
        </layout>
       </item>
@@ -85,6 +74,13 @@
   </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>AxialFatSliceWidget</class>
+   <extends>QOpenGLWidget</extends>
+   <header>axialfatslicewidget.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>
