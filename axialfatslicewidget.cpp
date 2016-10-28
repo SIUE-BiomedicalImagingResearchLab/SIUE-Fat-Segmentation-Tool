@@ -23,6 +23,21 @@ void AxialFatSliceWidget::paintGL()
     glClear(GL_COLOR_BUFFER_BIT);
 }
 
+void AxialFatSliceWidget::mouseMoveEvent(QMouseEvent *eventMove)
+{
+    //qDebug() << "MOVE!";
+}
+
+void AxialFatSliceWidget::mousePressEvent(QMouseEvent *eventPress)
+{
+    //qDebug() << "PRESS";
+}
+
+void AxialFatSliceWidget::mouseReleaseEvent(QMouseEvent *eventRelease)
+{
+    //qDebug() << "RELEASE";
+}
+
 AxialFatSliceWidget::~AxialFatSliceWidget()
 {
 

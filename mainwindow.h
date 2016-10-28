@@ -6,6 +6,8 @@
 #include <QDir>
 #include <QDebug>
 #include <QMessageBox>
+#include <QSettings>
+#include <QDesktopWidget>
 
 #include <nifti/include/nifti1.h>
 #include <nifti/include/fslio.h>
@@ -31,6 +33,9 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
+
+    void readSettings();
+    void writeSettings();
 };
 
 #endif // MAINWINDOW_H
