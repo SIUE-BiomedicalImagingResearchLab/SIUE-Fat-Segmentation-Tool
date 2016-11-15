@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/">
+        <file>shaders/axialslice.frag</file>
+        <file>shaders/axialslice.vert</file>
+    </qresource>
+</RCC>
