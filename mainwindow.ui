@@ -20,29 +20,25 @@
    <string>Visceral Fat Segmentation</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <layout class="QVBoxLayout" name="verticalLayout_2">
-    <item>
-     <layout class="QVBoxLayout" name="verticalLayout">
+   <layout class="QGridLayout" name="gridLayout">
+    <item row="0" column="0">
+     <layout class="QHBoxLayout" name="horizontalLayout" stretch="2,7">
+      <property name="spacing">
+       <number>3</number>
+      </property>
+      <property name="sizeConstraint">
+       <enum>QLayout::SetNoConstraint</enum>
+      </property>
       <item>
-       <layout class="QHBoxLayout" name="horizontalLayout">
+       <layout class="QVBoxLayout" name="verticalLayout" stretch="3,4">
+        <property name="sizeConstraint">
+         <enum>QLayout::SetMaximumSize</enum>
+        </property>
         <item>
          <widget class="QGroupBox" name="groupBox">
           <property name="title">
            <string>GroupBox</string>
           </property>
-          <widget class="QSlider" name="horizontalSlider">
-           <property name="geometry">
-            <rect>
-             <x>40</x>
-             <y>70</y>
-             <width>160</width>
-             <height>22</height>
-            </rect>
-           </property>
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-          </widget>
           <widget class="QRadioButton" name="radioButton">
            <property name="geometry">
             <rect>
@@ -69,6 +65,33 @@
             <string>RadioButton</string>
            </property>
           </widget>
+          <widget class="QWidget" name="">
+           <property name="geometry">
+            <rect>
+             <x>40</x>
+             <y>70</y>
+             <width>129</width>
+             <height>24</height>
+            </rect>
+           </property>
+           <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="0,0">
+            <item>
+             <widget class="QSlider" name="horizontalSlider">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QSpinBox" name="spinBox"/>
+            </item>
+           </layout>
+          </widget>
+          <zorder>horizontalSlider</zorder>
+          <zorder>radioButton</zorder>
+          <zorder>radioButton_2</zorder>
+          <zorder>glWidgetWater</zorder>
+          <zorder>spinBox</zorder>
          </widget>
         </item>
         <item>
@@ -84,14 +107,20 @@
           </property>
          </widget>
         </item>
-        <item>
-         <widget class="AxialFatSliceWidget" name="glWidgetFat">
-          <property name="mouseTracking">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
        </layout>
+      </item>
+      <item>
+       <widget class="AxialFatSliceWidget" name="glWidgetSlice">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>2</horstretch>
+          <verstretch>1</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="mouseTracking">
+         <bool>true</bool>
+        </property>
+       </widget>
       </item>
      </layout>
     </item>

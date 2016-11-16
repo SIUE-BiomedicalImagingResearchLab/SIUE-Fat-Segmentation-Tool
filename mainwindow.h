@@ -12,7 +12,7 @@
 #include <nifti/include/nifti1.h>
 #include <nifti/include/fslio.h>
 
-#include "nifti.hpp"
+#include "niftimage.h"
 #include "util.hpp"
 #include "exception.hpp"
 
@@ -36,15 +36,11 @@ private slots:
 private:
     Ui::MainWindow *ui;
 
-    nifti_image *fatUpperImage;
-    nifti_image *fatLowerImage;
-    nifti_image *waterUpperImage;
-    nifti_image *waterLowerImage;
+    NIFTImage *fatImage;
+    NIFTImage *waterImage;
 
     void readSettings();
     void writeSettings();
-
-    void checkNIFTIImages();
 };
 
 #endif // MAINWINDOW_H

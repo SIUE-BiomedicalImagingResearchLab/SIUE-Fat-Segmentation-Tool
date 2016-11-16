@@ -4,10 +4,8 @@ AxialFatSliceWidget::AxialFatSliceWidget(QWidget *parent) : QOpenGLWidget(parent
 {
     this->displayType = AxialDisplayType::FatOnly;
 
-    this->fatUpperImage = NULL;
-    this->fatLowerImage = NULL;
-    this->waterUpperImage = NULL;
-    this->waterLowerImage = NULL;
+    this->fatImage = NULL;
+    this->waterImage = NULL;
 
     this->texture = NULL;
     this->sliceVertices.append(VertexPT(QVector3D(-1.0f, -1.0f, 0.0f), QVector2D(0.0f, 0.0f)));
@@ -20,12 +18,13 @@ AxialFatSliceWidget::AxialFatSliceWidget(QWidget *parent) : QOpenGLWidget(parent
     this->currTime = -1;
 }
 
-void AxialFatSliceWidget::setImages(nifti_image *fatUpper, nifti_image *fatLower, nifti_image *waterUpper, nifti_image *waterLower)
+void AxialFatSliceWidget::setImages(NIFTImage *fat, NIFTImage *water)
 {
-    fatUpperImage = fatUpper;
-    fatLowerImage = fatLower;
-    waterUpperImage = waterUpper;
-    waterLowerImage = waterLower;
+    if (!fat || !water)
+        return;
+
+    fatImage = fat;
+    waterImage = water;
 
     SetAxialSlice(54);
     // TODO: Make this a better value
@@ -33,55 +32,79 @@ void AxialFatSliceWidget::setImages(nifti_image *fatUpper, nifti_image *fatLower
 
 void AxialFatSliceWidget::SetAxialSlice(int slice, int time)
 {
-    if (!fatUpperImage || !fatLowerImage || !waterUpperImage || !waterLowerImage)
+    if (!fatImage || !waterImage)
         return;
 
-    void *buffer = NULL;
-    int dims[8] = {-1, -1, -1, slice, time, -1, -1, -1};
-
+    cv::Mat matrix;
     switch (displayType)
     {
         case AxialDisplayType::FatOnly:
         {
-            qDebug() << "Meow: " << nifti_read_collapsed_image(fatUpperImage, dims, &buffer);
-
-            qDebug() << "Datatype: " << fatUpperImage->datatype;
-            buffer = new short[fatUpperImage->dim[1] * fatUpperImage->dim[2]];
-            memset(buffer, 0x6F, (fatUpperImage->dim[1] * fatUpperImage->dim[2] * sizeof(short)));
-            short flip = 0;
-            for (int i = 0; i < fatUpperImage->dim[2]; ++i)
+            matrix = fatImage->getSlice(slice);
+            if (matrix.empty())
             {
-                for (int ii = 0; ii < fatUpperImage->dim[1]; ++ii)
-                {
-                    //((short *)buffer)[i * ii] = abs(flip);
-                    flip++;
-                }
-                flip += 5;
+                qDebug() << "Unable to retrieve slice " << slice << " from the fat image. Matrix returned empty.";
+                return;
             }
+
+            cv::normalize(matrix.clone(), matrix, 0.0f, 1.0f, cv::NORM_MINMAX, CV_32FC1);
         }
         break;
 
         case AxialDisplayType::WaterOnly:
-            nifti_read_collapsed_image(waterUpperImage, dims, &buffer);
-            // TODO: Check to make sure this was successful.
-            break;
+        {
+            matrix = waterImage->getSlice(slice, true);
+            if (matrix.empty())
+            {
+                qDebug() << "Unable to retrieve slice " << slice << " from the fat image. Matrix returned empty.";
+                return;
+            }
+
+            cv::normalize(matrix.clone(), matrix, 0.0f, 1.0f, cv::NORM_MINMAX, CV_32FC1);
+        }
+        break;
 
         case AxialDisplayType::FatFraction:
-            //buffer = new float[fatUpperImage->dim[1] * fatUpperImage->dim[2]];
-            break;
+        {
+            cv::Mat fatTemp = fatImage->getSlice(slice, true);
+            cv::Mat waterTemp = waterImage->getSlice(slice, true);
+            if (fatTemp.empty() || waterTemp.empty())
+            {
+                qDebug() << "Unable to retrieve slice " << slice << " from the fat or water image. Matrix returned empty.";
+                return;
+            }
+
+            cv::normalize(fatTemp.clone(), fatTemp, 0.0f, 1.0f, cv::NORM_MINMAX, CV_32FC1);
+            cv::normalize(waterTemp.clone(), waterTemp, 0.0f, 1.0f, cv::NORM_MINMAX, CV_32FC1);
+
+            matrix = (fatTemp - waterTemp) / fatTemp;
+        }
+        break;
 
         case AxialDisplayType::WaterFraction:
-            //buffer = new float[fatUpperImage->dim[1] * fatUpperImage->dim[2]];
-            break;
+        {
+            cv::Mat fatTemp = fatImage->getSlice(slice, true);
+            cv::Mat waterTemp = waterImage->getSlice(slice, true);
+            if (fatTemp.empty() || waterTemp.empty())
+            {
+                qDebug() << "Unable to retrieve slice " << slice << " from the fat or water image. Matrix returned empty.";
+                return;
+            }
+
+            cv::normalize(fatTemp.clone(), fatTemp, 0.0f, 1.0f, cv::NORM_MINMAX, CV_32FC1);
+            cv::normalize(waterTemp.clone(), waterTemp, 0.0f, 1.0f, cv::NORM_MINMAX, CV_32FC1);
+
+            matrix = (waterTemp - fatTemp) / waterTemp;
+        }
+        break;
     }
 
     glBindTexture(GL_TEXTURE_2D, texture);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-    GLenum *dataType = nifti_datatype_to_opengl(fatUpperImage->datatype);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, fatUpperImage->dim[1], fatUpperImage->dim[2], 0, dataType[1], dataType[2], buffer);
-    // TODO: Delete the buffer if necessary
+    GLenum *dataType = NIFTImage::openCVToOpenGLDatatype(matrix.type());
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, fatImage->getXDim(), fatImage->getYDim(), 0, dataType[1], dataType[2], matrix.data);
 
     GLenum err;
     if ((err = glGetError()) != GL_NO_ERROR)
@@ -117,8 +140,8 @@ void AxialFatSliceWidget::initializeGL()
     glBindVertexArray(vertexObject);
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(0, VertexPT::PosTupleSize, GL_FLOAT, true, VertexPT::stride(), (void *)VertexPT::posOffset());
-    glVertexAttribPointer(1, VertexPT::TexPosTupleSize, GL_FLOAT, true, VertexPT::stride(), (void *)VertexPT::texPosOffset());
+    glVertexAttribPointer(0, VertexPT::PosTupleSize, GL_FLOAT, true, VertexPT::stride(), static_cast<const char *>(0) + VertexPT::posOffset());
+    glVertexAttribPointer(1, VertexPT::TexPosTupleSize, GL_FLOAT, true, VertexPT::stride(), static_cast<const char *>(0) + VertexPT::texPosOffset());
 
     // Enable 2D textures and generate a blank texture for the axial slice
     glEnable(GL_TEXTURE_2D);

@@ -11,21 +11,22 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = VisceralFatValidation
 TEMPLATE = app
 
-release: DEFINES += QT_NO_WARNING_OUTPUT QT_NO_DEBUG_OUTPUT
+CONFIG(release, debug|release): DEFINES += QT_NO_WARNING_OUTPUT QT_NO_DEBUG_OUTPUT
 
 SOURCES += main.cpp\
         mainwindow.cpp \
     util.cpp \
     axialfatslicewidget.cpp \
-    nifti.cpp \
-    vertex.cpp
+    vertex.cpp \
+    niftimage.cpp
 
 HEADERS  += mainwindow.h \
     util.hpp \
     axialfatslicewidget.h \
     exception.hpp \
-    nifti.hpp \
-    vertex.hpp
+    vertex.hpp \
+    application.h \
+    niftimage.h
 
 FORMS    += mainwindow.ui
 
@@ -42,6 +43,11 @@ LIBS += -L$$PWD/nifti/lib/ \
         libnifticdf.dll.a \
         libniftiio.dll.a \
         libznz.dll.a
+
+INCLUDEPATH += 'C:/Program Files/opencv2/include'
+DEPENDPATH += 'C:/Program Files/opencv2/include'
+LIBS += -L'C:/Program Files/opencv2/lib' \
+        -lopencv_world310
 
 RESOURCES += \
     resources.qrc

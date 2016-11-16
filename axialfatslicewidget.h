@@ -14,7 +14,9 @@
 #include <nifti/include/nifti1.h>
 #include <nifti/include/fslio.h>
 
-#include "nifti.hpp"
+#include <opencv2/opencv.hpp>
+
+#include "niftimage.h"
 #include "vertex.hpp"
 
 enum AxialDisplayType
@@ -30,10 +32,8 @@ class AxialFatSliceWidget : public QOpenGLWidget, protected QOpenGLFunctions_3_3
 private:
     AxialDisplayType displayType;
 
-    nifti_image *fatUpperImage;
-    nifti_image *fatLowerImage;
-    nifti_image *waterUpperImage;
-    nifti_image *waterLowerImage;
+    NIFTImage *fatImage;
+    NIFTImage *waterImage;
 
     QOpenGLShaderProgram *program;
     GLuint vertexBuf, indexBuf;
@@ -51,7 +51,7 @@ public:
 
     void SetAxialSlice(int slice, int time = -1);
 
-    void setImages(nifti_image *fatUpper, nifti_image *fatLower, nifti_image *waterUpper, nifti_image *waterLower);
+    void setImages(NIFTImage *fat, NIFTImage *water);
 
 protected:
     void initializeGL();
