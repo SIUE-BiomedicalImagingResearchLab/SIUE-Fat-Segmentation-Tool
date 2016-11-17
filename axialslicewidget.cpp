@@ -2,7 +2,7 @@
 
 AxialSliceWidget::AxialSliceWidget(QWidget *parent) : QOpenGLWidget(parent)
 {
-    this->displayType = AxialDisplayType::WaterOnly;//AxialDisplayType::FatOnly;
+    this->displayType = AxialDisplayType::FatOnly;
 
     this->fatImage = NULL;
     this->waterImage = NULL;
@@ -19,6 +19,14 @@ AxialSliceWidget::AxialSliceWidget(QWidget *parent) : QOpenGLWidget(parent)
     this->curColorMap = ColorMap::Gray;
     this->curBrightness = 0.0f;
     this->curContrast = 1.0f;
+
+    this->startDraw = false;
+    this->startPan = false;
+
+    this->projectionMatrix.setToIdentity();
+    this->viewMatrix.setToIdentity();
+    this->scaling = 1.0f;
+    this->translation = QVector3D(0.0f, 0.0f, 0.0f);
 }
 
 void AxialSliceWidget::setImages(NIFTImage *fat, NIFTImage *water)
@@ -31,6 +39,11 @@ void AxialSliceWidget::setImages(NIFTImage *fat, NIFTImage *water)
 
     this->curSlice = -1;
     this->curTime = -1;
+
+    this->projectionMatrix.setToIdentity();
+    this->viewMatrix.setToIdentity();
+    this->scaling = 1.0f;
+    this->translation = QVector3D(0.0f, 0.0f, 0.0f);
 }
 
 void AxialSliceWidget::setAxialSlice(int slice, int time)
@@ -67,7 +80,6 @@ void AxialSliceWidget::setAxialSlice(int slice, int time)
         {
             // Get the slice for the water image. If the result is empty then there was an error retrieving the slice
             matrix = waterImage->getSlice(slice, true);
-            qDebug() << "Testing...";
             if (matrix.empty())
             {
                 qDebug() << "Unable to retrieve slice " << slice << " from the fat image. Matrix returned empty.";
@@ -199,12 +211,6 @@ void AxialSliceWidget::setContrast(float contrast)
 
     curContrast = contrast;
 
-    for (int i = 0; i < ColorMap::Count; ++i)
-    {
-        program[i]->bind();
-        program[i]->setUniformValue("contrast", contrast);
-    }
-
     // Redraw the screen because the contrast has changed
     update();
 }
@@ -225,20 +231,27 @@ void AxialSliceWidget::setBrightness(float brightness)
 
     curBrightness = brightness;
 
-    for (int i = 0; i < ColorMap::Count; ++i)
-    {
-        program[i]->bind();
-        program[i]->setUniformValue("brightness", brightness);
-    }
-
     // Redraw the screen because the brightness has changed
+    update();
+}
+
+void AxialSliceWidget::resetView()
+{
+    // Reset translation and scaling factors
+    translation = QVector3D(0.0f, 0.0f, 0.0f);
+    scaling = 1.0f;
+
+    // Update the screen
     update();
 }
 
 void AxialSliceWidget::initializeGL()
 {
     initializeOpenGLFunctions();
-    glClearColor(0.0f, 1.0f, 1.0f, 1.0f);
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+
+    // Create MVP matrix from the model, view, and projection matrix.
+    QMatrix4x4 mvp = /* model * */viewMatrix * projectionMatrix;
 
     // Create a new shader variable, load the GLSL vertex and fragment files, link and bind the program.
     for (int i = 0; i < ColorMap::Count; ++i)
@@ -251,6 +264,7 @@ void AxialSliceWidget::initializeGL()
         program[i]->bind();
 
         program[i]->setUniformValue("tex", 0);
+        program[i]->setUniformValue("mvp", mvp);
     }
 
     // Generate vertex buffer for the axial slice. The sliceVertices data is uploaded to the VBO
@@ -284,22 +298,44 @@ void AxialSliceWidget::initializeGL()
 
 void AxialSliceWidget::resizeGL(int w, int h)
 {
-    // Update projection matrix and other size related settings:
-    //m_projection.setToIdentity();
-    //m_projection.perspective(45.0f, w / float(h), 0.01f, 100.0f);
+    // Shuts compiler up about unused variables w and h.
+    (void)w;
+    (void)h;
 
-    /* I am on hold with this for awhile until I can find out how to draw the 3D image of the NIFTI file onto a OpenGL surface.
-     * I am not sure what to do about the vertices and elements buffer since I only have a file that says what the color intensity
-     * should be at a certain point */
+    /* Because of the simplicity of this program, A.K.A because it is in 2D, there is no need to do anything when the window itself is resized.
+     * This is automatically handled and it is typically only useful when doing 3D applications I believe.
+     */
 }
 
 void AxialSliceWidget::paintGL()
 {
     glClear(GL_COLOR_BUFFER_BIT);
 
-    // Bind the shader program, VAO, bind texture to GL_TEXTURE0, bind VBO, bind IBO
+    // Calculate the ModelViewProjection (MVP) matrix to transform the location of the axial slices
+    QMatrix4x4 mvpMatrix;
+    QMatrix4x4 modelMatrix;
+
+    // Translate the modelMatrix according to translation vector
+    // Then scale according to scaling factor
+    modelMatrix.translate(translation);
+    modelMatrix.scale(scaling);
+
+    // Create the MVP matrix by M * V * P
+    mvpMatrix = modelMatrix * viewMatrix * projectionMatrix;
+
+    // Get the current shader program, bind it, and set the brightness, contrast, and MVP
+    // Note: I did quite a bit of research on this and updating the uniform values in this function is
+    // likely going to be the best results. Yes, it may be redundant and slow down the program when it
+    // doesn't change much but when the program is quickly working, it will be updating this regardless
+    // Until I see performance issues with this method, I believe it is the best method
+    QOpenGLShaderProgram *curProgram = program[(int)curColorMap];
+    curProgram->bind();
+    curProgram->setUniformValue("brightness", curBrightness);
+    curProgram->setUniformValue("contrast", curContrast);
+    curProgram->setUniformValue("MVP", mvpMatrix);
+
+    // Bind the VAO, bind texture to GL_TEXTURE0, bind VBO, bind IBO
     // The program that is bound is the index of the curColorMap.
-    program[(int)curColorMap]->bind();
     glBindVertexArray(vertexObject);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture);
@@ -316,22 +352,100 @@ void AxialSliceWidget::paintGL()
     glBindTexture(GL_TEXTURE_2D, 0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-    program[(int)curColorMap]->release();
+    curProgram->release();
 }
 
 void AxialSliceWidget::mouseMoveEvent(QMouseEvent *eventMove)
 {
-    //qDebug() << "MOVE!";
+    if (startDraw)
+    {
+        // Do drawing stuff
+    }
+    else if (startPan)
+    {
+        // Change in mouse x/y based on last mouse position
+        QPointF delta = (eventMove->pos() - lastMousePos);
+
+        // Divide delta by respective width/height of screen and add it to the translation
+        translation += QVector3D((delta.x() * 2.0f / this->width()), (-delta.y() * 2.0f / this->height()), 0.0f);
+
+        // Tell the screen to draw itself since the scene changed
+        update();
+
+        // Set last mouse position to this one
+        lastMousePos = eventMove->pos();
+    }
 }
 
 void AxialSliceWidget::mousePressEvent(QMouseEvent *eventPress)
 {
-    //qDebug() << "PRESS";
+    // There are button() and buttons() functions in QMouseEvent that have a very
+    // important distinction between one another. button() is only going to return
+    // the button that caused this event while buttons() is a state of all buttons
+    // held down during this event.
+    // Since multiple buttons down does not have functionality, the button() function
+    // is used and if an additional button is down with functionality, the old button
+    // is turned off and the new takes place.
+    if (eventPress->button() == Qt::LeftButton)
+    {
+        // See below for explanation of why this occurs
+        if (startPan)
+        {
+            // TODO: Any other stuff here
+            startPan = false;
+        }
+
+        // Start drawing stuff here
+        startDraw = true;
+    }
+    else if (eventPress->button() == Qt::MiddleButton)
+    {
+        // If the left button is already down and the middle button is clicked, we want
+        // to turn off the drawing functionality from the left click and start panning.
+        // Basically, we don't want to be drawing and panning with the Left/Middle clicks
+        // both on so the latest one overwrites
+        if (startDraw)
+        {
+            // TODO: Any other stuff here
+            startDraw = false;
+        }
+
+        // Flag to indicate that panning is occuring
+        // The starting position is stored so to know how much movement has occurred
+        startPan = true;
+        lastMousePos = eventPress->pos();
+    }
 }
 
 void AxialSliceWidget::mouseReleaseEvent(QMouseEvent *eventRelease)
 {
-    //qDebug() << "RELEASE";
+    if (eventRelease->button() == Qt::LeftButton && startDraw)
+    {
+        // Stop drawing here
+        startDraw = false;
+    }
+    else if (eventRelease->button() == Qt::MiddleButton && startPan)
+    {
+        startPan = false;
+    }
+}
+
+void AxialSliceWidget::wheelEvent(QWheelEvent *event)
+{
+    // The unit for angle delta is in eighths of a degree
+    QPoint numDegrees = event->angleDelta() / 8;
+
+    if (!numDegrees.isNull())
+    {
+        // Zoom in 5% every 15 degrees which is one step on most mouses
+        scaling += numDegrees.y() * (0.05f / 15);
+
+        // Clamp it between 0.05f (5%) to 3.0f (300%)
+        scaling = std::max(std::min(scaling, 3.0f), 0.05f);
+
+        // Update the screen
+        update();
+    }
 }
 
 AxialSliceWidget::~AxialSliceWidget()

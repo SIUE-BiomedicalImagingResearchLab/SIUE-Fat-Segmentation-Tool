@@ -10,6 +10,8 @@
 #include <QMouseEvent>
 #include <QOpenGLTexture>
 #include <QVector>
+#include <QMatrix4x4>
+#include <QTimer>
 
 #include <nifti/include/nifti1.h>
 #include <nifti/include/fslio.h>
@@ -66,6 +68,8 @@ static QString colorMapFragName[ColorMap::Count] =
 
 class AxialSliceWidget : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Core
 {
+    Q_OBJECT
+
 private:
     AxialDisplayType displayType;
 
@@ -87,6 +91,17 @@ private:
     float curBrightness;
     float curContrast;
 
+    bool startDraw;
+
+    bool startPan;
+    QPoint lastMousePos;
+
+    QMatrix4x4 projectionMatrix;
+    QMatrix4x4 viewMatrix;
+
+    float scaling;
+    QVector3D translation;
+
 public:
     AxialSliceWidget(QWidget *parent);
     ~AxialSliceWidget();
@@ -107,6 +122,8 @@ public:
     float getBrightness();
     void setBrightness(float brightness);
 
+    void resetView();
+
 protected:
     void initializeGL();
     void resizeGL(int w, int h);
@@ -115,6 +132,8 @@ protected:
     void mouseMoveEvent(QMouseEvent *eventMove);
     void mousePressEvent(QMouseEvent *eventPress);
     void mouseReleaseEvent(QMouseEvent *eventRelease);
+
+    void wheelEvent(QWheelEvent *event);
 };
 
 #endif // AXIALSLICEWIDGET_H

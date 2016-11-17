@@ -52,11 +52,15 @@ private slots:
 
     void on_waterFracRadioBtn_toggled(bool checked);
 
+    void on_resetViewBtn_clicked();
+
 private:
     Ui::MainWindow *ui;
 
     NIFTImage *fatImage;
     NIFTImage *waterImage;
+
+    QString defaultOpenDir;
 
     void readSettings();
     void writeSettings();

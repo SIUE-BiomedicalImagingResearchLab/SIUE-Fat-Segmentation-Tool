@@ -16,6 +16,9 @@
     <verstretch>0</verstretch>
    </sizepolicy>
   </property>
+  <property name="mouseTracking">
+   <bool>true</bool>
+  </property>
   <property name="windowTitle">
    <string>Visceral Fat Segmentation</string>
   </property>
@@ -51,57 +54,119 @@
           <property name="checkable">
            <bool>false</bool>
           </property>
-          <layout class="QGridLayout" name="gridLayout_2" rowstretch="0,0,0,0,0" columnstretch="0,0,0">
-           <item row="4" column="2" alignment="Qt::AlignTop">
-            <widget class="QGroupBox" name="sliceViewBox">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="toolTip">
-              <string/>
-             </property>
-             <property name="title">
-              <string>Slice View</string>
-             </property>
-             <layout class="QVBoxLayout" name="verticalLayout_2">
-              <property name="spacing">
-               <number>1</number>
-              </property>
-              <item>
-               <widget class="QRadioButton" name="fatRadioBtn">
-                <property name="text">
-                 <string>Fat Only</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QRadioButton" name="waterRadioBtn">
-                <property name="text">
-                 <string>Water Only</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QRadioButton" name="fatFracRadioBtn">
-                <property name="text">
-                 <string>Fat Fraction</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QRadioButton" name="waterFracRadioBtn">
-                <property name="text">
-                 <string>Water Fraction</string>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </widget>
+          <layout class="QGridLayout" name="gridLayout_2" rowstretch="0,0,0,0,0" columnstretch="0,0,0,0,0">
+           <item row="0" column="0" colspan="5">
+            <layout class="QHBoxLayout" name="sliceLayout" stretch="0,0,0">
+             <item>
+              <widget class="QLabel" name="label_4">
+               <property name="text">
+                <string>&amp;Slice:</string>
+               </property>
+               <property name="buddy">
+                <cstring>sliceSlider</cstring>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QSlider" name="sliceSlider">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="tickPosition">
+                <enum>QSlider::NoTicks</enum>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QSpinBox" name="sliceSpinBox">
+               <property name="mouseTracking">
+                <bool>true</bool>
+               </property>
+               <property name="focusPolicy">
+                <enum>Qt::WheelFocus</enum>
+               </property>
+               <property name="buttonSymbols">
+                <enum>QAbstractSpinBox::UpDownArrows</enum>
+               </property>
+               <property name="keyboardTracking">
+                <bool>false</bool>
+               </property>
+               <property name="suffix">
+                <string/>
+               </property>
+              </widget>
+             </item>
+            </layout>
            </item>
-           <item row="3" column="0" colspan="3">
+           <item row="1" column="0" colspan="5">
+            <layout class="QHBoxLayout" name="brightnessLayout" stretch="0,0,0">
+             <item>
+              <widget class="QLabel" name="label_3">
+               <property name="text">
+                <string>&amp;Brightness</string>
+               </property>
+               <property name="buddy">
+                <cstring>brightnessSlider</cstring>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QSlider" name="brightnessSlider">
+               <property name="focusPolicy">
+                <enum>Qt::StrongFocus</enum>
+               </property>
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QSpinBox" name="brightnessSpinBox">
+               <property name="suffix">
+                <string>%</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item row="2" column="0" colspan="5">
+            <layout class="QHBoxLayout" name="contrastLayout" stretch="0,0,0">
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QLabel" name="label">
+               <property name="text">
+                <string>&amp;Contrast</string>
+               </property>
+               <property name="buddy">
+                <cstring>contrastSlider</cstring>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QSlider" name="contrastSlider">
+               <property name="focusPolicy">
+                <enum>Qt::StrongFocus</enum>
+               </property>
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QSpinBox" name="contrastSpinBox">
+               <property name="suffix">
+                <string>%</string>
+               </property>
+               <property name="value">
+                <number>99</number>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item row="3" column="0" colspan="5">
             <layout class="QHBoxLayout" name="colorMapLayout">
              <item>
               <widget class="QLabel" name="label_5">
@@ -112,7 +177,10 @@
                 </sizepolicy>
                </property>
                <property name="text">
-                <string>Color Map: </string>
+                <string>Color &amp;Map: </string>
+               </property>
+               <property name="buddy">
+                <cstring>colorMapComboBox</cstring>
                </property>
               </widget>
              </item>
@@ -201,6 +269,147 @@
               </widget>
              </item>
             </layout>
+           </item>
+           <item row="4" column="1">
+            <widget class="QGroupBox" name="groupBox_2">
+             <property name="toolTip">
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Active layer being traced out on axial slice screen&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             </property>
+             <property name="title">
+              <string>Current Layer</string>
+             </property>
+             <layout class="QVBoxLayout" name="verticalLayout_3">
+              <property name="spacing">
+               <number>2</number>
+              </property>
+              <item>
+               <widget class="QRadioButton" name="EATRadioBtn">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Epicardial Adipose Tissue&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Fat within pericardial sac&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="toolTipDuration">
+                 <number>-1</number>
+                </property>
+                <property name="whatsThis">
+                 <string>This is something crazier I must say.</string>
+                </property>
+                <property name="text">
+                 <string>EAT</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QRadioButton" name="IMATRadioBtn">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Inter&lt;/span&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;M&lt;/span&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;uscular Adipose Tissue&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Fat in between muscles&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="text">
+                 <string>IMAT</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QRadioButton" name="PAATRadioBtn">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Peri-Aortic Adipose Tissue&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Fat surrounding aorta&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="text">
+                 <string>PAAT</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QRadioButton" name="PATRadioBtn">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Paracardial Adipose Tissue&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Fat outside pericardial sac&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="text">
+                 <string>PAT</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QRadioButton" name="SCATRadioBtn">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;SubCutaneous Adipose Tissue&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Fat beneath the skin&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="text">
+                 <string>SCAT</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QRadioButton" name="TATRadioBtn">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Total Adipose Tissue&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Total amount of fat&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="text">
+                 <string>TAT</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QRadioButton" name="VATRadioBtn">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Visceral Adipose Tissue&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Fat surrounding organs within abdomen&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="text">
+                 <string>VAT</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QRadioButton" name="aortaRadioBtn">
+                <property name="toolTip">
+                 <string/>
+                </property>
+                <property name="text">
+                 <string>Aorta</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QRadioButton" name="heartRadioBtn">
+                <property name="toolTip">
+                 <string/>
+                </property>
+                <property name="text">
+                 <string>Heart</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QRadioButton" name="lungsRadioBtn">
+                <property name="toolTip">
+                 <string/>
+                </property>
+                <property name="text">
+                 <string>Lungs</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QRadioButton" name="organsRadioBtn">
+                <property name="toolTip">
+                 <string/>
+                </property>
+                <property name="text">
+                 <string>Organs</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QRadioButton" name="voidsRadioBtn">
+                <property name="toolTip">
+                 <string/>
+                </property>
+                <property name="text">
+                 <string>Voids</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
            </item>
            <item row="4" column="0">
             <widget class="QGroupBox" name="groupBox">
@@ -457,248 +666,93 @@
              </layout>
             </widget>
            </item>
-           <item row="2" column="0" colspan="3">
-            <layout class="QHBoxLayout" name="contrastLayout" stretch="0,0,0">
+           <item row="4" column="2">
+            <layout class="QVBoxLayout" name="verticalLayout_4">
+             <property name="spacing">
+              <number>3</number>
+             </property>
+             <property name="sizeConstraint">
+              <enum>QLayout::SetMaximumSize</enum>
+             </property>
              <property name="leftMargin">
               <number>0</number>
              </property>
-             <item>
-              <widget class="QLabel" name="label">
-               <property name="text">
-                <string>Contrast</string>
+             <item alignment="Qt::AlignLeft|Qt::AlignTop">
+              <widget class="QGroupBox" name="sliceViewBox">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
                </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QSlider" name="contrastSlider">
-               <property name="focusPolicy">
-                <enum>Qt::StrongFocus</enum>
-               </property>
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QSpinBox" name="contrastSpinBox">
-               <property name="suffix">
-                <string>%</string>
-               </property>
-               <property name="value">
-                <number>99</number>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
-           <item row="1" column="0" colspan="3">
-            <layout class="QHBoxLayout" name="brightnessLayout" stretch="0,0,0">
-             <item>
-              <widget class="QLabel" name="label_3">
-               <property name="text">
-                <string>Brightness</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QSlider" name="brightnessSlider">
-               <property name="focusPolicy">
-                <enum>Qt::StrongFocus</enum>
-               </property>
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QSpinBox" name="brightnessSpinBox">
-               <property name="suffix">
-                <string>%</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
-           <item row="0" column="0" colspan="3">
-            <layout class="QHBoxLayout" name="sliceLayout" stretch="0,0,0">
-             <item>
-              <widget class="QLabel" name="label_4">
-               <property name="text">
-                <string>Slice:</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QSlider" name="sliceSlider">
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-               <property name="tickPosition">
-                <enum>QSlider::NoTicks</enum>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QSpinBox" name="sliceSpinBox">
-               <property name="mouseTracking">
-                <bool>true</bool>
-               </property>
-               <property name="focusPolicy">
-                <enum>Qt::WheelFocus</enum>
-               </property>
-               <property name="buttonSymbols">
-                <enum>QAbstractSpinBox::UpDownArrows</enum>
-               </property>
-               <property name="keyboardTracking">
-                <bool>false</bool>
-               </property>
-               <property name="suffix">
+               <property name="toolTip">
                 <string/>
                </property>
+               <property name="title">
+                <string>Slice View</string>
+               </property>
+               <layout class="QVBoxLayout" name="verticalLayout_2">
+                <property name="spacing">
+                 <number>1</number>
+                </property>
+                <item>
+                 <widget class="QRadioButton" name="fatRadioBtn">
+                  <property name="text">
+                   <string>Fat Only</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QRadioButton" name="waterRadioBtn">
+                  <property name="text">
+                   <string>Water Only</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QRadioButton" name="fatFracRadioBtn">
+                  <property name="text">
+                   <string>Fat Fraction</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QRadioButton" name="waterFracRadioBtn">
+                  <property name="text">
+                   <string>Water Fraction</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
               </widget>
              </item>
+             <item alignment="Qt::AlignTop">
+              <widget class="QPushButton" name="resetViewBtn">
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Resets the axial slice view to center with no scaling.&lt;/p&gt;&lt;p&gt;Shortcut: &lt;span style=&quot; font-weight:600;&quot;&gt;Space bar&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+               <property name="text">
+                <string>Reset View</string>
+               </property>
+               <property name="shortcut">
+                <string>Space</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="verticalSpacer">
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>20</width>
+                 <height>40</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
             </layout>
-           </item>
-           <item row="4" column="1">
-            <widget class="QGroupBox" name="groupBox_2">
-             <property name="toolTip">
-              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Active layer being traced out on axial slice screen&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-             </property>
-             <property name="title">
-              <string>Current Layer</string>
-             </property>
-             <layout class="QVBoxLayout" name="verticalLayout_3">
-              <property name="spacing">
-               <number>2</number>
-              </property>
-              <item>
-               <widget class="QRadioButton" name="EATRadioBtn">
-                <property name="toolTip">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Epicardial Adipose Tissue&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Fat within pericardial sac&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                </property>
-                <property name="toolTipDuration">
-                 <number>-1</number>
-                </property>
-                <property name="whatsThis">
-                 <string>This is something crazier I must say.</string>
-                </property>
-                <property name="text">
-                 <string>EAT</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QRadioButton" name="IMATRadioBtn">
-                <property name="toolTip">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Inter&lt;/span&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;M&lt;/span&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;uscular Adipose Tissue&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Fat in between muscles&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                </property>
-                <property name="text">
-                 <string>IMAT</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QRadioButton" name="PAATRadioBtn">
-                <property name="toolTip">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Peri-Aortic Adipose Tissue&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Fat surrounding aorta&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                </property>
-                <property name="text">
-                 <string>PAAT</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QRadioButton" name="PATRadioBtn">
-                <property name="toolTip">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Paracardial Adipose Tissue&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Fat outside pericardial sac&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                </property>
-                <property name="text">
-                 <string>PAT</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QRadioButton" name="SCATRadioBtn">
-                <property name="toolTip">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;SubCutaneous Adipose Tissue&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Fat beneath the skin&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                </property>
-                <property name="text">
-                 <string>SCAT</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QRadioButton" name="TATRadioBtn">
-                <property name="toolTip">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Total Adipose Tissue&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Total amount of fat&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                </property>
-                <property name="text">
-                 <string>TAT</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QRadioButton" name="VATRadioBtn">
-                <property name="toolTip">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Visceral Adipose Tissue&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Fat surrounding organs within abdomen&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                </property>
-                <property name="text">
-                 <string>VAT</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QRadioButton" name="aortaRadioBtn">
-                <property name="toolTip">
-                 <string/>
-                </property>
-                <property name="text">
-                 <string>Aorta</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QRadioButton" name="heartRadioBtn">
-                <property name="toolTip">
-                 <string/>
-                </property>
-                <property name="text">
-                 <string>Heart</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QRadioButton" name="lungsRadioBtn">
-                <property name="toolTip">
-                 <string/>
-                </property>
-                <property name="text">
-                 <string>Lungs</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QRadioButton" name="organsRadioBtn">
-                <property name="toolTip">
-                 <string/>
-                </property>
-                <property name="text">
-                 <string>Organs</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QRadioButton" name="voidsRadioBtn">
-                <property name="toolTip">
-                 <string/>
-                </property>
-                <property name="text">
-                 <string>Voids</string>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </widget>
            </item>
           </layout>
          </widget>
@@ -765,7 +819,10 @@
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionOpen">
    <property name="text">
-    <string>Open</string>
+    <string>&amp;Open</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
    </property>
   </action>
   <action name="actionExit">

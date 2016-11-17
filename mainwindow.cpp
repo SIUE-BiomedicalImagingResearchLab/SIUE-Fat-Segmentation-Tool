@@ -31,7 +31,7 @@ void MainWindow::on_actionOpen_triggered()
     try
     {
         // Start "Select folder" dialog at user's home path.
-        QString path = QFileDialog::getExistingDirectory(this, "Open Directory", QDir::homePath(), QFileDialog::ShowDirsOnly);
+        QString path = QFileDialog::getExistingDirectory(this, "Open Directory", defaultOpenDir, QFileDialog::ShowDirsOnly);
         if (path.isNull())
             return; // If they hit cancel, do nothing
 
@@ -100,6 +100,9 @@ void MainWindow::on_actionOpen_triggered()
         // Set the contrast spin box value to the default contrast
         ui->contrastSpinBox->setValue(floor(ui->glWidgetSlice->getContrast() * 100.0f));
 
+        // Set the EAT radio button for the default layer to be drawing with
+        ui->EATRadioBtn->setChecked(true);
+
         // Read the current display type for the axial slice widget and check
         // the appropiate radio button for the current axial view
         switch (ui->glWidgetSlice->getDisplayType())
@@ -109,6 +112,9 @@ void MainWindow::on_actionOpen_triggered()
             case AxialDisplayType::FatFraction: ui->fatFracRadioBtn->setChecked(true); break;
             case AxialDisplayType::WaterFraction: ui->waterFracRadioBtn->setChecked(true); break;
         }
+
+        // Since the NIFTI files were successfully opened, the default path in the FileChooser dialog next time will be this path
+        defaultOpenDir = path;
     }
     catch (const Exception &e)
     {
@@ -189,6 +195,35 @@ void MainWindow::on_colorMapComboBox_currentIndexChanged(int index)
     ui->glWidgetSlice->setColorMap((ColorMap)index);
 }
 
+void MainWindow::on_fatRadioBtn_toggled(bool checked)
+{
+    if (checked)
+        ui->glWidgetSlice->setDisplayType(AxialDisplayType::FatOnly);
+}
+
+void MainWindow::on_waterRadioBtn_toggled(bool checked)
+{
+    if (checked)
+        ui->glWidgetSlice->setDisplayType(AxialDisplayType::WaterOnly);
+}
+
+void MainWindow::on_fatFracRadioBtn_toggled(bool checked)
+{
+    if (checked)
+        ui->glWidgetSlice->setDisplayType(AxialDisplayType::FatFraction);
+}
+
+void MainWindow::on_waterFracRadioBtn_toggled(bool checked)
+{
+    if (checked)
+        ui->glWidgetSlice->setDisplayType(AxialDisplayType::WaterFraction);
+}
+
+void MainWindow::on_resetViewBtn_clicked()
+{
+    ui->glWidgetSlice->resetView();
+}
+
 void MainWindow::readSettings()
 {
     // Load previous settings based on organization name and application name (set in main.cpp)
@@ -213,6 +248,8 @@ void MainWindow::readSettings()
     {
         restoreGeometry(geometry);
     }
+
+    defaultOpenDir = settings.value("defaultDir", QDir::homePath()).toString();
 }
 
 void MainWindow::writeSettings()
@@ -222,6 +259,8 @@ void MainWindow::writeSettings()
 
     // Set key "geometry" to the current window position and size
     settings.setValue("geometry", saveGeometry());
+
+    settings.setValue("defaultDir", defaultOpenDir);
 }
 
 MainWindow::~MainWindow()
@@ -232,28 +271,4 @@ MainWindow::~MainWindow()
     // Save current window settings for next time
     writeSettings();
     delete ui;
-}
-
-void MainWindow::on_fatRadioBtn_toggled(bool checked)
-{
-    if (checked)
-        ui->glWidgetSlice->setDisplayType(AxialDisplayType::FatOnly);
-}
-
-void MainWindow::on_waterRadioBtn_toggled(bool checked)
-{
-    if (checked)
-        ui->glWidgetSlice->setDisplayType(AxialDisplayType::WaterOnly);
-}
-
-void MainWindow::on_fatFracRadioBtn_toggled(bool checked)
-{
-    if (checked)
-        ui->glWidgetSlice->setDisplayType(AxialDisplayType::FatFraction);
-}
-
-void MainWindow::on_waterFracRadioBtn_toggled(bool checked)
-{
-    if (checked)
-        ui->glWidgetSlice->setDisplayType(AxialDisplayType::WaterFraction);
 }
