@@ -33,6 +33,17 @@ private slots:
 
     void on_actionOpen_triggered();
 
+    void on_sliceSlider_valueChanged(int value);
+    void on_sliceSpinBox_valueChanged(int value);
+
+    void on_brightnessSlider_valueChanged(int value);
+    void on_brightnessSpinBox_valueChanged(int value);
+
+    void on_contrastSlider_valueChanged(int value);
+    void on_contrastSpinBox_valueChanged(int value);
+
+    void on_colorMapComboBox_currentIndexChanged(int index);
+
 private:
     Ui::MainWindow *ui;
 

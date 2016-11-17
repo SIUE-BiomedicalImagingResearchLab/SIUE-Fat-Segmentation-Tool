@@ -35,67 +35,241 @@
          <enum>QLayout::SetMaximumSize</enum>
         </property>
         <item>
-         <widget class="QGroupBox" name="groupBox">
+         <widget class="QGroupBox" name="settingsBox">
           <property name="title">
-           <string>GroupBox</string>
+           <string>Settings</string>
           </property>
-          <widget class="QRadioButton" name="radioButton">
-           <property name="geometry">
-            <rect>
-             <x>20</x>
-             <y>280</y>
-             <width>82</width>
-             <height>17</height>
-            </rect>
+          <layout class="QGridLayout" name="settingsLayout">
+           <property name="leftMargin">
+            <number>5</number>
            </property>
-           <property name="text">
-            <string>RadioButton</string>
+           <property name="topMargin">
+            <number>5</number>
            </property>
-          </widget>
-          <widget class="QRadioButton" name="radioButton_2">
-           <property name="geometry">
-            <rect>
-             <x>20</x>
-             <y>300</y>
-             <width>82</width>
-             <height>17</height>
-            </rect>
+           <property name="rightMargin">
+            <number>5</number>
            </property>
-           <property name="text">
-            <string>RadioButton</string>
+           <property name="bottomMargin">
+            <number>5</number>
            </property>
-          </widget>
-          <widget class="QWidget" name="">
-           <property name="geometry">
-            <rect>
-             <x>40</x>
-             <y>70</y>
-             <width>129</width>
-             <height>24</height>
-            </rect>
-           </property>
-           <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="0,0">
-            <item>
-             <widget class="QSlider" name="horizontalSlider">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QSpinBox" name="spinBox"/>
-            </item>
-           </layout>
-          </widget>
-          <zorder>horizontalSlider</zorder>
-          <zorder>radioButton</zorder>
-          <zorder>radioButton_2</zorder>
-          <zorder>glWidgetWater</zorder>
-          <zorder>spinBox</zorder>
+           <item row="0" column="0">
+            <layout class="QVBoxLayout" name="verticalLayout_2">
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <item>
+              <layout class="QHBoxLayout" name="sliceLayout" stretch="0,0,0">
+               <item>
+                <widget class="QLabel" name="label_4">
+                 <property name="text">
+                  <string>Slice:</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QSlider" name="sliceSlider">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                 <property name="tickPosition">
+                  <enum>QSlider::NoTicks</enum>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QSpinBox" name="sliceSpinBox">
+                 <property name="mouseTracking">
+                  <bool>true</bool>
+                 </property>
+                 <property name="focusPolicy">
+                  <enum>Qt::WheelFocus</enum>
+                 </property>
+                 <property name="buttonSymbols">
+                  <enum>QAbstractSpinBox::UpDownArrows</enum>
+                 </property>
+                 <property name="keyboardTracking">
+                  <bool>false</bool>
+                 </property>
+                 <property name="suffix">
+                  <string/>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" name="brightnessLayout" stretch="0,0,0">
+               <item>
+                <widget class="QLabel" name="label_3">
+                 <property name="text">
+                  <string>Brightness</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QSlider" name="brightnessSlider">
+                 <property name="focusPolicy">
+                  <enum>Qt::StrongFocus</enum>
+                 </property>
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QSpinBox" name="brightnessSpinBox">
+                 <property name="suffix">
+                  <string>%</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" name="contrastLayout" stretch="0,0,0">
+               <property name="leftMargin">
+                <number>0</number>
+               </property>
+               <item>
+                <widget class="QLabel" name="label">
+                 <property name="text">
+                  <string>Contrast</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QSlider" name="contrastSlider">
+                 <property name="focusPolicy">
+                  <enum>Qt::StrongFocus</enum>
+                 </property>
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QSpinBox" name="contrastSpinBox">
+                 <property name="suffix">
+                  <string>%</string>
+                 </property>
+                 <property name="value">
+                  <number>99</number>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" name="horizontalLayout_2">
+               <item>
+                <widget class="QLabel" name="label_5">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="text">
+                  <string>Color Map: </string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QComboBox" name="colorMapComboBox">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="currentText">
+                  <string>Autumn</string>
+                 </property>
+                 <property name="currentIndex">
+                  <number>0</number>
+                 </property>
+                 <property name="maxVisibleItems">
+                  <number>13</number>
+                 </property>
+                 <item>
+                  <property name="text">
+                   <string>Autumn</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Bone</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Cool</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Copper</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Gray</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Hot</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>HSV</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Jet</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Parula</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Pink</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Spring</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Summer</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Winter</string>
+                  </property>
+                 </item>
+                </widget>
+               </item>
+              </layout>
+             </item>
+            </layout>
+           </item>
+          </layout>
          </widget>
         </item>
         <item>
-         <widget class="QOpenGLWidget" name="glWidgetWater">
+         <widget class="QOpenGLWidget" name="glWidgetMinimap">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
             <horstretch>0</horstretch>
@@ -110,7 +284,7 @@
        </layout>
       </item>
       <item>
-       <widget class="AxialFatSliceWidget" name="glWidgetSlice">
+       <widget class="AxialSliceWidget" name="glWidgetSlice">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
           <horstretch>2</horstretch>
@@ -171,11 +345,19 @@
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
   <customwidget>
-   <class>AxialFatSliceWidget</class>
+   <class>AxialSliceWidget</class>
    <extends>QOpenGLWidget</extends>
-   <header>axialfatslicewidget.h</header>
+   <header>axialslicewidget.h</header>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>sliceSlider</tabstop>
+  <tabstop>brightnessSlider</tabstop>
+  <tabstop>contrastSlider</tabstop>
+  <tabstop>sliceSpinBox</tabstop>
+  <tabstop>brightnessSpinBox</tabstop>
+  <tabstop>contrastSpinBox</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

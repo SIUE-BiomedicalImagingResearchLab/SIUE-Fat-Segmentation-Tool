@@ -18,6 +18,7 @@ void MainWindow::on_actionExit_triggered()
 {
     // When exit is clicked in menu, close the application
     this->close();
+
 }
 
 void MainWindow::on_actionOpen_triggered()
@@ -70,11 +71,34 @@ void MainWindow::on_actionOpen_triggered()
         if (!fatImage->compatible(waterImage))
             EXCEPTION("Fat and water image are incompatible", "The fat and water image are incompatible in some way. Please check the NIFTI file format of the files and try again.");
 
-        AxialFatSliceWidget *widget = this->findChild<AxialFatSliceWidget *>("glWidgetFat", Qt::FindChildrenRecursively);
-        if (!widget)
-            EXCEPTION("Unable to find widget", "An error occurred while finding the AxialFatSliceWidget glWidgetFat.");
+        // The default slice that it will go to is half of the zDim
+        int defaultSlice = floor(fatImage->getZDim() / 2);
+        // In the OpenGL widget, set the images and default axial slice
+        ui->glWidgetSlice->setImages(fatImage, waterImage);
+        ui->glWidgetSlice->setAxialSlice(defaultSlice);
 
-        widget->setImages(fatImage, waterImage);
+        // Set the range of the slice spin box to be 0 to the height of the fatImage (this is upper + lower z-height
+        ui->sliceSpinBox->setRange(0, fatImage->getZDim());
+        // Set the value of the slice spin box to be what the defaultSlice is.
+        ui->sliceSpinBox->setValue(defaultSlice);
+
+        // Set the range of the slice slider to be 0 to the height of the fatImage (this is upper + lower z-height
+        ui->sliceSlider->setRange(0, fatImage->getZDim());
+        // Set the value of the slice slider to be what the defaultSlice is.
+        ui->sliceSlider->setValue(defaultSlice);
+
+        // Set the colormap value in the combo box to the current color map
+        ui->colorMapComboBox->setCurrentIndex(ui->glWidgetSlice->getColorMap());
+
+        // Set the brightness slider value to the default brightness
+        ui->brightnessSlider->setValue(floor(ui->glWidgetSlice->getBrightness() * 100.0f));
+        // Set the brightness spin box value to the default brightness
+        ui->brightnessSpinBox->setValue(floor(ui->glWidgetSlice->getBrightness() * 100.0f));
+
+        // Set the contrast slider value to the default contrast
+        ui->contrastSlider->setValue(floor(ui->glWidgetSlice->getContrast() * 100.0f));
+        // Set the contrast spin box value to the default contrast
+        ui->contrastSpinBox->setValue(floor(ui->glWidgetSlice->getContrast() * 100.0f));
     }
     catch (const Exception &e)
     {
@@ -96,6 +120,63 @@ void MainWindow::on_actionOpen_triggered()
         if (waterLowerImage) nifti_image_free(waterLowerImage);
         throw;
     }
+}
+
+void MainWindow::on_sliceSlider_valueChanged(int value)
+{
+    // Update the text box beside the slider. Keep the values consistent
+    ui->sliceSpinBox->setValue(value);
+    // Set the axial slice for the OpenGL that renders the slice
+    ui->glWidgetSlice->setAxialSlice(value);
+}
+
+void MainWindow::on_sliceSpinBox_valueChanged(int value)
+{
+    // Update the slider beside the text box. Keep the values consistent
+    ui->sliceSlider->setValue(value);
+    // Set the axial slice for the OpenGL that renders the slice
+    ui->glWidgetSlice->setAxialSlice(value);
+}
+
+void MainWindow::on_brightnessSlider_valueChanged(int value)
+{
+    // Update the text box beside the slider. Keep the values consistent
+    ui->brightnessSpinBox->setValue(value);
+    // Set the brightness for the AxialSliceWidget
+    ui->glWidgetSlice->setBrightness(value / 100.0f);
+}
+
+void MainWindow::on_brightnessSpinBox_valueChanged(int value)
+{
+    // Update the slider beside the text box. Keep the values consistent
+    ui->brightnessSlider->setValue(value);
+    // Set the brightness for the AxialSliceWidget
+    ui->glWidgetSlice->setBrightness(value / 100.0f);
+}
+
+void MainWindow::on_contrastSlider_valueChanged(int value)
+{
+    // Update the text box beside the slider. Keep the values consistent
+    ui->contrastSpinBox->setValue(value);
+    // Set the contrast for the AxialSliceWidget
+    ui->glWidgetSlice->setContrast(value / 100.0f);
+}
+
+void MainWindow::on_contrastSpinBox_valueChanged(int value)
+{
+    // Update the slider beside the text box. Keep the values consistent
+    ui->contrastSlider->setValue(value);
+    // Set the contrast for the AxialSliceWidget
+    ui->glWidgetSlice->setContrast(value / 100.0f);
+}
+
+void MainWindow::on_colorMapComboBox_currentIndexChanged(int index)
+{
+    // If the index is out of the acceptable bounds for the ColorMap, then do nothing
+    if (index < (int)ColorMap::Autumn || index >= (int)ColorMap::Count)
+        return;
+
+    ui->glWidgetSlice->setColorMap((ColorMap)index);
 }
 
 void MainWindow::readSettings()

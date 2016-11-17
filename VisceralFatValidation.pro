@@ -16,17 +16,17 @@ CONFIG(release, debug|release): DEFINES += QT_NO_WARNING_OUTPUT QT_NO_DEBUG_OUTP
 SOURCES += main.cpp\
         mainwindow.cpp \
     util.cpp \
-    axialfatslicewidget.cpp \
     vertex.cpp \
-    niftimage.cpp
+    niftimage.cpp \
+    axialslicewidget.cpp
 
 HEADERS  += mainwindow.h \
     util.hpp \
-    axialfatslicewidget.h \
     exception.hpp \
     vertex.hpp \
     application.h \
-    niftimage.h
+    niftimage.h \
+    axialslicewidget.h
 
 FORMS    += mainwindow.ui
 

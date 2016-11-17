@@ -2,5 +2,18 @@
     <qresource prefix="/">
         <file>shaders/axialslice.frag</file>
         <file>shaders/axialslice.vert</file>
+        <file>shaders/MATLAB_autumn.frag</file>
+        <file>shaders/MATLAB_bone.frag</file>
+        <file>shaders/MATLAB_cool.frag</file>
+        <file>shaders/MATLAB_copper.frag</file>
+        <file>shaders/MATLAB_hot.frag</file>
+        <file>shaders/MATLAB_hsv.frag</file>
+        <file>shaders/MATLAB_jet.frag</file>
+        <file>shaders/MATLAB_parula.frag</file>
+        <file>shaders/MATLAB_pink.frag</file>
+        <file>shaders/MATLAB_spring.frag</file>
+        <file>shaders/MATLAB_summer.frag</file>
+        <file>shaders/MATLAB_winter.frag</file>
+        <file>shaders/MATLAB_gray.frag</file>
     </qresource>
 </RCC>
