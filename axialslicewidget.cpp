@@ -2,7 +2,7 @@
 
 AxialSliceWidget::AxialSliceWidget(QWidget *parent) : QOpenGLWidget(parent)
 {
-    this->displayType = AxialDisplayType::FatOnly;
+    this->displayType = AxialDisplayType::WaterOnly;//AxialDisplayType::FatOnly;
 
     this->fatImage = NULL;
     this->waterImage = NULL;
@@ -67,6 +67,7 @@ void AxialSliceWidget::setAxialSlice(int slice, int time)
         {
             // Get the slice for the water image. If the result is empty then there was an error retrieving the slice
             matrix = waterImage->getSlice(slice, true);
+            qDebug() << "Testing...";
             if (matrix.empty())
             {
                 qDebug() << "Unable to retrieve slice " << slice << " from the fat image. Matrix returned empty.";
@@ -142,6 +143,26 @@ void AxialSliceWidget::setAxialSlice(int slice, int time)
     update();
 }
 
+AxialDisplayType AxialSliceWidget::getDisplayType()
+{
+    return displayType;
+}
+
+void AxialSliceWidget::setDisplayType(AxialDisplayType type)
+{
+    // If the display type is out of the acceptable range, then do nothing
+    if (type < AxialDisplayType::FatOnly || type > AxialDisplayType::WaterFraction)
+    {
+        qDebug() << "Invalid display type was specified for AxialSliceWidget: " << type;
+        return;
+    }
+
+    displayType = type;
+
+    // Call setAxialSlice which will update the texture with the appropiate data and redraw the screen
+    setAxialSlice(curSlice, curTime);
+}
+
 ColorMap AxialSliceWidget::getColorMap()
 {
     return curColorMap;
@@ -149,6 +170,7 @@ ColorMap AxialSliceWidget::getColorMap()
 
 void AxialSliceWidget::setColorMap(ColorMap map)
 {
+    // If the map given is out of the acceptable range, then do nothing
     if (map < ColorMap::Autumn || map >= ColorMap::Count)
     {
         qDebug() << "Invalid color map was specified for AxialSliceWidget: " << map;
@@ -170,7 +192,10 @@ void AxialSliceWidget::setContrast(float contrast)
 {
     // If the contrast is out of the acceptable range, then do nothing
     if (contrast < 0.0f || contrast > 1.0f)
+    {
+        qDebug() << "Invalid contrast was specified for AxialSliceWidget: " << contrast;
         return;
+    }
 
     curContrast = contrast;
 
@@ -193,7 +218,10 @@ void AxialSliceWidget::setBrightness(float brightness)
 {
     // If the brightness is out of the acceptable range, then do nothing
     if (brightness < 0.0f || brightness > 1.0f)
+    {
+        qDebug() << "Invalid brightness was specified for AxialSliceWidget: " << brightness;
         return;
+    }
 
     curBrightness = brightness;
 

@@ -44,6 +44,14 @@ private slots:
 
     void on_colorMapComboBox_currentIndexChanged(int index);
 
+    void on_fatRadioBtn_toggled(bool checked);
+
+    void on_waterRadioBtn_toggled(bool checked);
+
+    void on_fatFracRadioBtn_toggled(bool checked);
+
+    void on_waterFracRadioBtn_toggled(bool checked);
+
 private:
     Ui::MainWindow *ui;
 

@@ -37,8 +37,8 @@ void MainWindow::on_actionOpen_triggered()
 
         // Load NIFTI file
         QString fatUpperPath = QDir(path).filePath("fatUpper.nii");
-        QString fatLowerPath = QDir(path).filePath("waterLower.nii");
-        QString waterUpperPath = QDir(path).filePath("fatUpper.nii");
+        QString fatLowerPath = QDir(path).filePath("fatLower.nii");
+        QString waterUpperPath = QDir(path).filePath("waterUpper.nii");
         QString waterLowerPath = QDir(path).filePath("waterLower.nii");
 
         // Loops through each of the four paths and check if the .nii OR .nii.gz file exists. If not, an error is thrown and the function is returned.
@@ -99,6 +99,16 @@ void MainWindow::on_actionOpen_triggered()
         ui->contrastSlider->setValue(floor(ui->glWidgetSlice->getContrast() * 100.0f));
         // Set the contrast spin box value to the default contrast
         ui->contrastSpinBox->setValue(floor(ui->glWidgetSlice->getContrast() * 100.0f));
+
+        // Read the current display type for the axial slice widget and check
+        // the appropiate radio button for the current axial view
+        switch (ui->glWidgetSlice->getDisplayType())
+        {
+            case AxialDisplayType::FatOnly: ui->fatRadioBtn->setChecked(true); break;
+            case AxialDisplayType::WaterOnly: ui->waterRadioBtn->setChecked(true); break;
+            case AxialDisplayType::FatFraction: ui->fatFracRadioBtn->setChecked(true); break;
+            case AxialDisplayType::WaterFraction: ui->waterFracRadioBtn->setChecked(true); break;
+        }
     }
     catch (const Exception &e)
     {
@@ -222,4 +232,28 @@ MainWindow::~MainWindow()
     // Save current window settings for next time
     writeSettings();
     delete ui;
+}
+
+void MainWindow::on_fatRadioBtn_toggled(bool checked)
+{
+    if (checked)
+        ui->glWidgetSlice->setDisplayType(AxialDisplayType::FatOnly);
+}
+
+void MainWindow::on_waterRadioBtn_toggled(bool checked)
+{
+    if (checked)
+        ui->glWidgetSlice->setDisplayType(AxialDisplayType::WaterOnly);
+}
+
+void MainWindow::on_fatFracRadioBtn_toggled(bool checked)
+{
+    if (checked)
+        ui->glWidgetSlice->setDisplayType(AxialDisplayType::FatFraction);
+}
+
+void MainWindow::on_waterFracRadioBtn_toggled(bool checked)
+{
+    if (checked)
+        ui->glWidgetSlice->setDisplayType(AxialDisplayType::WaterFraction);
 }

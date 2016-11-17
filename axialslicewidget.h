@@ -95,6 +95,9 @@ public:
 
     void setImages(NIFTImage *fat, NIFTImage *water);
 
+    AxialDisplayType getDisplayType();
+    void setDisplayType(AxialDisplayType type);
+
     ColorMap getColorMap();
     void setColorMap(ColorMap map);
 
