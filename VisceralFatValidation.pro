@@ -18,7 +18,8 @@ SOURCES += main.cpp\
     util.cpp \
     vertex.cpp \
     niftimage.cpp \
-    axialslicewidget.cpp
+    axialslicewidget.cpp \
+    commands.cpp
 
 HEADERS  += mainwindow.h \
     util.hpp \
@@ -26,7 +27,8 @@ HEADERS  += mainwindow.h \
     vertex.hpp \
     application.h \
     niftimage.h \
-    axialslicewidget.h
+    axialslicewidget.h \
+    commands.h
 
 FORMS    += mainwindow.ui
 

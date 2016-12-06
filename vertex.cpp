@@ -1,6 +1,7 @@
 #include "vertex.hpp"
 
 // VertexPCT
+// --------------------------------------------------------------------------------------------------------------------
 Q_DECLARE_TYPEINFO(VertexPCT, Q_MOVABLE_TYPE);
 Q_DECL_CONSTEXPR VertexPCT::VertexPCT() {}
 Q_DECL_CONSTEXPR VertexPCT::VertexPCT(const QVector3D &pos_) : pos(pos_) {}
@@ -13,6 +14,7 @@ Q_DECL_CONSTEXPR int VertexPCT::texPosOffset()  { return offsetof(VertexPCT, tex
 Q_DECL_CONSTEXPR int VertexPCT::stride()  { return sizeof(VertexPCT); }
 
 // VertexPC4T
+// --------------------------------------------------------------------------------------------------------------------
 Q_DECLARE_TYPEINFO(VertexPC4T, Q_MOVABLE_TYPE);
 Q_DECL_CONSTEXPR VertexPC4T::VertexPC4T() {}
 Q_DECL_CONSTEXPR VertexPC4T::VertexPC4T(const QVector3D &pos_) : pos(pos_) {}
@@ -25,6 +27,7 @@ Q_DECL_CONSTEXPR int VertexPC4T::texPosOffset()  { return offsetof(VertexPC4T, t
 Q_DECL_CONSTEXPR int VertexPC4T::stride()  { return sizeof(VertexPC4T); }
 
 // VertexPT
+// --------------------------------------------------------------------------------------------------------------------
 Q_DECLARE_TYPEINFO(VertexPT, Q_MOVABLE_TYPE);
 Q_DECL_CONSTEXPR VertexPT::VertexPT() {}
 Q_DECL_CONSTEXPR VertexPT::VertexPT(const QVector3D &pos_) : pos(pos_) {}
@@ -35,6 +38,7 @@ Q_DECL_CONSTEXPR int VertexPT::texPosOffset()  { return offsetof(VertexPT, texPo
 Q_DECL_CONSTEXPR int VertexPT::stride()  { return sizeof(VertexPT); }
 
 // VertexPC
+// --------------------------------------------------------------------------------------------------------------------
 Q_DECLARE_TYPEINFO(VertexPC, Q_MOVABLE_TYPE);
 Q_DECL_CONSTEXPR VertexPC::VertexPC() {}
 Q_DECL_CONSTEXPR VertexPC::VertexPC(const QVector3D &pos_) : pos(pos_) {}

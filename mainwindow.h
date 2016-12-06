@@ -8,6 +8,8 @@
 #include <QMessageBox>
 #include <QSettings>
 #include <QDesktopWidget>
+#include <QUndoStack>
+#include <QUndoView>
 
 #include <nifti/include/nifti1.h>
 #include <nifti/include/fslio.h>
@@ -24,9 +26,23 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
+private:
+    Ui::MainWindow *ui;
+
+    NIFTImage *fatImage;
+    NIFTImage *waterImage;
+
+    QUndoView *undoView;
+    QUndoStack *undoStack;
+
+    QString defaultOpenDir;
+
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
+
+    void readSettings();
+    void writeSettings();
 
 private slots:
     void on_actionExit_triggered();
@@ -54,16 +70,12 @@ private slots:
 
     void on_resetViewBtn_clicked();
 
-private:
-    Ui::MainWindow *ui;
+    void undoStack_canUndoChanged(bool canUndo);
+    void undoStack_canRedoChanged(bool canRedo);
 
-    NIFTImage *fatImage;
-    NIFTImage *waterImage;
-
-    QString defaultOpenDir;
-
-    void readSettings();
-    void writeSettings();
+    void on_actionShow_History_triggered();
+    void on_actionUndo_triggered();
+    void on_actionRedo_triggered();
 };
 
 #endif // MAINWINDOW_H

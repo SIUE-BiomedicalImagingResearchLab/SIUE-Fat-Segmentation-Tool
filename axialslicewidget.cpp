@@ -1,4 +1,5 @@
 #include "axialslicewidget.h"
+#include "commands.h"
 
 AxialSliceWidget::AxialSliceWidget(QWidget *parent) : QOpenGLWidget(parent)
 {
@@ -22,6 +23,7 @@ AxialSliceWidget::AxialSliceWidget(QWidget *parent) : QOpenGLWidget(parent)
 
     this->startDraw = false;
     this->startPan = false;
+    this->moveID = CommandID::Move;
 
     this->projectionMatrix.setToIdentity();
     this->viewMatrix.setToIdentity();
@@ -44,6 +46,11 @@ void AxialSliceWidget::setImages(NIFTImage *fat, NIFTImage *water)
     this->viewMatrix.setToIdentity();
     this->scaling = 1.0f;
     this->translation = QVector3D(0.0f, 0.0f, 0.0f);
+}
+
+bool AxialSliceWidget::isLoaded()
+{
+    return (fatImage == NULL && waterImage == NULL);
 }
 
 void AxialSliceWidget::setAxialSlice(int slice, int time)
@@ -175,6 +182,11 @@ void AxialSliceWidget::setDisplayType(AxialDisplayType type)
     setAxialSlice(curSlice, curTime);
 }
 
+int AxialSliceWidget::getCurSlice()
+{
+    return curSlice;
+}
+
 ColorMap AxialSliceWidget::getColorMap()
 {
     return curColorMap;
@@ -233,6 +245,21 @@ void AxialSliceWidget::setBrightness(float brightness)
 
     // Redraw the screen because the brightness has changed
     update();
+}
+
+float &AxialSliceWidget::rscaling()
+{
+    return scaling;
+}
+
+QVector3D &AxialSliceWidget::rtranslation()
+{
+    return translation;
+}
+
+void AxialSliceWidget::setUndoStack(QUndoStack *stack)
+{
+    undoStack = stack;
 }
 
 void AxialSliceWidget::resetView()
@@ -359,6 +386,7 @@ void AxialSliceWidget::mouseMoveEvent(QMouseEvent *eventMove)
 {
     if (startDraw)
     {
+        eventMove->pos();
         // Do drawing stuff
     }
     else if (startPan)
@@ -366,11 +394,9 @@ void AxialSliceWidget::mouseMoveEvent(QMouseEvent *eventMove)
         // Change in mouse x/y based on last mouse position
         QPointF delta = (eventMove->pos() - lastMousePos);
 
-        // Divide delta by respective width/height of screen and add it to the translation
-        translation += QVector3D((delta.x() * 2.0f / this->width()), (-delta.y() * 2.0f / this->height()), 0.0f);
-
-        // Tell the screen to draw itself since the scene changed
-        update();
+        // Push a new move command on the undoStack. This will call the command but also keep track
+        // of it if an undo or redo action is called. redo function is called immediately.
+        undoStack->push(new MoveCommand(delta, this, moveID));
 
         // Set last mouse position to this one
         lastMousePos = eventMove->pos();
@@ -390,10 +416,7 @@ void AxialSliceWidget::mousePressEvent(QMouseEvent *eventPress)
     {
         // See below for explanation of why this occurs
         if (startPan)
-        {
-            // TODO: Any other stuff here
             startPan = false;
-        }
 
         // Start drawing stuff here
         startDraw = true;
@@ -413,6 +436,7 @@ void AxialSliceWidget::mousePressEvent(QMouseEvent *eventPress)
         // Flag to indicate that panning is occuring
         // The starting position is stored so to know how much movement has occurred
         startPan = true;
+        moveID = (CommandID)((moveID + 1) % CommandID::MoveEnd);
         lastMousePos = eventPress->pos();
     }
 }
@@ -432,19 +456,21 @@ void AxialSliceWidget::mouseReleaseEvent(QMouseEvent *eventRelease)
 
 void AxialSliceWidget::wheelEvent(QWheelEvent *event)
 {
+    // If a mouse button is down while doing this event, do not scale
+    if (event->buttons() != Qt::NoButton)
+        return;
+
     // The unit for angle delta is in eighths of a degree
     QPoint numDegrees = event->angleDelta() / 8;
 
     if (!numDegrees.isNull())
     {
         // Zoom in 5% every 15 degrees which is one step on most mouses
-        scaling += numDegrees.y() * (0.05f / 15);
+        float scaleDelta = numDegrees.y() * (0.05f / 15);
 
-        // Clamp it between 0.05f (5%) to 3.0f (300%)
-        scaling = std::max(std::min(scaling, 3.0f), 0.05f);
-
-        // Update the screen
-        update();
+        // Push a new scale command on the undo stack which will immediately call redo for an action.
+        // This keeps track of it if an undo or redo command is called
+        undoStack->push(new ScaleCommand(scaleDelta, this));
     }
 }
 

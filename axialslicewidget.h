@@ -11,7 +11,7 @@
 #include <QOpenGLTexture>
 #include <QVector>
 #include <QMatrix4x4>
-#include <QTimer>
+#include <QUndoStack>
 
 #include <nifti/include/nifti1.h>
 #include <nifti/include/fslio.h>
@@ -20,6 +20,7 @@
 
 #include "niftimage.h"
 #include "vertex.hpp"
+#include "commands.h"
 
 // TODO: These three items outside of the widget class may not belong here.
 // In reality, the Minimap widget might use these too and a common place for them would be nice
@@ -95,12 +96,15 @@ private:
 
     bool startPan;
     QPoint lastMousePos;
+    CommandID moveID;
 
     QMatrix4x4 projectionMatrix;
     QMatrix4x4 viewMatrix;
 
     float scaling;
     QVector3D translation;
+
+    QUndoStack *undoStack;
 
 public:
     AxialSliceWidget(QWidget *parent);
@@ -109,9 +113,12 @@ public:
     void setAxialSlice(int slice, int time = -1);
 
     void setImages(NIFTImage *fat, NIFTImage *water);
+    bool isLoaded();
 
     AxialDisplayType getDisplayType();
     void setDisplayType(AxialDisplayType type);
+
+    int getCurSlice();
 
     ColorMap getColorMap();
     void setColorMap(ColorMap map);
@@ -123,6 +130,11 @@ public:
     void setBrightness(float brightness);
 
     void resetView();
+
+    float &rscaling();
+    QVector3D &rtranslation();
+
+    void setUndoStack(QUndoStack *stack);
 
 protected:
     void initializeGL();

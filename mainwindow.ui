@@ -39,6 +39,9 @@
         </property>
         <item>
          <widget class="QGroupBox" name="settingsBox">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
             <horstretch>0</horstretch>
@@ -125,6 +128,9 @@
                <property name="suffix">
                 <string>%</string>
                </property>
+               <property name="maximum">
+                <number>100</number>
+               </property>
               </widget>
              </item>
             </layout>
@@ -149,6 +155,9 @@
                <property name="focusPolicy">
                 <enum>Qt::StrongFocus</enum>
                </property>
+               <property name="maximum">
+                <number>100</number>
+               </property>
                <property name="orientation">
                 <enum>Qt::Horizontal</enum>
                </property>
@@ -159,8 +168,11 @@
                <property name="suffix">
                 <string>%</string>
                </property>
+               <property name="maximum">
+                <number>100</number>
+               </property>
                <property name="value">
-                <number>99</number>
+                <number>100</number>
                </property>
               </widget>
              </item>
@@ -271,7 +283,13 @@
             </layout>
            </item>
            <item row="4" column="1">
-            <widget class="QGroupBox" name="groupBox_2">
+            <widget class="QGroupBox" name="currentLayerBox">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
              <property name="toolTip">
               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Active layer being traced out on axial slice screen&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
              </property>
@@ -284,6 +302,12 @@
               </property>
               <item>
                <widget class="QRadioButton" name="EATRadioBtn">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
                 <property name="toolTip">
                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Epicardial Adipose Tissue&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Fat within pericardial sac&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                 </property>
@@ -300,6 +324,12 @@
               </item>
               <item>
                <widget class="QRadioButton" name="IMATRadioBtn">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
                 <property name="toolTip">
                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Inter&lt;/span&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;M&lt;/span&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;uscular Adipose Tissue&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Fat in between muscles&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                 </property>
@@ -310,6 +340,12 @@
               </item>
               <item>
                <widget class="QRadioButton" name="PAATRadioBtn">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
                 <property name="toolTip">
                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Peri-Aortic Adipose Tissue&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Fat surrounding aorta&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                 </property>
@@ -320,6 +356,12 @@
               </item>
               <item>
                <widget class="QRadioButton" name="PATRadioBtn">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
                 <property name="toolTip">
                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Paracardial Adipose Tissue&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Fat outside pericardial sac&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                 </property>
@@ -330,6 +372,12 @@
               </item>
               <item>
                <widget class="QRadioButton" name="SCATRadioBtn">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
                 <property name="toolTip">
                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;SubCutaneous Adipose Tissue&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Fat beneath the skin&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                 </property>
@@ -339,17 +387,13 @@
                </widget>
               </item>
               <item>
-               <widget class="QRadioButton" name="TATRadioBtn">
-                <property name="toolTip">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Total Adipose Tissue&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Total amount of fat&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                </property>
-                <property name="text">
-                 <string>TAT</string>
-                </property>
-               </widget>
-              </item>
-              <item>
                <widget class="QRadioButton" name="VATRadioBtn">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
                 <property name="toolTip">
                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Visceral Adipose Tissue&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Fat surrounding organs within abdomen&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                 </property>
@@ -358,61 +402,11 @@
                 </property>
                </widget>
               </item>
-              <item>
-               <widget class="QRadioButton" name="aortaRadioBtn">
-                <property name="toolTip">
-                 <string/>
-                </property>
-                <property name="text">
-                 <string>Aorta</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QRadioButton" name="heartRadioBtn">
-                <property name="toolTip">
-                 <string/>
-                </property>
-                <property name="text">
-                 <string>Heart</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QRadioButton" name="lungsRadioBtn">
-                <property name="toolTip">
-                 <string/>
-                </property>
-                <property name="text">
-                 <string>Lungs</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QRadioButton" name="organsRadioBtn">
-                <property name="toolTip">
-                 <string/>
-                </property>
-                <property name="text">
-                 <string>Organs</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QRadioButton" name="voidsRadioBtn">
-                <property name="toolTip">
-                 <string/>
-                </property>
-                <property name="text">
-                 <string>Voids</string>
-                </property>
-               </widget>
-              </item>
              </layout>
             </widget>
            </item>
            <item row="4" column="0">
-            <widget class="QGroupBox" name="groupBox">
+            <widget class="QGroupBox" name="visibleLayersBox">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
                <horstretch>0</horstretch>
@@ -441,48 +435,19 @@
               <property name="verticalSpacing">
                <number>2</number>
               </property>
-              <item row="10" column="0" alignment="Qt::AlignLeft">
-               <widget class="QCheckBox" name="lungsCheckBox">
+              <item row="6" column="0" alignment="Qt::AlignLeft">
+               <widget class="QCheckBox" name="VATCheckBox">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
                   <horstretch>0</horstretch>
                   <verstretch>0</verstretch>
                  </sizepolicy>
                 </property>
-                <property name="text">
-                 <string>Lungs</string>
-                </property>
-                <property name="checked">
-                 <bool>true</bool>
-                </property>
-               </widget>
-              </item>
-              <item row="12" column="0" alignment="Qt::AlignLeft">
-               <widget class="QCheckBox" name="voidsCheckBox">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Visceral Adipose Tissue&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Fat surrounding organs within abdomen&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                 </property>
                 <property name="text">
-                 <string>Voids</string>
-                </property>
-                <property name="checked">
-                 <bool>true</bool>
-                </property>
-               </widget>
-              </item>
-              <item row="11" column="0" alignment="Qt::AlignLeft">
-               <widget class="QCheckBox" name="organsCheckBox">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="text">
-                 <string>Organs</string>
+                 <string>VAT</string>
                 </property>
                 <property name="checked">
                  <bool>true</bool>
@@ -517,8 +482,8 @@
                 </property>
                </widget>
               </item>
-              <item row="6" column="0" alignment="Qt::AlignLeft">
-               <widget class="QCheckBox" name="TATCheckBox">
+              <item row="4" column="0" alignment="Qt::AlignLeft">
+               <widget class="QCheckBox" name="PATCheckBox">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
                   <horstretch>0</horstretch>
@@ -526,80 +491,10 @@
                  </sizepolicy>
                 </property>
                 <property name="toolTip">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Total Adipose Tissue&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Total amount of fat&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Paracardial Adipose Tissue&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Fat outside pericardial sac&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                 </property>
                 <property name="text">
-                 <string>TAT</string>
-                </property>
-                <property name="checked">
-                 <bool>true</bool>
-                </property>
-               </widget>
-              </item>
-              <item row="7" column="0" alignment="Qt::AlignLeft">
-               <widget class="QCheckBox" name="VATCheckBox">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="toolTip">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Visceral Adipose Tissue&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Fat surrounding organs within abdomen&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                </property>
-                <property name="text">
-                 <string>VAT</string>
-                </property>
-                <property name="checked">
-                 <bool>true</bool>
-                </property>
-               </widget>
-              </item>
-              <item row="8" column="0" alignment="Qt::AlignLeft">
-               <widget class="QCheckBox" name="aortaCheckBox">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="text">
-                 <string>Aorta</string>
-                </property>
-                <property name="checked">
-                 <bool>true</bool>
-                </property>
-               </widget>
-              </item>
-              <item row="9" column="0" alignment="Qt::AlignLeft">
-               <widget class="QCheckBox" name="heartCheckBox">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="text">
-                 <string>Heart</string>
-                </property>
-                <property name="checked">
-                 <bool>true</bool>
-                </property>
-               </widget>
-              </item>
-              <item row="2" column="0" alignment="Qt::AlignLeft">
-               <widget class="QCheckBox" name="IMATCheckBox">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="toolTip">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Inter&lt;/span&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;M&lt;/span&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;uscular Adipose Tissue&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Fat in between muscles&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                </property>
-                <property name="text">
-                 <string>IMAT</string>
+                 <string>PAT</string>
                 </property>
                 <property name="checked">
                  <bool>true</bool>
@@ -625,8 +520,8 @@
                 </property>
                </widget>
               </item>
-              <item row="4" column="0" alignment="Qt::AlignLeft">
-               <widget class="QCheckBox" name="PATCheckBox">
+              <item row="2" column="0" alignment="Qt::AlignLeft">
+               <widget class="QCheckBox" name="IMATCheckBox">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
                   <horstretch>0</horstretch>
@@ -634,10 +529,10 @@
                  </sizepolicy>
                 </property>
                 <property name="toolTip">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Paracardial Adipose Tissue&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Fat outside pericardial sac&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Inter&lt;/span&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;M&lt;/span&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;uscular Adipose Tissue&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Fat in between muscles&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                 </property>
                 <property name="text">
-                 <string>PAT</string>
+                 <string>IMAT</string>
                 </property>
                 <property name="checked">
                  <bool>true</bool>
@@ -747,7 +642,7 @@
                <property name="sizeHint" stdset="0">
                 <size>
                  <width>20</width>
-                 <height>40</height>
+                 <height>5</height>
                 </size>
                </property>
               </spacer>
@@ -800,13 +695,22 @@
    </property>
    <widget class="QMenu" name="menuFile">
     <property name="title">
-     <string>File</string>
+     <string>&amp;File</string>
     </property>
     <addaction name="actionOpen"/>
     <addaction name="separator"/>
     <addaction name="actionExit"/>
    </widget>
+   <widget class="QMenu" name="menuEdit">
+    <property name="title">
+     <string>&amp;Edit</string>
+    </property>
+    <addaction name="actionUndo"/>
+    <addaction name="actionRedo"/>
+    <addaction name="actionShow_History"/>
+   </widget>
    <addaction name="menuFile"/>
+   <addaction name="menuEdit"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <attribute name="toolBarArea">
@@ -824,13 +728,40 @@
    <property name="shortcut">
     <string>Ctrl+O</string>
    </property>
+   <property name="shortcutContext">
+    <enum>Qt::WindowShortcut</enum>
+   </property>
   </action>
   <action name="actionExit">
    <property name="text">
-    <string>Exit</string>
+    <string>E&amp;xit</string>
+   </property>
+   <property name="shortcutContext">
+    <enum>Qt::WindowShortcut</enum>
+   </property>
+  </action>
+  <action name="actionUndo">
+   <property name="text">
+    <string>&amp;Undo</string>
    </property>
    <property name="shortcut">
-    <string>Esc</string>
+    <string>Ctrl+Z</string>
+   </property>
+  </action>
+  <action name="actionRedo">
+   <property name="text">
+    <string>&amp;Redo</string>
+   </property>
+  </action>
+  <action name="actionShow_History">
+   <property name="checkable">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Show &amp;History</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+H</string>
    </property>
   </action>
  </widget>
