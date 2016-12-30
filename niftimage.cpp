@@ -1,31 +1,21 @@
 #include "niftimage.h"
 
-NIFTImage::NIFTImage()
+NIFTImage::NIFTImage() : upper(NULL), lower(NULL), subConfig(NULL), xDim(0), yDim(0), zDim(0)
 {
-    // Initialize values to defaults
-    this->upper = NULL;
-    this->lower = NULL;
 
-    this->xDim = 0;
-    this->yDim = 0;
-    this->zDim = 0;
 }
 
-NIFTImage::NIFTImage(nifti_image *upper, nifti_image *lower)
+NIFTImage::NIFTImage(nifti_image *upper, nifti_image *lower, SubjectConfig *config) : NIFTImage()
 {
-    // Initialize values to defaults
-    this->upper = NULL;
-    this->lower = NULL;
-
-    this->xDim = 0;
-    this->yDim = 0;
-    this->zDim = 0;
-
-    // Set the image upper and lower
-    setImage(upper, lower);
+    setImage(upper, lower, config);
 }
 
-/* setImage does exactly what it says. It sets the upper and lower NIFTI images for the class.
+NIFTImage::NIFTImage(SubjectConfig *config) : NIFTImage()
+{
+    setSubjectConfig(config);
+}
+
+/* setImage sets the upper and lower NIFTI images for the class.
  * In addition, the old upper and lower NIFTI images are deleted and a new data matrix is created.
  * The new data matrix is of size zDim x yDim x xDim where xDim and yDim are dim[1] and dim[2] of the
  * NIFTI file and zDim is the sum of dim[3] of the upper and lower image.
@@ -38,11 +28,14 @@ NIFTImage::NIFTImage(nifti_image *upper, nifti_image *lower)
  *      true - No error occurred and the operation was successful
  *      false - An error occurred
  */
-bool NIFTImage::setImage(nifti_image *upper, nifti_image *lower)
+bool NIFTImage::setImage(nifti_image *upper, nifti_image *lower, SubjectConfig *config)
 {
     // If one of the parameters given is NULL, then return false
     if (!upper || !lower)
+    {
+        qDebug() << "Null upper/lower image pointer was given. Unable to set the NIFTI image";
         return false;
+    }
 
     // If there are previous upper and lower images, free the nifti files
     if (this->upper && this->lower)
@@ -60,39 +53,76 @@ bool NIFTImage::setImage(nifti_image *upper, nifti_image *lower)
     if (!checkImage())
         return false;
 
+    if (config)
+    {
+        this->subConfig = config;
+    }
+    else if (!subConfig)
+    {
+        qDebug() << "No subject configuration data for NIFTI image. Unable to load NIFTI image without data.";
+        return false;
+    }
+
+    // Define the number of slices that will be transferred for the upper/lower images
+    // This is NOT the same as the size of the upper/lower NIFTI images because only a
+    // certain portion is extracted from the upper/lower images
+    int upperLength = subConfig->imageUpperSuperior - subConfig->imageUpperInferior + 1;
+    int lowerLength = subConfig->imageLowerSuperior - subConfig->imageLowerInferior + 1;
+
     // xDim, yDim, and zDim are the dimensions of the resulting image with upper and lower portions put together.
     // The xDim and yDim stay the same as the two images but the zDim is upper slices plus the number of lower slices
     xDim = upper->dim[1];
     yDim = upper->dim[2];
-    zDim = upper->dim[3] + lower->dim[3];
+    zDim = upperLength + lowerLength;
 
     // Create matrix of zDim x yDim x xDim.
     // The default datatype of the matrix is to match the NIFTI file datatype
-    int dims[] = { zDim, yDim, xDim };
     int datatype = niftiToOpenCVDatatype(upper);
-    data = cv::Mat(3, dims, datatype, cv::Scalar(0));
+    data = cv::Mat({zDim, yDim, xDim}, datatype, cv::Scalar(0));
 
-    // Now that the empty matrix, data, is created it is time to fill in the upper and lower image data
-    // upperROI is the region in the data matrix where the data will go for the upper image
-    const cv::Range upperRegion[] = { cv::Range(0, upper->dim[3]), cv::Range::all(), cv::Range::all() };
-    cv::Mat upperROI = data(upperRegion);
+    /* Upper */
+    cv::Mat upperROI = data({cv::Range(lowerLength, zDim), cv::Range::all(), cv::Range::all()});
 
-    // Create a matrix denoted upperMat of the NIFTI file data for upper image
-    int dimsUpper[] = { upper->dim[3], upper->dim[2], upper->dim[1] };
-    cv::Mat upperMat(3, dimsUpper, datatype, upper->data);
-    // Copy the upperMat matrix to the upperROI. Note: This will affect the data matrix
-    upperMat.copyTo(upperROI);
+    cv::Mat upperMat({upper->dim[3], upper->dim[2], upper->dim[1]}, datatype, upper->data);
+    // Copy imageUpperInferior to imageUpperSuperior to upperMatROI
+    cv::Mat upperMatROI = upperMat({cv::Range(subConfig->imageUpperInferior, subConfig->imageUpperSuperior + 1), cv::Range::all(), cv::Range::all()});
 
-    // lowerROI is the region in the data matrix where the data will go for the lower image
-    const cv::Range lowerRegion[] = { cv::Range(upper->dim[3], zDim), cv::Range::all(), cv::Range::all() };
-    cv::Mat lowerROI = data(lowerRegion);
+    upperMatROI.copyTo(upperROI);
 
-    // Create a matrix denoted lowerMat of the NIFTI file data for lower image
-    int dimsLower[] = { lower->dim[3], lower->dim[2], lower->dim[1] };
-    cv::Mat lowerMat(3, dimsLower, datatype, lower->data);
-    // Copy the lowerMat matrix to the lowerROI. Note: This will affect the data matrix
-    lowerMat.copyTo(lowerROI);
+    /* Lower */
+    cv::Mat lowerROI = data({cv::Range(0, lowerLength), cv::Range::all(), cv::Range::all()});
 
+    cv::Mat lowerMat({lower->dim[3], lower->dim[2], lower->dim[1]}, datatype, lower->data);
+
+    // Copy imageLowerInferior to imageLowerSuperior to lowerMatROI
+    cv::Mat lowerMatROI = lowerMat({cv::Range(subConfig->imageLowerInferior, subConfig->imageLowerSuperior + 1), cv::Range::all(), cv::Range::all()});
+
+    lowerMatROI.copyTo(lowerROI);
+
+    // Flip the matrix once it is loaded
+    cv::Mat dataFlipped;
+    opencv::flip(data, dataFlipped, 0);
+    data = dataFlipped;
+
+    return true;
+}
+
+/* setSubjectConfig sets the configuration data for the subject.
+ * It is used for stitching together the upper/lower NIFTI images into one coherent 3D image.
+ *
+ * Returns:
+ *      true - No error occurred and the operation was successful
+ *      false - An error occurred
+ */
+bool NIFTImage::setSubjectConfig(SubjectConfig *config)
+{
+    if (!config)
+    {
+        qDebug() << "Null config pointer was given. Unable to set the subject configuration in NIFTI class";
+        return false;
+    }
+
+    this->subConfig = config;
     return true;
 }
 

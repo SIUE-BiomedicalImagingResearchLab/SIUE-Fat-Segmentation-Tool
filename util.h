@@ -1,14 +1,14 @@
-#ifndef UTIL_HPP
-#define UTIL_HPP
+#ifndef UTIL_H
+#define UTIL_H
 
 #include <QFileInfo>
 
-namespace Util
+namespace util
 {
 
 /* Determines if the filename exists and is a file, returns true, otherwise returns false */
-bool FileExists(QString filename);
+bool fileExists(QString filename);
 
 }
 
-#endif // UTIL_HPP
+#endif // UTIL_H

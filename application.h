@@ -6,7 +6,7 @@
 
 #include <opencv2/opencv.hpp>
 
-#include "exception.hpp"
+#include "exception.h"
 
 class Application : public QApplication
 {

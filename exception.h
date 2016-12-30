@@ -1,5 +1,5 @@
-#ifndef EXCEPTION_HPP
-#define EXCEPTION_HPP
+#ifndef EXCEPTION_H
+#define EXCEPTION_H
 
 #include <stdexcept>
 
@@ -41,4 +41,4 @@ class Exception : std::exception
 #define EXCEPTION(title, message) throw Exception(title, message)
 #define EXCEPTIONF(title, format, ...) { char *buf__ = new char[1024]; snprintf(buf__, 1024, format, __VA_ARGS__); buf__[1023] = '\0'; throw Exception(title, buf__); }
 
-#endif // EXCEPTION_HPP
+#endif // EXCEPTION_H

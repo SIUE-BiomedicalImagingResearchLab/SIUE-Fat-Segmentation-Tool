@@ -11,12 +11,13 @@
 #include <QUndoStack>
 #include <QUndoView>
 
-#include <nifti/include/nifti1.h>
-#include <nifti/include/fslio.h>
+#include <nifti/nifti1.h>
+#include <nifti/nifti1_io.h>
 
 #include "niftimage.h"
-#include "util.hpp"
-#include "exception.hpp"
+#include "util.h"
+#include "exception.h"
+#include "subjectconfig.h"
 
 namespace Ui {
 class MainWindow;
@@ -36,6 +37,8 @@ private:
     QUndoStack *undoStack;
 
     QString defaultOpenDir;
+
+    SubjectConfig *subConfig;
 
 public:
     explicit MainWindow(QWidget *parent = 0);

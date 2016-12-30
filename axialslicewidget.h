@@ -13,13 +13,13 @@
 #include <QMatrix4x4>
 #include <QUndoStack>
 
-#include <nifti/include/nifti1.h>
-#include <nifti/include/fslio.h>
+#include <nifti/nifti1.h>
+#include <nifti/nifti1_io.h>
 
 #include <opencv2/opencv.hpp>
 
 #include "niftimage.h"
-#include "vertex.hpp"
+#include "vertex.h"
 #include "commands.h"
 
 // TODO: These three items outside of the widget class may not belong here.

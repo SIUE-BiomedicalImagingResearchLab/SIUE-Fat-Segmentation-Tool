@@ -44,8 +44,8 @@ bool MoveCommand::mergeWith(const QUndoCommand *command)
     // Updates text that is shown on QUndoView
     setText(QObject::tr("Move image by (%1%, %2%)").arg(int(delta.x()*100.0f)).arg(int(delta.y()*100.0f)));
 
-    if (delta.length() == 0)
-        setObsolete(true);
+    //if (delta.length() == 0)
+    //    setObsolete(true);
 
     return true;
 }
@@ -106,8 +106,8 @@ bool ScaleCommand::mergeWith(const QUndoCommand *command)
     // if you do not want to bother building the Qt libraries(6+ hours of time at least), then comment out
     // all instances of setObsolete and it should work. However, if you are interested, download the source
     // code and cherry-pick the patch at: https://codereview.qt-project.org/#/c/178852/
-    if (scaling == 0.0f)
-        setObsolete(true);
+    //if (scaling == 0.0f)
+    //    setObsolete(true);
 
     return true;
 }
@@ -178,8 +178,8 @@ bool SliceChangeCommand::mergeWith(const QUndoCommand *command)
     // Updates text that is shown on QUndoView
     setText(QObject::tr("Move to slice %1").arg(newSlice));
 
-    if (newSlice == oldSlice)
-        setObsolete(true);
+    //if (newSlice == oldSlice)
+    //    setObsolete(true);
 
     return true;
 }
@@ -250,8 +250,8 @@ bool BrightnessChangeCommand::mergeWith(const QUndoCommand *command)
     // Updates text that is shown on QUndoView
     setText(QObject::tr("Brightness set to %1%").arg(int(newBrightness * 100.0f)));
 
-    if (newBrightness == oldBrightness)
-        setObsolete(true);
+    //if (newBrightness == oldBrightness)
+    //   setObsolete(true);
 
     return true;
 }
@@ -322,8 +322,8 @@ bool ContrastChangeCommand::mergeWith(const QUndoCommand *command)
     // Updates text that is shown on QUndoView
     setText(QObject::tr("Contrast set to %1%").arg(int(newContrast * 100.0f)));
 
-    if (newContrast == oldContrast)
-        setObsolete(true);
+    //if (newContrast == oldContrast)
+    //    setObsolete(true);
 
     return true;
 }

@@ -5,11 +5,14 @@
 #include <QFile>
 
 #include <opencv2/opencv.hpp>
+#include "opencv.h"
+#include "util.h"
+#include "subjectconfig.h"
 
 #include <QOpenGLFunctions_3_3_Core>
 
-#include <nifti/include/nifti1.h>
-#include <nifti/include/fslio.h>
+#include <nifti/nifti1.h>
+#include <nifti/nifti1_io.h>
 
 static GLenum niftiToOpenGLLUT[][3] =
 {
@@ -63,12 +66,16 @@ private:
 
     cv::Mat data;
 
+    SubjectConfig *subConfig;
+
 public:
     NIFTImage();
-    NIFTImage(nifti_image *upper, nifti_image *lower);
+    NIFTImage(nifti_image *upper, nifti_image *lower, SubjectConfig *config = NULL);
+    NIFTImage(SubjectConfig *config);
     ~NIFTImage();
 
-    bool setImage(nifti_image *upper, nifti_image *lower);
+    bool setImage(nifti_image *upper, nifti_image *lower, SubjectConfig *config = NULL);
+    bool setSubjectConfig(SubjectConfig *config);
 
     bool checkImage();
     bool compatible(NIFTImage *image);

@@ -1,5 +1,5 @@
-#ifndef VERTEX_HPP
-#define VERTEX_HPP
+#ifndef VERTEX_H
+#define VERTEX_H
 
 #include <QVector2D>
 #include <QVector3D>
@@ -88,4 +88,4 @@ struct VertexPC
     static Q_DECL_CONSTEXPR int stride();
 };
 
-#endif // VERTEX_HPP
+#endif // VERTEX_H

@@ -4,9 +4,12 @@
 #
 #-------------------------------------------------
 
-QT       += core gui opengl
+QT       += core gui opengl xml
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+
+CONFIG += c++11
+CONFIG -= app_bundle
 
 TARGET = VisceralFatValidation
 TEMPLATE = app
@@ -19,16 +22,20 @@ SOURCES += main.cpp\
     vertex.cpp \
     niftimage.cpp \
     axialslicewidget.cpp \
-    commands.cpp
+    commands.cpp \
+    opencv.cpp \
+    subjectconfig.cpp
 
 HEADERS  += mainwindow.h \
-    util.hpp \
-    exception.hpp \
-    vertex.hpp \
     application.h \
     niftimage.h \
     axialslicewidget.h \
-    commands.h
+    commands.h \
+    opencv.h \
+    vertex.h \
+    exception.h \
+    util.h \
+    subjectconfig.h
 
 FORMS    += mainwindow.ui
 
@@ -38,18 +45,32 @@ DISTFILES += \
 
 # Include the NIFTI files and link the dynamic libraries.
 # The DLL files should deploy with the application automatically
-INCLUDEPATH += $$PWD/nifti/include
-DEPENDPATH += $$PWD/nifti/include
+INCLUDEPATH += 'D:/DevelLibs/nifticlib-2.0.0/build/include'
+DEPENDPATH += 'D:/DevelLibs/nifticlib-2.0.0/build/include'
 
-LIBS += -L$$PWD/nifti/lib/ \
-        libnifticdf.dll.a \
-        libniftiio.dll.a \
-        libznz.dll.a
+LIBS += -LD:/DevelLibs/nifticlib-2.0.0/build/lib \
+        -lnifticdf \
+        -lniftiio \
+        -lznz
 
-INCLUDEPATH += 'C:/Program Files/opencv2/include'
-DEPENDPATH += 'C:/Program Files/opencv2/include'
-LIBS += -L'C:/Program Files/opencv2/lib' \
-        -lopencv_world310
+LIBS += -LD:/DevelLibs/zlib-1.2.8/build/lib \
+        -lzlib
+
+INCLUDEPATH += 'D:/DevelLibs/opencv/build/install/include'
+DEPENDPATH += 'D:/DevelLibs/opencv/build/install/include'
+CONFIG(debug, debug|release): LIBS += -LD:/DevelLibs/opencv/build/lib/Debug \
+        -lopencv_core310d \
+        -lopencv_imgproc310d \
+        -lopencv_highgui310d \
+        -lopencv_ml310d \
+        -lopencv_video310d
+
+CONFIG(release, debug|release): LIBS += -LD:/DevelLibs/opencv/build/lib/Release \
+        -lopencv_core310 \
+        -lopencv_imgproc310 \
+        -lopencv_highgui310 \
+        -lopencv_ml310 \
+        -lopencv_video310
 
 RESOURCES += \
     resources.qrc

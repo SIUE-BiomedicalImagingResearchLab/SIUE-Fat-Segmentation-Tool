@@ -1,9 +1,9 @@
-#include "util.hpp"
+#include "util.h"
 
-namespace Util
+namespace util
 {
 
-bool FileExists(QString filename)
+bool fileExists(QString filename)
 {
     QFileInfo fileInfo(filename);
     return (fileInfo.exists() && fileInfo.isFile());
