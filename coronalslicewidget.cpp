@@ -8,21 +8,11 @@ CoronalSliceWidget::CoronalSliceWidget(QWidget *parent) : QOpenGLWidget(parent)
     this->fatImage = NULL;
     this->waterImage = NULL;
 
-    this->texture = NULL;
-    this->sliceVertices.append(VertexPT(QVector3D(-1.0f, -1.0f, 0.0f), QVector2D(0.0f, 0.0f)));
-    this->sliceVertices.append(VertexPT(QVector3D(-1.0f, 1.0f, 0.0f), QVector2D(0.0f, 1.0f)));
-    this->sliceVertices.append(VertexPT(QVector3D(1.0f, -1.0f, 0.0f), QVector2D(1.0f, 0.0f)));
-    this->sliceVertices.append(VertexPT(QVector3D(1.0f, 1.0f, 0.0f), QVector2D(1.0f, 1.0f)));
-    this->sliceIndices.append({ 0, 1, 2, 3 });
+    this->sliceTexture = NULL;
 
     this->location = QVector4D(-1, 1, 1, -1);
     this->startPan = false;
     this->moveID = CommandID::CoronalMove;
-
-    this->projectionMatrix.setToIdentity();
-    this->viewMatrix.setToIdentity();
-    this->scaling = 1.0f;
-    this->translation = QVector3D(0.0f, 0.0f, 0.0f);
 }
 
 void CoronalSliceWidget::setImages(NIFTImage *fat, NIFTImage *water)
@@ -43,13 +33,13 @@ void CoronalSliceWidget::setImages(NIFTImage *fat, NIFTImage *water)
 
 bool CoronalSliceWidget::isLoaded()
 {
-    return (fatImage == NULL && waterImage == NULL);
+    return (fatImage && waterImage);
 }
 
 void CoronalSliceWidget::setLocation(QVector4D location)
 {
     // If there is no fat or water image currently loaded then return with doing nothing.
-    if (!fatImage || !waterImage)
+    if (!isLoaded())
         return;
 
     QVector4D delta = location - this->location;
@@ -69,9 +59,13 @@ void CoronalSliceWidget::setLocation(QVector4D location)
     if (location.w() != Location::NoChange && (location.w() >= 0))
         this->location.setW(location.w());
 
-    // If Z value changed, then update the texture
-    if (location.z() != Location::NoChange && delta.z())
+    // If Y value changed, then update the texture
+    if (location.y() != Location::NoChange && delta.y())
         updateTexture();
+
+    // If Z value changed, then update the crosshair line
+    if (location.z() != Location::NoChange && delta.z())
+        updateCrosshairLine();
 }
 
 QVector4D CoronalSliceWidget::getLocation()
@@ -121,6 +115,7 @@ void CoronalSliceWidget::resetView()
     scaling = 1.0f;
 
     // Update the screen
+    updateCrosshairLine();
     update();
 }
 
@@ -129,7 +124,12 @@ void CoronalSliceWidget::initializeGL()
     initializeOpenGLFunctions();
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
-    // Create a new shader program, load the GLSL vertex and fragment files, link/bind program
+    // Setup matrices and view options
+    projectionMatrix.setToIdentity();
+    viewMatrix.setToIdentity();
+    scaling = 1.0f;
+    translation = QVector3D(0.0f, 0.0f, 0.0f);
+
     program = new QOpenGLShaderProgram();
     program->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/shaders/coronalslice.vert");
     program->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/shaders/coronalslice.frag");
@@ -138,32 +138,67 @@ void CoronalSliceWidget::initializeGL()
 
     program->setUniformValue("tex", 0);
 
+    initializeSliceView();
+    initializeCrosshairLine();
+}
+
+void CoronalSliceWidget::initializeSliceView()
+{
+    // get context opengl-version
+    qDebug() << "----------------- CoronalSliceWidget -------------------------";
+    qDebug() << "Widget OpenGL: " << format().majorVersion() << "." << format().minorVersion();
+    qDebug() << "Context valid: " << context()->isValid();
+    qDebug() << "Really used OpenGL: " << context()->format().majorVersion() << "." << context()->format().minorVersion();
+    qDebug() << "OpenGL information: VENDOR:       " << (const char*)glGetString(GL_VENDOR);
+    qDebug() << "                    RENDERDER:    " << (const char*)glGetString(GL_RENDERER);
+    qDebug() << "                    VERSION:      " << (const char*)glGetString(GL_VERSION);
+    qDebug() << "                    GLSL VERSION: " << (const char*)glGetString(GL_SHADING_LANGUAGE_VERSION);
+    qDebug() << "";
+
+    // Setup the axial slice vertices
+    sliceVertices.clear();
+    sliceVertices.append(VertexPT(QVector3D(-1.0f, -1.0f, 0.0f), QVector2D(0.0f, 0.0f)));
+    sliceVertices.append(VertexPT(QVector3D(-1.0f, 1.0f, 0.0f), QVector2D(0.0f, 1.0f)));
+    sliceVertices.append(VertexPT(QVector3D(1.0f, -1.0f, 0.0f), QVector2D(1.0f, 0.0f)));
+    sliceVertices.append(VertexPT(QVector3D(1.0f, 1.0f, 0.0f), QVector2D(1.0f, 1.0f)));
+
+    // Setup the axial slice indices
+    sliceIndices.clear();
+    sliceIndices.append({ 0, 1, 2, 3});
+
     // Generate vertex buffer for the axial slice. The sliceVertices data is uploaded to the VBO
-    glGenBuffers(1, &vertexBuf);
-    glBindBuffer(GL_ARRAY_BUFFER, vertexBuf);
+    glGenBuffers(1, &sliceVertexBuf);
+    glBindBuffer(GL_ARRAY_BUFFER, sliceVertexBuf);
     glBufferData(GL_ARRAY_BUFFER, sliceVertices.size() * sizeof(VertexPT), sliceVertices.constData(), GL_STATIC_DRAW);
 
     // Generate index buffer for the axial slice. The sliceIndices data is uploaded to the IBO
-    glGenBuffers(1, &indexBuf);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuf);
+    glGenBuffers(1, &sliceIndexBuf);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, sliceIndexBuf);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sliceIndices.size() * sizeof(GLushort), sliceIndices.constData(), GL_STATIC_DRAW);
 
     // Generate VAO for the axial slice vertices uploaded. Location 0 is the position and location 1 is the texture position
-    glGenVertexArrays(1, &vertexObject);
-    glBindVertexArray(vertexObject);
+    glGenVertexArrays(1, &sliceVertexObject);
+    glBindVertexArray(sliceVertexObject);
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(0, VertexPT::PosTupleSize, GL_FLOAT, true, VertexPT::stride(), static_cast<const char *>(0) + VertexPT::posOffset());
     glVertexAttribPointer(1, VertexPT::TexPosTupleSize, GL_FLOAT, true, VertexPT::stride(), static_cast<const char *>(0) + VertexPT::texPosOffset());
 
     // Enable 2D textures and generate a blank texture for the axial slice
-    glGenTextures(1, &this->texture);
-    // This sets the GLSL uniform value 'tex' to 0 which means GL_TEXTURE0 is the texture used for tex variable
+    glEnable(GL_TEXTURE_2D);
+    glGenTextures(1, &this->sliceTexture);
 
     // Release (unbind) all
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
+}
+
+void CoronalSliceWidget::initializeCrosshairLine()
+{
+    lineStart = QPoint(0, 0);
+    lineEnd = QPoint(0, 0);
+    lineWidth = 0;
 }
 
 void CoronalSliceWidget::updateTexture()
@@ -182,7 +217,7 @@ void CoronalSliceWidget::updateTexture()
     cv::normalize(matrix.clone(), matrix, 0.0f, 1.0f, cv::NORM_MINMAX, CV_32FC1);
 
     // Bind the texture and setup the parameters for it
-    glBindTexture(GL_TEXTURE_2D, texture);
+    glBindTexture(GL_TEXTURE_2D, sliceTexture);
     // These parameters basically say the pixel value is equal to the average of the nearby pixel values when magnifying or minifying the values
     // Essentially, when stretching or shrinking the texture to the screen, it will smooth out the pixel values instead of making it look blocky
     // like GL_NEAREST would.
@@ -202,6 +237,74 @@ void CoronalSliceWidget::updateTexture()
     update();
 }
 
+void CoronalSliceWidget::updateCrosshairLine()
+{
+    // Calculate the ModelViewProjection (MVP) matrix to transform the location of the axial slices
+    QMatrix4x4 mvpMatrix;
+    QMatrix4x4 modelMatrix;
+
+    // Translate the modelMatrix according to translation vector
+    // Then scale according to scaling factor
+    modelMatrix.translate(translation);
+    modelMatrix.scale(scaling);
+
+    // Create the MVP matrix by M * V * P
+    mvpMatrix = modelMatrix * viewMatrix * projectionMatrix;
+
+    // Start with calculating the thickness of each axial layer according to the translation/scaling factors
+    // Need to get this in terms of window coordinates b/c that is the system QPainter uses
+
+    // Create a start point at top of screen (axialSlice 0)
+    // Set the end point to be one slice down (axialSlice 1)
+    // It needs to be in terms of OpenGL coordinate system [-1.0f, 1.0f]
+    QVector4D start(-1.0f, -1.0f, 0.0f, 1.0f);
+    QVector4D end(-1.0f, ((1.0f / (fatImage->getZDim() - 1)) * 2.0f - 1.0f), 0.0f, 1.0f);
+
+    // Transform the points based on the model-view-projection matrix
+    start = mvpMatrix * start;
+    end = mvpMatrix * end;
+
+    // Get the difference between the start and end point
+    QVector4D delta = end - start;
+
+    // Transform the points from OpenGL coord. system to window coord. system
+    // The reason this is done first is because the MVP may allow rotation which
+    // means there is an X/Y component of delta. Therefore, since the width/height
+    // of the Window is supposedly different, this must be scaled first
+    delta.setX((delta.x()) * width() / 2.0f);
+    delta.setY((-delta.y()) * height() / 2.0f);
+
+    // Set lineWidth to be an integer value of the delta length. However, the
+    // lineWidth must be at least 1 so that the pen will be shown
+    lineWidth = std::max((int)std::floor(delta.length()), 1);
+
+    // Now the start and end points of the line will be calculated
+    // Calculate y location of current axial slice in OpenGL coord. system
+    float y = (location.z() / (fatImage->getZDim() - 1)) * 2.0f - 1.0f;
+
+    // Start line is left of screen at specified y value and end value is right of screen at specified y value
+    start = QVector4D(-1.0f, y, 0.0f, 1.0f);
+    end = QVector4D(1.0f, y, 0.0f, 1.0f);
+
+    // Transform the points based on the model-view-projection matrix
+    start = mvpMatrix * start;
+    end = mvpMatrix * end;
+
+    // Transform start to Window coord. system
+    start.setX((start.x() + 1.0f) * width() / 2.0f);
+    start.setY((-start.y() + 1.0f) * height() / 2.0f);
+
+    // Transform end to Window coord. system
+    end.setX((end.x() + 1.0f) * width() / 2.0f);
+    end.setY((-end.y() + 1.0f) * height() / 2.0f);
+
+    // Convert to 2D points
+    lineStart = start.toPoint();
+    lineEnd = end.toPoint();
+
+    update();
+}
+
 void CoronalSliceWidget::resizeGL(int w, int h)
 {
     // Shuts compiler up about unused variables w and h.
@@ -215,6 +318,13 @@ void CoronalSliceWidget::resizeGL(int w, int h)
 
 void CoronalSliceWidget::paintGL()
 {
+    // Do nothing if fat/water images are not loaded
+    if (!isLoaded())
+        return;
+
+    QPainter painter(this);
+
+    painter.beginNativePainting();
     glClear(GL_COLOR_BUFFER_BIT);
 
     // Calculate the ModelViewProjection (MVP) matrix to transform the location of the axial slices
@@ -234,11 +344,11 @@ void CoronalSliceWidget::paintGL()
 
     // Bind the VAO, bind texture to GL_TEXTURE0, bind VBO, bind IBO
     // The program that is bound is the index of the curColorMap.
-    glBindVertexArray(vertexObject);
+    glBindVertexArray(sliceVertexObject);
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture);
-    glBindBuffer(GL_ARRAY_BUFFER, vertexBuf);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuf);
+    glBindTexture(GL_TEXTURE_2D, sliceTexture);
+    glBindBuffer(GL_ARRAY_BUFFER, sliceVertexBuf);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, sliceIndexBuf);
 
     // Draw a triangle strip of 4 elements which is two triangles. The indices are unsigned shorts
     glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_SHORT, 0);
@@ -252,6 +362,12 @@ void CoronalSliceWidget::paintGL()
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     program->release();
+
+    painter.endNativePainting();
+
+    // Draw crosshair line
+    painter.setPen(QPen(Qt::red, lineWidth, Qt::SolidLine, Qt::RoundCap));
+    painter.drawLine(lineStart, lineEnd);
 }
 
 void CoronalSliceWidget::mouseMoveEvent(QMouseEvent *eventMove)
@@ -320,9 +436,9 @@ void CoronalSliceWidget::wheelEvent(QWheelEvent *event)
 CoronalSliceWidget::~CoronalSliceWidget()
 {
     // Destroy the VAO, VBO, and IBO
-    glDeleteVertexArrays(1, &vertexObject);
-    glDeleteBuffers(1, &vertexBuf);
-    glDeleteBuffers(1, &indexBuf);
-    glDeleteTextures(1, &texture);
+    glDeleteVertexArrays(1, &sliceVertexObject);
+    glDeleteBuffers(1, &sliceVertexBuf);
+    glDeleteBuffers(1, &sliceIndexBuf);
+    glDeleteTextures(1, &sliceTexture);
     delete program;
 }

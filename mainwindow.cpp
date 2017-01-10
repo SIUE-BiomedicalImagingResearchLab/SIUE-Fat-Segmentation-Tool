@@ -350,6 +350,7 @@ void MainWindow::on_waterFracRadioBtn_toggled(bool checked)
 void MainWindow::on_resetViewBtn_clicked()
 {
     ui->glWidgetAxial->resetView();
+    ui->glWidgetCoronal->resetView();
 }
 
 void MainWindow::undoStack_canUndoChanged(bool canUndo)

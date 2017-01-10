@@ -13,6 +13,7 @@
 #include <QVector4D>
 #include <QMatrix4x4>
 #include <QUndoStack>
+#include <QPainter>
 
 #include <nifti/nifti1.h>
 #include <nifti/nifti1_io.h>
@@ -35,11 +36,14 @@ private:
     NIFTImage *waterImage;
 
     QOpenGLShaderProgram *program;
-    GLuint vertexBuf, indexBuf;
-    GLuint vertexObject;
-    GLuint texture;
+    GLuint sliceVertexBuf, sliceIndexBuf;
+    GLuint sliceVertexObject;
+    GLuint sliceTexture;
     QVector<VertexPT> sliceVertices;
     QVector<unsigned short> sliceIndices;
+
+    QPoint lineStart, lineEnd;
+    int lineWidth;
 
     // Location of where the user is viewing.
     // The format is (X, Y, Z, T) where T is time
@@ -84,14 +88,16 @@ public:
 
     void setUndoStack(QUndoStack *stack);
 
+    void updateTexture();
+    void updateCrosshairLine();
+
 protected:
     void initializeGL();
     void resizeGL(int w, int h);
     void paintGL();
 
-    void initializeColorMaps();
-
-    void updateTexture();
+    void initializeSliceView();
+    void initializeCrosshairLine();
 
     void mouseMoveEvent(QMouseEvent *eventMove);
     void mousePressEvent(QMouseEvent *eventPress);

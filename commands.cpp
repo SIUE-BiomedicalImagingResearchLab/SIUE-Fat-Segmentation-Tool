@@ -24,6 +24,7 @@ void AxialMoveCommand::undo()
     widget->rtranslation() -= delta;
 
     // Tell the screen to draw itself since the scene changed
+    widget->updateCrosshairLine();
     widget->update();
 }
 
@@ -33,6 +34,7 @@ void AxialMoveCommand::redo()
     widget->rtranslation() += delta;
 
     // Tell the screen to draw itself since the scene changed
+    widget->updateCrosshairLine();
     widget->update();
 }
 
@@ -78,6 +80,7 @@ void CoronalMoveCommand::undo()
     widget->rtranslation() -= delta;
 
     // Tell the screen to draw itself since the scene changed
+    widget->updateCrosshairLine();
     widget->update();
 }
 
@@ -87,6 +90,7 @@ void CoronalMoveCommand::redo()
     widget->rtranslation() += delta;
 
     // Tell the screen to draw itself since the scene changed
+    widget->updateCrosshairLine();
     widget->update();
 }
 
@@ -131,6 +135,7 @@ void AxialScaleCommand::undo()
     widget->rscaling() = std::max(std::min(widget->rscaling(), 3.0f), 0.05f);
 
     // Tell the screen to draw itself since the scene changed
+    widget->updateCrosshairLine();
     widget->update();
 }
 
@@ -143,6 +148,7 @@ void AxialScaleCommand::redo()
     widget->rscaling() = std::max(std::min(widget->rscaling(), 3.0f), 0.05f);
 
     // Tell the screen to draw itself since the scene changed
+    widget->updateCrosshairLine();
     widget->update();
 }
 
@@ -193,6 +199,7 @@ void CoronalScaleCommand::undo()
     widget->rscaling() = std::max(std::min(widget->rscaling(), 3.0f), 0.05f);
 
     // Tell the screen to draw itself since the scene changed
+    widget->updateCrosshairLine();
     widget->update();
 }
 
@@ -205,6 +212,7 @@ void CoronalScaleCommand::redo()
     widget->rscaling() = std::max(std::min(widget->rscaling(), 3.0f), 0.05f);
 
     // Tell the screen to draw itself since the scene changed
+    widget->updateCrosshairLine();
     widget->update();
 }
 
