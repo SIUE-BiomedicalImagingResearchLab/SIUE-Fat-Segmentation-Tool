@@ -1,9 +1,11 @@
 #include "commands.h"
 #include "axialslicewidget.h"
+#include "coronalslicewidget.h"
+#include "mainwindow.h"
 
-// Move Command
+// AxialMoveCommand
 // --------------------------------------------------------------------------------------------------------------------
-MoveCommand::MoveCommand(QPointF delta, AxialSliceWidget *widget, CommandID ID, QUndoCommand *parent) : QUndoCommand(parent)
+AxialMoveCommand::AxialMoveCommand(QPointF delta, AxialSliceWidget *widget, CommandID ID, QUndoCommand *parent) : QUndoCommand(parent)
 {
     // Divide delta by respective width/height of screen and multiply by 2.0f
     // This is because the OpenGL range is -1.0f -> 1.0f(2.0 total) and the width/height of the screen is given.
@@ -13,10 +15,10 @@ MoveCommand::MoveCommand(QPointF delta, AxialSliceWidget *widget, CommandID ID, 
     this->ID = ID;
 
     // Updates text that is shown on QUndoView
-    setText(QObject::tr("Move image by (%1%, %2%)").arg(int(delta.x() * 100.0f)).arg(int(delta.y() * 100.0f)));
+    setText(QObject::tr("Move axial image by (%1%, %2%)").arg(int(delta.x() * 100.0f)).arg(int(delta.y() * 100.0f)));
 }
 
-void MoveCommand::undo()
+void AxialMoveCommand::undo()
 {
     // Divide delta by respective width/height of screen and add it to the translation
     widget->rtranslation() -= delta;
@@ -25,7 +27,7 @@ void MoveCommand::undo()
     widget->update();
 }
 
-void MoveCommand::redo()
+void AxialMoveCommand::redo()
 {
     // Add delta to translation
     widget->rtranslation() += delta;
@@ -34,15 +36,15 @@ void MoveCommand::redo()
     widget->update();
 }
 
-bool MoveCommand::mergeWith(const QUndoCommand *command)
+bool AxialMoveCommand::mergeWith(const QUndoCommand *command)
 {
-    const MoveCommand *moveCommand = static_cast<const MoveCommand *>(command);
+    const AxialMoveCommand *moveCommand = static_cast<const AxialMoveCommand *>(command);
 
     // Merge the commands by adding their respective deltas
     delta += moveCommand->delta;
 
     // Updates text that is shown on QUndoView
-    setText(QObject::tr("Move image by (%1%, %2%)").arg(int(delta.x()*100.0f)).arg(int(delta.y()*100.0f)));
+    setText(QObject::tr("Move axial image by (%1%, %2%)").arg(int(delta.x()*100.0f)).arg(int(delta.y()*100.0f)));
 
     //if (delta.length() == 0)
     //    setObsolete(true);
@@ -50,23 +52,77 @@ bool MoveCommand::mergeWith(const QUndoCommand *command)
     return true;
 }
 
-MoveCommand::~MoveCommand()
+AxialMoveCommand::~AxialMoveCommand()
 {
 
 }
 
-// ScaleCommand
+// CoronalMoveCommand
 // --------------------------------------------------------------------------------------------------------------------
-ScaleCommand::ScaleCommand(float scaling, AxialSliceWidget *widget, QUndoCommand *parent) : QUndoCommand(parent)
+CoronalMoveCommand::CoronalMoveCommand(QPointF delta, CoronalSliceWidget *widget, CommandID ID, QUndoCommand *parent) : QUndoCommand(parent)
+{
+    // Divide delta by respective width/height of screen and multiply by 2.0f
+    // This is because the OpenGL range is -1.0f -> 1.0f(2.0 total) and the width/height of the screen is given.
+    // This converts from window coordinates to OpenGL coordinates
+    this->delta = QVector3D((delta.x() * 2.0f / widget->width()), (-delta.y() * 2.0f / widget->height()), 0.0f);
+    this->widget = widget;
+    this->ID = ID;
+
+    // Updates text that is shown on QUndoView
+    setText(QObject::tr("Move coronal image by (%1%, %2%)").arg(int(delta.x() * 100.0f)).arg(int(delta.y() * 100.0f)));
+}
+
+void CoronalMoveCommand::undo()
+{
+    // Divide delta by respective width/height of screen and add it to the translation
+    widget->rtranslation() -= delta;
+
+    // Tell the screen to draw itself since the scene changed
+    widget->update();
+}
+
+void CoronalMoveCommand::redo()
+{
+    // Add delta to translation
+    widget->rtranslation() += delta;
+
+    // Tell the screen to draw itself since the scene changed
+    widget->update();
+}
+
+bool CoronalMoveCommand::mergeWith(const QUndoCommand *command)
+{
+    const CoronalMoveCommand *moveCommand = static_cast<const CoronalMoveCommand *>(command);
+
+    // Merge the commands by adding their respective deltas
+    delta += moveCommand->delta;
+
+    // Updates text that is shown on QUndoView
+    setText(QObject::tr("Move coronal image by (%1%, %2%)").arg(int(delta.x()*100.0f)).arg(int(delta.y()*100.0f)));
+
+    //if (delta.length() == 0)
+    //    setObsolete(true);
+
+    return true;
+}
+
+CoronalMoveCommand::~CoronalMoveCommand()
+{
+
+}
+
+// AxialScaleCommand
+// --------------------------------------------------------------------------------------------------------------------
+AxialScaleCommand::AxialScaleCommand(float scaling, AxialSliceWidget *widget, QUndoCommand *parent) : QUndoCommand(parent)
 {
     this->scaling = scaling;
     this->widget = widget;
 
     // Updates text that is shown on QUndoView
-    setText(QObject::tr("Scale image by %1%").arg(int(scaling * 100.0f)));
+    setText(QObject::tr("Scale axial image by %1%").arg(int(scaling * 100.0f)));
 }
 
-void ScaleCommand::undo()
+void AxialScaleCommand::undo()
 {
     // Add the scaling to the total scaling to zoom in or out
     widget->rscaling() -= scaling;
@@ -78,7 +134,7 @@ void ScaleCommand::undo()
     widget->update();
 }
 
-void ScaleCommand::redo()
+void AxialScaleCommand::redo()
 {
     // Add the scaling to the total scaling to zoom in or out
     widget->rscaling() += scaling;
@@ -90,15 +146,15 @@ void ScaleCommand::redo()
     widget->update();
 }
 
-bool ScaleCommand::mergeWith(const QUndoCommand *command)
+bool AxialScaleCommand::mergeWith(const QUndoCommand *command)
 {
-    const ScaleCommand *scaleCommand = static_cast<const ScaleCommand *>(command);
+    const AxialScaleCommand *scaleCommand = static_cast<const AxialScaleCommand *>(command);
 
     // Merge the two commands by adding the scaling component
     scaling += scaleCommand->scaling;
 
     // Updates text that is shown on QUndoView
-    setText(QObject::tr("Scale image by %1%").arg(int(scaling*100.0f)));
+    setText(QObject::tr("Scale axial image by %1%").arg(int(scaling*100.0f)));
 
     // When building this executable, the setObsolete command requires a special patch in Qt to work
     // correctly. It is something that I edited in the Qt source code and contributed to the Qt source
@@ -112,79 +168,207 @@ bool ScaleCommand::mergeWith(const QUndoCommand *command)
     return true;
 }
 
-ScaleCommand::~ScaleCommand()
+AxialScaleCommand::~AxialScaleCommand()
 {
 
 }
 
-// SliceChangeCommand
+// CoronalScaleCommand
 // --------------------------------------------------------------------------------------------------------------------
-SliceChangeCommand::SliceChangeCommand(int oldSlice, int newSlice, AxialSliceWidget *widget, QSlider *slider, QSpinBox *spinBox, QUndoCommand *parent) : QUndoCommand(parent)
+CoronalScaleCommand::CoronalScaleCommand(float scaling, CoronalSliceWidget *widget, QUndoCommand *parent) : QUndoCommand(parent)
 {
-    this->oldSlice = oldSlice;
-    this->newSlice = newSlice;
+    this->scaling = scaling;
     this->widget = widget;
-    this->slider = slider;
-    this->spinBox = spinBox;
 
     // Updates text that is shown on QUndoView
-    setText(QObject::tr("Move to slice %1").arg(newSlice));
+    setText(QObject::tr("Scale coronal image by %1%").arg(int(scaling * 100.0f)));
 }
 
-void SliceChangeCommand::undo()
+void CoronalScaleCommand::undo()
 {
-    // Go back to the old slice
-    widget->setAxialSlice(oldSlice);
+    // Add the scaling to the total scaling to zoom in or out
+    widget->rscaling() -= scaling;
 
-    // Set the slider value to be equal to the new slice. It blocks all signals from the setValue so that way
-    // the valueChanged is not called again and creates a new SliceChangeCommand.
-    bool prev = slider->blockSignals(true);
-    slider->setValue(oldSlice);
-    slider->blockSignals(prev);
+    // Clamp it between 0.05f (5%) to 3.0f (300%)
+    widget->rscaling() = std::max(std::min(widget->rscaling(), 3.0f), 0.05f);
 
-    // Set the spin box value to be equal to the new slice. It blocks all signals from the setValue so that way
-    // the valueChanged is not called again and creates a new SliceChangeCommand.
-    prev = spinBox->blockSignals(true);
-    spinBox->setValue(oldSlice);
-    spinBox->blockSignals(prev);
+    // Tell the screen to draw itself since the scene changed
+    widget->update();
 }
 
-void SliceChangeCommand::redo()
+void CoronalScaleCommand::redo()
 {
-    // Go to the new slice
-    widget->setAxialSlice(newSlice);
+    // Add the scaling to the total scaling to zoom in or out
+    widget->rscaling() += scaling;
 
-    // Set the slider value to be equal to the new slice. It blocks all signals from the setValue so that way
-    // the valueChanged is not called again and creates a new SliceChangeCommand.
-    bool prev = slider->blockSignals(true);
-    slider->setValue(newSlice);
-    slider->blockSignals(prev);
+    // Clamp it between 0.05f (5%) to 3.0f (300%)
+    widget->rscaling() = std::max(std::min(widget->rscaling(), 3.0f), 0.05f);
 
-    // Set the spin box value to be equal to the new slice. It blocks all signals from the setValue so that way
-    // the valueChanged is not called again and creates a new SliceChangeCommand.
-    prev = spinBox->blockSignals(true);
-    spinBox->setValue(newSlice);
-    spinBox->blockSignals(prev);
+    // Tell the screen to draw itself since the scene changed
+    widget->update();
 }
 
-bool SliceChangeCommand::mergeWith(const QUndoCommand *command)
+bool CoronalScaleCommand::mergeWith(const QUndoCommand *command)
 {
-    const SliceChangeCommand *sliceChangeCommand = static_cast<const SliceChangeCommand *>(command);
+    const CoronalScaleCommand *scaleCommand = static_cast<const CoronalScaleCommand *>(command);
 
-    // Since the newest command will get merged with the older command, this means the oldSlice of the current command (this) will stay
-    // the same but the newSlice will change to what the merged command is
-    newSlice = sliceChangeCommand->newSlice;
+    // Merge the two commands by adding the scaling component
+    scaling += scaleCommand->scaling;
 
     // Updates text that is shown on QUndoView
-    setText(QObject::tr("Move to slice %1").arg(newSlice));
+    setText(QObject::tr("Scale coronal image by %1%").arg(int(scaling*100.0f)));
 
-    //if (newSlice == oldSlice)
+    // When building this executable, the setObsolete command requires a special patch in Qt to work
+    // correctly. It is something that I edited in the Qt source code and contributed to the Qt source
+    // code. It is likely that it will not become apart of the built libraries until Qt 5.9+. Therefore,
+    // if you do not want to bother building the Qt libraries(6+ hours of time at least), then comment out
+    // all instances of setObsolete and it should work. However, if you are interested, download the source
+    // code and cherry-pick the patch at: https://codereview.qt-project.org/#/c/178852/
+    //if (scaling == 0.0f)
     //    setObsolete(true);
 
     return true;
 }
 
-SliceChangeCommand::~SliceChangeCommand()
+CoronalScaleCommand::~CoronalScaleCommand()
+{
+
+}
+
+// LocationChangeCommand
+// --------------------------------------------------------------------------------------------------------------------
+LocationChangeCommand::LocationChangeCommand(QVector4D oldLocation, QVector4D newLocation, AxialSliceWidget *axialWidget, CoronalSliceWidget *coronalWidget,
+                                             QSlider *axialSlider, QSpinBox *axialSpinBox, QSlider *coronalSlider, QSpinBox *coronalSpinBox,
+                                             QSlider *saggitalSlider, QSpinBox *saggitalSpinBox, QUndoCommand *parent) : QUndoCommand(parent)
+{
+    this->oldLocation = oldLocation;
+    this->newLocation = newLocation;
+    this->axialWidget = axialWidget;
+    this->coronalWidget = coronalWidget;
+
+    this->axialSlider = axialSlider;
+    this->axialSpinBox = axialSpinBox;
+
+    this->coronalSlider = coronalSlider;
+    this->coronalSpinBox = coronalSpinBox;
+
+    this->saggitalSlider = saggitalSlider;
+    this->saggitalSpinBox = saggitalSpinBox;
+
+    // Updates text that is shown on QUndoView
+    //setText(QObject::tr("Move to slice %1").arg(newSlice));
+}
+
+void LocationChangeCommand::undo()
+{
+    // Go back to the old slice
+    axialWidget->setLocation(oldLocation);
+    coronalWidget->setLocation(oldLocation);
+
+    QVector4D delta = newLocation - oldLocation;
+
+    if (delta.z() && axialSlider && axialSpinBox)
+    {
+        // Set the slider value to be equal to the new slice. It blocks all signals from the setValue so that way
+        // the valueChanged is not called again and creates a new LocationChangeCommand.
+        bool prev = axialSlider->blockSignals(true);
+        axialSlider->setValue(oldLocation.z());
+        axialSlider->blockSignals(prev);
+
+        // Set the spin box value to be equal to the new slice. It blocks all signals from the setValue so that way
+        // the valueChanged is not called again and creates a new LocationChangeCommand.
+        prev = axialSpinBox->blockSignals(true);
+        axialSpinBox->setValue(oldLocation.z());
+        axialSpinBox->blockSignals(prev);
+    }
+
+    if (delta.y() && coronalSlider && coronalSpinBox)
+    {
+        bool prev = coronalSlider->blockSignals(true);
+        coronalSlider->setValue(oldLocation.y());
+        coronalSlider->blockSignals(prev);
+
+        prev = coronalSpinBox->blockSignals(true);
+        coronalSpinBox->setValue(oldLocation.y());
+        coronalSpinBox->blockSignals(prev);
+    }
+
+    if (delta.x() && saggitalSlider && saggitalSpinBox)
+    {
+        bool prev = saggitalSlider->blockSignals(true);
+        saggitalSlider->setValue(oldLocation.x());
+        saggitalSlider->blockSignals(prev);
+
+        prev = saggitalSpinBox->blockSignals(true);
+        saggitalSpinBox->setValue(oldLocation.x());
+        saggitalSpinBox->blockSignals(prev);
+    }
+}
+
+void LocationChangeCommand::redo()
+{
+    // Go to new location
+    axialWidget->setLocation(newLocation);
+    coronalWidget->setLocation(newLocation);
+
+    QVector4D delta = newLocation - oldLocation;
+
+    if (delta.z() != Location::NoChange && delta.z() && axialSlider && axialSpinBox)
+    {
+        // Set the slider value to be equal to the new slice. It blocks all signals from the setValue so that way
+        // the valueChanged is not called again and creates a new LocationChangeCommand.
+        bool prev = axialSlider->blockSignals(true);
+        axialSlider->setValue(newLocation.z());
+        axialSlider->blockSignals(prev);
+
+        // Set the spin box value to be equal to the new slice. It blocks all signals from the setValue so that way
+        // the valueChanged is not called again and creates a new LocationChangeCommand.
+        prev = axialSpinBox->blockSignals(true);
+        axialSpinBox->setValue(newLocation.z());
+        axialSpinBox->blockSignals(prev);
+    }
+
+    if (delta.y() != Location::NoChange && delta.y() && coronalSlider && coronalSpinBox)
+    {
+        bool prev = coronalSlider->blockSignals(true);
+        coronalSlider->setValue(newLocation.y());
+        coronalSlider->blockSignals(prev);
+
+        prev = coronalSpinBox->blockSignals(true);
+        coronalSpinBox->setValue(newLocation.y());
+        coronalSpinBox->blockSignals(prev);
+    }
+
+    if (delta.x() != Location::NoChange && delta.x() && saggitalSlider && saggitalSpinBox)
+    {
+        bool prev = saggitalSlider->blockSignals(true);
+        saggitalSlider->setValue(newLocation.x());
+        saggitalSlider->blockSignals(prev);
+
+        prev = saggitalSpinBox->blockSignals(true);
+        saggitalSpinBox->setValue(newLocation.x());
+        saggitalSpinBox->blockSignals(prev);
+    }
+}
+
+bool LocationChangeCommand::mergeWith(const QUndoCommand *command)
+{
+    const LocationChangeCommand *sliceChangeCommand = static_cast<const LocationChangeCommand *>(command);
+
+    // Since the newest command will get merged with the older command, this means the oldLocation of the current command (this) will stay
+    // the same but the newLocation will change to what the merged command is
+    newLocation = sliceChangeCommand->newLocation;
+
+    // Updates text that is shown on QUndoView
+    //setText(QObject::tr("Move to slice %1").arg(newSlice));
+
+    //if (newLocation == oldLocation)
+    //    setObsolete(true);
+
+    return true;
+}
+
+LocationChangeCommand::~LocationChangeCommand()
 {
 
 }
@@ -377,7 +561,7 @@ ColorMapChangeCommand::~ColorMapChangeCommand()
 
 // SliceViewChangeCommand
 // --------------------------------------------------------------------------------------------------------------------
-SliceViewChangeCommand::SliceViewChangeCommand(AxialDisplayType oldDT, AxialDisplayType newDT, AxialSliceWidget *widget, QRadioButton *oldBtn, QRadioButton *newBtn, QUndoCommand *parent) : QUndoCommand(parent)
+SliceViewChangeCommand::SliceViewChangeCommand(SliceDisplayType oldDT, SliceDisplayType newDT, AxialSliceWidget *widget, QRadioButton *oldBtn, QRadioButton *newBtn, QUndoCommand *parent) : QUndoCommand(parent)
 {
     this->oldDT = oldDT;
     this->newDT = newDT;

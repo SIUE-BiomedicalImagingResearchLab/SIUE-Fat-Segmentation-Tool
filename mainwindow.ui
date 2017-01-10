@@ -57,355 +57,146 @@
           <property name="checkable">
            <bool>false</bool>
           </property>
-          <layout class="QGridLayout" name="gridLayout_2" rowstretch="0,0,0,0,0" columnstretch="0,0,0,0,0">
-           <item row="0" column="0" colspan="5">
-            <layout class="QHBoxLayout" name="sliceLayout" stretch="0,0,0">
-             <item>
-              <widget class="QLabel" name="label_4">
-               <property name="text">
-                <string>&amp;Slice:</string>
-               </property>
-               <property name="buddy">
-                <cstring>sliceSlider</cstring>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QSlider" name="sliceSlider">
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-               <property name="tickPosition">
-                <enum>QSlider::NoTicks</enum>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QSpinBox" name="sliceSpinBox">
-               <property name="mouseTracking">
-                <bool>true</bool>
-               </property>
-               <property name="focusPolicy">
-                <enum>Qt::WheelFocus</enum>
-               </property>
-               <property name="buttonSymbols">
-                <enum>QAbstractSpinBox::UpDownArrows</enum>
-               </property>
-               <property name="keyboardTracking">
-                <bool>false</bool>
-               </property>
-               <property name="suffix">
-                <string/>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
-           <item row="1" column="0" colspan="5">
-            <layout class="QHBoxLayout" name="brightnessLayout" stretch="0,0,0">
-             <item>
-              <widget class="QLabel" name="label_3">
-               <property name="text">
-                <string>&amp;Brightness</string>
-               </property>
-               <property name="buddy">
-                <cstring>brightnessSlider</cstring>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QSlider" name="brightnessSlider">
-               <property name="focusPolicy">
-                <enum>Qt::StrongFocus</enum>
-               </property>
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QSpinBox" name="brightnessSpinBox">
-               <property name="suffix">
-                <string>%</string>
-               </property>
-               <property name="maximum">
-                <number>100</number>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
-           <item row="2" column="0" colspan="5">
-            <layout class="QHBoxLayout" name="contrastLayout" stretch="0,0,0">
-             <property name="leftMargin">
-              <number>0</number>
-             </property>
-             <item>
-              <widget class="QLabel" name="label">
-               <property name="text">
-                <string>&amp;Contrast</string>
-               </property>
-               <property name="buddy">
-                <cstring>contrastSlider</cstring>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QSlider" name="contrastSlider">
-               <property name="focusPolicy">
-                <enum>Qt::StrongFocus</enum>
-               </property>
-               <property name="maximum">
-                <number>100</number>
-               </property>
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QSpinBox" name="contrastSpinBox">
-               <property name="suffix">
-                <string>%</string>
-               </property>
-               <property name="maximum">
-                <number>100</number>
-               </property>
-               <property name="value">
-                <number>100</number>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
-           <item row="3" column="0" colspan="5">
-            <layout class="QHBoxLayout" name="colorMapLayout">
-             <item>
-              <widget class="QLabel" name="label_5">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="text">
-                <string>Color &amp;Map: </string>
-               </property>
-               <property name="buddy">
-                <cstring>colorMapComboBox</cstring>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QComboBox" name="colorMapComboBox">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="currentText">
-                <string>Autumn</string>
-               </property>
-               <property name="currentIndex">
-                <number>0</number>
-               </property>
-               <property name="maxVisibleItems">
-                <number>13</number>
-               </property>
-               <item>
-                <property name="text">
-                 <string>Autumn</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>Bone</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>Cool</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>Copper</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>Gray</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>Hot</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>HSV</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>Jet</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>Parula</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>Pink</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>Spring</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>Summer</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>Winter</string>
-                </property>
-               </item>
-              </widget>
-             </item>
-            </layout>
-           </item>
-           <item row="4" column="1">
-            <widget class="QGroupBox" name="currentLayerBox">
+          <layout class="QGridLayout" name="gridLayout_2">
+           <item row="4" column="0" colspan="3">
+            <widget class="QGroupBox" name="groupBox">
              <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                <horstretch>0</horstretch>
                <verstretch>0</verstretch>
               </sizepolicy>
              </property>
-             <property name="toolTip">
-              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Active layer being traced out on axial slice screen&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-             </property>
              <property name="title">
-              <string>Current Layer</string>
+              <string>Secondary</string>
              </property>
-             <layout class="QVBoxLayout" name="verticalLayout_3">
-              <property name="spacing">
-               <number>2</number>
-              </property>
+             <layout class="QVBoxLayout" name="verticalLayout_5">
               <item>
-               <widget class="QRadioButton" name="EATRadioBtn">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="toolTip">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Epicardial Adipose Tissue&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Fat within pericardial sac&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                </property>
-                <property name="toolTipDuration">
-                 <number>-1</number>
-                </property>
-                <property name="whatsThis">
-                 <string>This is something crazier I must say.</string>
-                </property>
-                <property name="text">
-                 <string>EAT</string>
-                </property>
-               </widget>
+               <layout class="QHBoxLayout" name="secdColorMapLayout">
+                <item>
+                 <widget class="QLabel" name="label_2">
+                  <property name="text">
+                   <string>Color Map</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QComboBox" name="secdColorMapComboBox">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="maxVisibleItems">
+                   <number>13</number>
+                  </property>
+                  <item>
+                   <property name="text">
+                    <string>Autumn</string>
+                   </property>
+                  </item>
+                  <item>
+                   <property name="text">
+                    <string>Bone</string>
+                   </property>
+                  </item>
+                  <item>
+                   <property name="text">
+                    <string>Cool</string>
+                   </property>
+                  </item>
+                  <item>
+                   <property name="text">
+                    <string>Copper</string>
+                   </property>
+                  </item>
+                  <item>
+                   <property name="text">
+                    <string>Gray</string>
+                   </property>
+                  </item>
+                  <item>
+                   <property name="text">
+                    <string>Hot</string>
+                   </property>
+                  </item>
+                  <item>
+                   <property name="text">
+                    <string>HSV</string>
+                   </property>
+                  </item>
+                  <item>
+                   <property name="text">
+                    <string>Jet</string>
+                   </property>
+                  </item>
+                  <item>
+                   <property name="text">
+                    <string>Parula</string>
+                   </property>
+                  </item>
+                  <item>
+                   <property name="text">
+                    <string>Pink</string>
+                   </property>
+                  </item>
+                  <item>
+                   <property name="text">
+                    <string>Spring</string>
+                   </property>
+                  </item>
+                  <item>
+                   <property name="text">
+                    <string>Summer</string>
+                   </property>
+                  </item>
+                  <item>
+                   <property name="text">
+                    <string>Winter</string>
+                   </property>
+                  </item>
+                 </widget>
+                </item>
+               </layout>
               </item>
               <item>
-               <widget class="QRadioButton" name="IMATRadioBtn">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
+               <layout class="QHBoxLayout" name="secdTransparencyLayout">
+                <property name="bottomMargin">
+                 <number>0</number>
                 </property>
-                <property name="toolTip">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Inter&lt;/span&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;M&lt;/span&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;uscular Adipose Tissue&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Fat in between muscles&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                </property>
-                <property name="text">
-                 <string>IMAT</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QRadioButton" name="PAATRadioBtn">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="toolTip">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Peri-Aortic Adipose Tissue&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Fat surrounding aorta&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                </property>
-                <property name="text">
-                 <string>PAAT</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QRadioButton" name="PATRadioBtn">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="toolTip">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Paracardial Adipose Tissue&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Fat outside pericardial sac&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                </property>
-                <property name="text">
-                 <string>PAT</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QRadioButton" name="SCATRadioBtn">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="toolTip">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;SubCutaneous Adipose Tissue&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Fat beneath the skin&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                </property>
-                <property name="text">
-                 <string>SCAT</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QRadioButton" name="VATRadioBtn">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="toolTip">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Visceral Adipose Tissue&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Fat surrounding organs within abdomen&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                </property>
-                <property name="text">
-                 <string>VAT</string>
-                </property>
-               </widget>
+                <item>
+                 <widget class="QLabel" name="label_6">
+                  <property name="text">
+                   <string>Transparency</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QSlider" name="secdTransparencySlider">
+                  <property name="maximum">
+                   <number>100</number>
+                  </property>
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QSpinBox" name="secdTransparencySpinBox">
+                  <property name="suffix">
+                   <string>%</string>
+                  </property>
+                  <property name="maximum">
+                   <number>100</number>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
               </item>
              </layout>
             </widget>
            </item>
-           <item row="4" column="0">
+           <item row="5" column="0">
             <widget class="QGroupBox" name="visibleLayersBox">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
@@ -561,7 +352,317 @@
              </layout>
             </widget>
            </item>
-           <item row="4" column="2">
+           <item row="5" column="1">
+            <widget class="QGroupBox" name="currentLayerBox">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="toolTip">
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Active layer being traced out on axial slice screen&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             </property>
+             <property name="title">
+              <string>Current Layer</string>
+             </property>
+             <layout class="QVBoxLayout" name="verticalLayout_3">
+              <property name="spacing">
+               <number>2</number>
+              </property>
+              <item>
+               <widget class="QRadioButton" name="EATRadioBtn">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Epicardial Adipose Tissue&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Fat within pericardial sac&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="toolTipDuration">
+                 <number>-1</number>
+                </property>
+                <property name="whatsThis">
+                 <string>This is something crazier I must say.</string>
+                </property>
+                <property name="text">
+                 <string>EAT</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QRadioButton" name="IMATRadioBtn">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Inter&lt;/span&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;M&lt;/span&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;uscular Adipose Tissue&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Fat in between muscles&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="text">
+                 <string>IMAT</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QRadioButton" name="PAATRadioBtn">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Peri-Aortic Adipose Tissue&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Fat surrounding aorta&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="text">
+                 <string>PAAT</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QRadioButton" name="PATRadioBtn">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Paracardial Adipose Tissue&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Fat outside pericardial sac&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="text">
+                 <string>PAT</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QRadioButton" name="SCATRadioBtn">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;SubCutaneous Adipose Tissue&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Fat beneath the skin&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="text">
+                 <string>SCAT</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QRadioButton" name="VATRadioBtn">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Visceral Adipose Tissue&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Fat surrounding organs within abdomen&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="text">
+                 <string>VAT</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item row="1" column="0" colspan="3">
+            <layout class="QHBoxLayout" name="brightnessLayout" stretch="0,0,0">
+             <item>
+              <widget class="QLabel" name="label_3">
+               <property name="text">
+                <string>&amp;Brightness</string>
+               </property>
+               <property name="buddy">
+                <cstring>brightnessSlider</cstring>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QSlider" name="brightnessSlider">
+               <property name="focusPolicy">
+                <enum>Qt::StrongFocus</enum>
+               </property>
+               <property name="maximum">
+                <number>100</number>
+               </property>
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QSpinBox" name="brightnessSpinBox">
+               <property name="suffix">
+                <string>%</string>
+               </property>
+               <property name="maximum">
+                <number>100</number>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item row="2" column="0" colspan="3">
+            <layout class="QHBoxLayout" name="contrastLayout" stretch="0,0,0">
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QLabel" name="label">
+               <property name="text">
+                <string>&amp;Contrast</string>
+               </property>
+               <property name="buddy">
+                <cstring>contrastSlider</cstring>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QSlider" name="contrastSlider">
+               <property name="focusPolicy">
+                <enum>Qt::StrongFocus</enum>
+               </property>
+               <property name="maximum">
+                <number>100</number>
+               </property>
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QSpinBox" name="contrastSpinBox">
+               <property name="suffix">
+                <string>%</string>
+               </property>
+               <property name="maximum">
+                <number>100</number>
+               </property>
+               <property name="value">
+                <number>100</number>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item row="3" column="0" colspan="3">
+            <layout class="QHBoxLayout" name="primColorMapLayout">
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QLabel" name="label_5">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="text">
+                <string>Primary Color Map</string>
+               </property>
+               <property name="buddy">
+                <cstring>primColorMapComboBox</cstring>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QComboBox" name="primColorMapComboBox">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="currentText">
+                <string>Autumn</string>
+               </property>
+               <property name="currentIndex">
+                <number>0</number>
+               </property>
+               <property name="maxVisibleItems">
+                <number>13</number>
+               </property>
+               <item>
+                <property name="text">
+                 <string>Autumn</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Bone</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Cool</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Copper</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Gray</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Hot</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>HSV</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Jet</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Parula</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Pink</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Spring</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Summer</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Winter</string>
+                </property>
+               </item>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item row="5" column="2">
             <layout class="QVBoxLayout" name="verticalLayout_4">
              <property name="spacing">
               <number>3</number>
@@ -572,7 +673,7 @@
              <property name="leftMargin">
               <number>0</number>
              </property>
-             <item alignment="Qt::AlignLeft|Qt::AlignTop">
+             <item>
               <widget class="QGroupBox" name="sliceViewBox">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
@@ -649,11 +750,57 @@
              </item>
             </layout>
            </item>
+           <item row="0" column="0" colspan="3">
+            <layout class="QHBoxLayout" name="sliceLayout" stretch="0,0,0">
+             <item>
+              <widget class="QLabel" name="label_4">
+               <property name="text">
+                <string>&amp;Slice:</string>
+               </property>
+               <property name="buddy">
+                <cstring>sliceSlider</cstring>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QSlider" name="sliceSlider">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="tickPosition">
+                <enum>QSlider::NoTicks</enum>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QSpinBox" name="sliceSpinBox">
+               <property name="mouseTracking">
+                <bool>true</bool>
+               </property>
+               <property name="focusPolicy">
+                <enum>Qt::WheelFocus</enum>
+               </property>
+               <property name="buttonSymbols">
+                <enum>QAbstractSpinBox::UpDownArrows</enum>
+               </property>
+               <property name="keyboardTracking">
+                <bool>false</bool>
+               </property>
+               <property name="suffix">
+                <string/>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
           </layout>
+          <zorder>visibleLayersBox</zorder>
+          <zorder>currentLayerBox</zorder>
+          <zorder>groupBox</zorder>
          </widget>
         </item>
         <item>
-         <widget class="QOpenGLWidget" name="glWidgetMinimap">
+         <widget class="CoronalSliceWidget" name="glWidgetCoronal">
           <property name="sizePolicy">
            <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
             <horstretch>0</horstretch>
@@ -668,7 +815,7 @@
        </layout>
       </item>
       <item>
-       <widget class="AxialSliceWidget" name="glWidgetSlice">
+       <widget class="AxialSliceWidget" name="glWidgetAxial">
         <property name="sizePolicy">
          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
           <horstretch>2</horstretch>
@@ -690,7 +837,7 @@
      <x>0</x>
      <y>0</y>
      <width>1200</width>
-     <height>21</height>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -720,7 +867,6 @@
     <bool>false</bool>
    </attribute>
   </widget>
-  <widget class="QStatusBar" name="statusBar"/>
   <action name="actionOpen">
    <property name="text">
     <string>&amp;Open</string>
@@ -771,6 +917,11 @@
    <class>AxialSliceWidget</class>
    <extends>QOpenGLWidget</extends>
    <header>axialslicewidget.h</header>
+  </customwidget>
+  <customwidget>
+   <class>CoronalSliceWidget</class>
+   <extends>QOpenGLWidget</extends>
+   <header>coronalslicewidget.h</header>
   </customwidget>
  </customwidgets>
  <tabstops>

@@ -1,16 +1,15 @@
 #version 330
 
 uniform sampler2D tex;
+uniform sampler1D mappingTexture;
 varying vec2 texCoord;
 
 uniform float brightness;
 uniform float contrast;
 
-vec4 colormap(float x);
-
 void main(void)
 {
-    vec4 texColor = texture2D(tex, texCoord.st);
+    vec4 texColor = texture(tex, texCoord.st);
 
-    gl_FragColor = colormap((texColor.r * contrast) + brightness);
+    gl_FragColor = texture(mappingTexture, clamp(((texColor.r * contrast) + brightness), 0.0, 1.0));
 }

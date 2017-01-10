@@ -289,12 +289,12 @@ cv::Mat NIFTImage::getRegion(std::vector<cv::Range> region, bool clone)
         return cv::Mat(data, region.data());
 }
 
-/* getSlice is similar to getRegion function but instead returns one slice of the data matrix.
+/* getAxialSlice is similar to getRegion function but instead returns one axial slice of the data matrix.
  *
  * Returns:
  *      cv::Mat - Matrix of the slice. If an error occurred, an empty matrix is returned.
  */
-cv::Mat NIFTImage::getSlice(int z, bool clone)
+cv::Mat NIFTImage::getAxialSlice(int z, bool clone)
 {
     if (data.empty() || z < 0 || z > zDim - 1)
         return cv::Mat();
@@ -312,48 +312,51 @@ cv::Mat NIFTImage::getSlice(int z, bool clone)
     return ret.reshape(0, 2, dims);
 }
 
-/*void NIFTImage::normalize(int datatype, int scale, int offset)
+/* getCoronalSlice is similar to getRegion function but instead returns one coronal slice of the data matrix.
+ *
+ * Returns:
+ *      cv::Mat - Matrix of the slice. If an error occurred, an empty matrix is returned.
+ */
+cv::Mat NIFTImage::getCoronalSlice(int y, bool clone)
 {
-    if (data.empty())
-        return;
+    if (data.empty() || y < 0 || y > yDim - 1)
+        return cv::Mat();
 
-    double minValue, maxValue;
-    cv::minMaxIdx(data, &minValue, &maxValue);
-    qDebug() << "MinValue: " << minValue << " MaxValue: " << maxValue;
+    const cv::Range region[] = { cv::Range::all(), cv::Range(y, y + 1), cv::Range::all() };
 
-    cv::Mat temp;
+    cv::Mat ret;
 
-    data.convertTo(temp, CV_32FC1);
+    if (clone)
+        ret = cv::Mat(data, region).clone();
+    else
+        ret = cv::Mat(data, region);
 
-    cv::Mat normalizedData = offset + (temp / 579.0f) * scale;
-    data = normalizedData;
-    //cv::normalize(data, data, 0, 65000, cv::NORM_MINMAX, CV_16UC1);
+    int dims[] = { data.size[2], data.size[0] };
+    return ret.reshape(0, 2, dims);
+}
 
+/* getSaggitalSlice is similar to getRegion function but instead returns one saggital slice of the data matrix.
+ *
+ * Returns:
+ *      cv::Mat - Matrix of the slice. If an error occurred, an empty matrix is returned.
+ */
+cv::Mat NIFTImage::getSaggitalSlice(int x, bool clone)
+{
+    if (data.empty() || x < 0 || x > xDim - 1)
+        return cv::Mat();
 
-    QFile file("C:/Users/addis/Desktop/matrix.txt");
-    file.open(QIODevice::WriteOnly);
-        //return 0;
+    const cv::Range region[] = { cv::Range::all(), cv::Range::all(), cv::Range(x, x + 1) };
 
-    QTextStream stream(&file);
+    cv::Mat ret;
 
-    for (int z = 0; z < 1; ++z)
-    {
-        for (int y = 0; y < yDim; ++y)
-        {
-            for (int x = 0; x < xDim; ++x)
-            {
-                //stream << data.at<float>(z, y, x) << " ";
-            }
-            stream << "\n";
-        }
-        stream << "-------------------\n\n\n--------------------------------\n";
-    }
+    if (clone)
+        ret = cv::Mat(data, region).clone();
+    else
+        ret = cv::Mat(data, region);
 
-    file.close();
-
-    //data = offset + (data / 100.0f);
-    //normalizedData.convertTo(data, datatype);
-}*/
+    int dims[] = { data.size[0], data.size[1] };
+    return ret.reshape(0, 2, dims);
+}
 
 /* getOpenGLDatatype returns the equivalent OpenGL datatype necessary for the data
  * matrix! Note: The NIFTI file datatype is irrelevant because the data matrix is the

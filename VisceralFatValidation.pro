@@ -24,7 +24,8 @@ SOURCES += main.cpp\
     axialslicewidget.cpp \
     commands.cpp \
     opencv.cpp \
-    subjectconfig.cpp
+    subjectconfig.cpp \
+    coronalslicewidget.cpp
 
 HEADERS  += mainwindow.h \
     application.h \
@@ -35,7 +36,9 @@ HEADERS  += mainwindow.h \
     vertex.h \
     exception.h \
     util.h \
-    subjectconfig.h
+    subjectconfig.h \
+    coronalslicewidget.h \
+    displayinfo.h
 
 FORMS    += mainwindow.ui
 

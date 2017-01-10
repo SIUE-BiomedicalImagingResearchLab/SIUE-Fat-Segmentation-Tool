@@ -1,5 +1,5 @@
-#ifndef AXIALSLICEWIDGET_H
-#define AXIALSLICEWIDGET_H
+#ifndef CORONALSLICEWIDGET_H
+#define CORONALSLICEWIDGET_H
 
 #include <QOpenGLWidget>
 #include <QOpenGLBuffer>
@@ -8,7 +8,7 @@
 #include <QOpenGLVertexArrayObject>
 #include <QDebug>
 #include <QMouseEvent>
-#include <QOpenGLTexture>
+#include <QWidget>
 #include <QVector>
 #include <QVector4D>
 #include <QMatrix4x4>
@@ -24,7 +24,7 @@
 #include "commands.h"
 #include "displayinfo.h"
 
-class AxialSliceWidget : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Core
+class CoronalSliceWidget : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Core
 {
     Q_OBJECT
 
@@ -38,20 +38,12 @@ private:
     GLuint vertexBuf, indexBuf;
     GLuint vertexObject;
     GLuint texture;
-    GLuint colorMapTexture[ColorMap::Count];
     QVector<VertexPT> sliceVertices;
     QVector<unsigned short> sliceIndices;
 
     // Location of where the user is viewing.
     // The format is (X, Y, Z, T) where T is time
     QVector4D location;
-
-    ColorMap curColorMap;
-
-    float curBrightness;
-    float curContrast;
-
-    bool startDraw;
 
     bool startPan;
     QPoint lastMousePos;
@@ -66,8 +58,8 @@ private:
     QUndoStack *undoStack;
 
 public:
-    AxialSliceWidget(QWidget *parent);
-    ~AxialSliceWidget();
+    CoronalSliceWidget(QWidget *parent);
+    ~CoronalSliceWidget();
 
     // A value of Location::NoChange(-1) means no change for the location
     void setLocation(QVector4D location);
@@ -78,9 +70,6 @@ public:
 
     SliceDisplayType getDisplayType();
     void setDisplayType(SliceDisplayType type);
-
-    ColorMap getColorMap();
-    void setColorMap(ColorMap map);
 
     float getContrast();
     void setContrast(float contrast);
@@ -111,4 +100,4 @@ protected:
     void wheelEvent(QWheelEvent *event);
 };
 
-#endif // AXIALSLICEWIDGET_H
+#endif // CORONALSLICEWIDGET_H

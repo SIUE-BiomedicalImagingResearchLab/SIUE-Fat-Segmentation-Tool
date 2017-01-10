@@ -87,7 +87,10 @@ public:
     int getZDim();
 
     cv::Mat getRegion(std::vector<cv::Range> region, bool clone = false);
-    cv::Mat getSlice(int z, bool clone = false);
+
+    cv::Mat getAxialSlice(int z, bool clone = false);
+    cv::Mat getCoronalSlice(int y, bool clone = false);
+    cv::Mat getSaggitalSlice(int x, bool clone = false);
 
     GLenum *getOpenGLDatatype();
 

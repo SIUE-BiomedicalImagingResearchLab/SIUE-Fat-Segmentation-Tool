@@ -3,7 +3,7 @@
 
 AxialSliceWidget::AxialSliceWidget(QWidget *parent) : QOpenGLWidget(parent)
 {
-    this->displayType = AxialDisplayType::FatOnly;
+    this->displayType = SliceDisplayType::FatOnly;
 
     this->fatImage = NULL;
     this->waterImage = NULL;
@@ -13,17 +13,16 @@ AxialSliceWidget::AxialSliceWidget(QWidget *parent) : QOpenGLWidget(parent)
     this->sliceVertices.append(VertexPT(QVector3D(-1.0f, 1.0f, 0.0f), QVector2D(0.0f, 1.0f)));
     this->sliceVertices.append(VertexPT(QVector3D(1.0f, -1.0f, 0.0f), QVector2D(1.0f, 0.0f)));
     this->sliceVertices.append(VertexPT(QVector3D(1.0f, 1.0f, 0.0f), QVector2D(1.0f, 1.0f)));
-    this->sliceIndices.append({ 0, 1, 2, 3});
+    this->sliceIndices.append({ 0, 1, 2, 3 });
 
-    this->curSlice = 1;
-    this->curTime = -1;
+    this->location = QVector4D(-1, 1, 1, -1);
     this->curColorMap = ColorMap::Gray;
     this->curBrightness = 0.0f;
     this->curContrast = 1.0f;
 
     this->startDraw = false;
     this->startPan = false;
-    this->moveID = CommandID::Move;
+    this->moveID = CommandID::AxialMove;
 
     this->projectionMatrix.setToIdentity();
     this->viewMatrix.setToIdentity();
@@ -39,13 +38,12 @@ void AxialSliceWidget::setImages(NIFTImage *fat, NIFTImage *water)
     fatImage = fat;
     waterImage = water;
 
-    this->curSlice = -1;
-    this->curTime = -1;
+    location = QVector4D(-1, 1, 1, -1);
 
-    this->projectionMatrix.setToIdentity();
-    this->viewMatrix.setToIdentity();
-    this->scaling = 1.0f;
-    this->translation = QVector3D(0.0f, 0.0f, 0.0f);
+    projectionMatrix.setToIdentity();
+    viewMatrix.setToIdentity();
+    scaling = 1.0f;
+    translation = QVector3D(0.0f, 0.0f, 0.0f);
 }
 
 bool AxialSliceWidget::isLoaded()
@@ -53,124 +51,48 @@ bool AxialSliceWidget::isLoaded()
     return (fatImage == NULL && waterImage == NULL);
 }
 
-void AxialSliceWidget::setAxialSlice(int slice, int time)
+void AxialSliceWidget::setLocation(QVector4D location)
 {
-    // If there is no fat or water image currently loaded or the slice is not in an acceptable range,
-    // then return with doing nothing.
-    if (!fatImage || !waterImage || slice < 0 || slice >= fatImage->getZDim())
+    // If there is no fat or water image currently loaded then return with doing nothing.
+    if (!fatImage || !waterImage)
         return;
 
-    // Update the currSlice and currTime variables
-    this->curSlice = slice;
-    this->curTime =  time;
+    QVector4D delta = location - this->location;
 
-    cv::Mat matrix;
-    switch (displayType)
-    {
-        case AxialDisplayType::FatOnly:
-        {
-            // Get the slice for the fat image. If the result is empty then there was an error retrieving the slice
-            matrix = fatImage->getSlice(slice);
-            if (matrix.empty())
-            {
-                qDebug() << "Unable to retrieve slice " << slice << " from the fat image. Matrix returned empty.";
-                return;
-            }
+    // Update the location variables for each component
+    // For each component, if its not equal to Location::NoChange and is different from the old value,
+    // then the value is updated
+    if (location.x() != Location::NoChange && (location.x() >= 0 && location.x() < fatImage->getXDim()))
+        this->location.setX(location.x());
 
-            // The normalize function does quite a bit here. It converts the matrix to a 32-bit float and normalizes it
-            // between 0.0f to 1.0f based on the min/max value. This does not affect the original 3D matrix in fatImage
-            cv::normalize(matrix.clone(), matrix, 0.0f, 1.0f, cv::NORM_MINMAX, CV_32FC1);
-        }
-        break;
+    if (location.y() != Location::NoChange && (location.y() >= 0 && location.y() < fatImage->getYDim()))
+        this->location.setY(location.y());
 
-        case AxialDisplayType::WaterOnly:
-        {
-            // Get the slice for the water image. If the result is empty then there was an error retrieving the slice
-            matrix = waterImage->getSlice(slice, true);
-            if (matrix.empty())
-            {
-                qDebug() << "Unable to retrieve slice " << slice << " from the fat image. Matrix returned empty.";
-                return;
-            }
+    if (location.z() != Location::NoChange && (location.z() >= 0 && location.z() < fatImage->getZDim()))
+        this->location.setZ(location.z());
 
-            // The normalize function does quite a bit here. It converts the matrix to a 32-bit float and normalizes it
-            // between 0.0f to 1.0f based on the min/max value. This does not affect the original 3D matrix in waterImage
-            cv::normalize(matrix.clone(), matrix, 0.0f, 1.0f, cv::NORM_MINMAX, CV_32FC1);
-        }
-        break;
+    if (location.w() != Location::NoChange && (location.w() >= 0))
+        this->location.setW(location.w());
 
-        case AxialDisplayType::FatFraction:
-        {
-            // Get the slice for the fat/water image. If the result is empty then there was an error retrieving the slice
-            cv::Mat fatTemp = fatImage->getSlice(slice, true);
-            cv::Mat waterTemp = waterImage->getSlice(slice, true);
-            if (fatTemp.empty() || waterTemp.empty())
-            {
-                qDebug() << "Unable to retrieve slice " << slice << " from the fat or water image. Matrix returned empty.";
-                return;
-            }
-
-            // The normalize function does quite a bit here. It converts the matrix to a 32-bit float and normalizes it
-            // between 0.0f to 1.0f based on the min/max value. This does not affect the original 3D matrix in fatImage/waterImage
-            cv::normalize(fatTemp.clone(), fatTemp, 0.0f, 1.0f, cv::NORM_MINMAX, CV_32FC1);
-            cv::normalize(waterTemp.clone(), waterTemp, 0.0f, 1.0f, cv::NORM_MINMAX, CV_32FC1);
-
-            matrix = fatTemp / (fatTemp + waterTemp);
-        }
-        break;
-
-        case AxialDisplayType::WaterFraction:
-        {
-            // Get the slice for the fat/water image. If the result is empty then there was an error retrieving the slice
-            cv::Mat fatTemp = fatImage->getSlice(slice, true);
-            cv::Mat waterTemp = waterImage->getSlice(slice, true);
-            if (fatTemp.empty() || waterTemp.empty())
-            {
-                qDebug() << "Unable to retrieve slice " << slice << " from the fat or water image. Matrix returned empty.";
-                return;
-            }
-
-            // The normalize function does quite a bit here. It converts the matrix to a 32-bit float and normalizes it
-            // between 0.0f to 1.0f based on the min/max value. This does not affect the original 3D matrix in fatImage/waterImage
-            cv::normalize(fatTemp.clone(), fatTemp, 0.0f, 1.0f, cv::NORM_MINMAX, CV_32FC1);
-            cv::normalize(waterTemp.clone(), waterTemp, 0.0f, 1.0f, cv::NORM_MINMAX, CV_32FC1);
-
-            matrix = waterTemp / (fatTemp + waterTemp);
-        }
-        break;
-    }
-
-    // Bind the texture and setup the parameters for it
-    glBindTexture(GL_TEXTURE_2D, texture);
-    // These parameters basically say the pixel value is equal to the average of the nearby pixel values when magnifying or minifying the values
-    // Essentially, when stretching or shrinking the texture to the screen, it will smooth out the pixel values instead of making it look blocky
-    // like GL_NEAREST would.
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    // Get the OpenGL datatype of the matrix
-    GLenum *dataType = NIFTImage::openCVToOpenGLDatatype(matrix.type());
-    // Upload the texture data from the matrix to the texture. The internal format is 32 bit floats with one channel for red
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, fatImage->getXDim(), fatImage->getYDim(), 0, dataType[1], dataType[2], matrix.data);
-
-    // If there was an error, then say something
-    GLenum err;
-    if ((err = glGetError()) != GL_NO_ERROR)
-        qDebug() << "Unable to upload texture image for slice " << slice << ". Error code: " << err;
-
-    // This update tells the widget to redraw itself since the texture was updated
-    update();
+    // If Z value changed, then update the texture
+    if (location.z() != Location::NoChange && delta.z())
+        updateTexture();
 }
 
-AxialDisplayType AxialSliceWidget::getDisplayType()
+QVector4D AxialSliceWidget::getLocation()
+{
+    return location;
+}
+
+SliceDisplayType AxialSliceWidget::getDisplayType()
 {
     return displayType;
 }
 
-void AxialSliceWidget::setDisplayType(AxialDisplayType type)
+void AxialSliceWidget::setDisplayType(SliceDisplayType type)
 {
     // If the display type is out of the acceptable range, then do nothing
-    if (type < AxialDisplayType::FatOnly || type > AxialDisplayType::WaterFraction)
+    if (type < SliceDisplayType::FatOnly || type > SliceDisplayType::WaterFraction)
     {
         qDebug() << "Invalid display type was specified for AxialSliceWidget: " << type;
         return;
@@ -178,13 +100,8 @@ void AxialSliceWidget::setDisplayType(AxialDisplayType type)
 
     displayType = type;
 
-    // Call setAxialSlice which will update the texture with the appropiate data and redraw the screen
-    setAxialSlice(curSlice, curTime);
-}
-
-int AxialSliceWidget::getCurSlice()
-{
-    return curSlice;
+    // This will recreate the texture because the display type has changed
+    updateTexture();
 }
 
 ColorMap AxialSliceWidget::getColorMap()
@@ -277,22 +194,17 @@ void AxialSliceWidget::initializeGL()
     initializeOpenGLFunctions();
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
-    // Create MVP matrix from the model, view, and projection matrix.
-    QMatrix4x4 mvp = /* model * */viewMatrix * projectionMatrix;
+    // Initialize the color map textures
+    initializeColorMaps();
 
-    // Create a new shader variable, load the GLSL vertex and fragment files, link and bind the program.
-    for (int i = 0; i < ColorMap::Count; ++i)
-    {
-        program[i] = new QOpenGLShaderProgram();
-        program[i]->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/shaders/axialslice.vert");
-        program[i]->addShaderFromSourceFile(QOpenGLShader::Fragment, colorMapFragName[i]);
-        program[i]->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/shaders/axialslice.frag");
-        program[i]->link();
-        program[i]->bind();
+    // Create a new shader program, load the GLSL vertex and fragment files, link/bind program
+    program = new QOpenGLShaderProgram();
+    program->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/shaders/axialslice.vert");
+    program->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/shaders/axialslice.frag");
+    program->link();
+    program->bind();
 
-        program[i]->setUniformValue("tex", 0);
-        program[i]->setUniformValue("mvp", mvp);
-    }
+    program->setUniformValue("tex", 0);
 
     // Generate vertex buffer for the axial slice. The sliceVertices data is uploaded to the VBO
     glGenBuffers(1, &vertexBuf);
@@ -313,7 +225,6 @@ void AxialSliceWidget::initializeGL()
     glVertexAttribPointer(1, VertexPT::TexPosTupleSize, GL_FLOAT, true, VertexPT::stride(), static_cast<const char *>(0) + VertexPT::texPosOffset());
 
     // Enable 2D textures and generate a blank texture for the axial slice
-    glEnable(GL_TEXTURE_2D);
     glGenTextures(1, &this->texture);
     // This sets the GLSL uniform value 'tex' to 0 which means GL_TEXTURE0 is the texture used for tex variable
 
@@ -321,6 +232,158 @@ void AxialSliceWidget::initializeGL()
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
+}
+
+void AxialSliceWidget::initializeColorMaps()
+{
+    // Width of the 1D texture map. The larger the number the more points in the 1D texture and the smoother the colors
+    const int width = 256;
+    // Internal format is how the data will be stored in the GPU. Format/type is how the data is represented
+    const GLint internalFormat = GL_RGBA32F;
+    const GLenum format = GL_RGBA;
+    const GLenum type = GL_UNSIGNED_BYTE;
+
+    // Create textures for each of the color maps
+    glGenTextures(ColorMap::Count, &this->colorMapTexture[0]);
+
+    for (int i = 0; i < ColorMap::Count; ++i)
+    {
+        QPixmap pixmap;
+
+        if (!pixmap.load(colorMapImageName[i]))
+        {
+            qWarning() << "Unable to load color map number " << i << " located at " << colorMapImageName[i];
+            continue;
+        }
+
+        // For simplicity, just convert the image to a 32-bit value. That way we know what the format is
+        QImage image = pixmap.toImage().convertToFormat(QImage::Format_RGBA8888);
+
+        if (image.height() != 1)
+        {
+            qWarning() << "Height must be 1 for color map number " << i << " located at " << colorMapImageName[i] << ": " << image.height();
+            continue;
+        }
+
+        // This is a formula to determine if a number is a power of two easily. If equal to zero, it is a power of two
+        if ((image.width() & (image.width() - 1)) != 0)
+        {
+            qWarning() << "Width must be power of two for color map number " << i << " located at " << colorMapImageName[i] << ": " << image.width();
+            continue;
+        }
+
+        // Bind the texture and setup the parameters for it
+        glBindTexture(GL_TEXTURE_1D, colorMapTexture[i]);
+        // These parameters say that the color value for a pixel will be chosen based on the nearest pixel value. This creates a more blocky effect
+        // since it will not be linearly interpolated like GL_LINEAR
+        glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+        // This parameter will clamp points to [0.0, 1.0]. This means that anything above 1.0 will become 1.0
+        // and anything below 0.0 will become 0.0
+        glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+
+        glTexImage1D(GL_TEXTURE_1D, 0, internalFormat, image.width(), 0, format, type, image.bits());
+    }
+}
+
+void AxialSliceWidget::updateTexture()
+{
+    cv::Mat matrix;
+    switch (displayType)
+    {
+        case SliceDisplayType::FatOnly:
+        {
+            // Get the slice for the fat image. If the result is empty then there was an error retrieving the slice
+            matrix = fatImage->getAxialSlice(location.z(), true);
+            if (matrix.empty())
+            {
+                qDebug() << "Unable to retrieve axial slice " << location.z() << " from the fat image. Matrix returned empty.";
+                return;
+            }
+
+            // The normalize function does quite a bit here. It converts the matrix to a 32-bit float and normalizes it
+            // between 0.0f to 1.0f based on the min/max value. This does not affect the original 3D matrix in fatImage
+            cv::normalize(matrix.clone(), matrix, 0.0f, 1.0f, cv::NORM_MINMAX, CV_32FC1);
+        }
+        break;
+
+        case SliceDisplayType::WaterOnly:
+        {
+            // Get the slice for the water image. If the result is empty then there was an error retrieving the slice
+            matrix = waterImage->getAxialSlice(location.z(), true);
+            if (matrix.empty())
+            {
+                qDebug() << "Unable to retrieve axial slice " << location.z() << " from the fat image. Matrix returned empty.";
+                return;
+            }
+
+            // The normalize function does quite a bit here. It converts the matrix to a 32-bit float and normalizes it
+            // between 0.0f to 1.0f based on the min/max value. This does not affect the original 3D matrix in waterImage
+            cv::normalize(matrix.clone(), matrix, 0.0f, 1.0f, cv::NORM_MINMAX, CV_32FC1);
+        }
+        break;
+
+        case SliceDisplayType::FatFraction:
+        {
+            // Get the slice for the fat/water image. If the result is empty then there was an error retrieving the slice
+            cv::Mat fatTemp = fatImage->getAxialSlice(location.z(), true);
+            cv::Mat waterTemp = waterImage->getAxialSlice(location.z(), true);
+            if (fatTemp.empty() || waterTemp.empty())
+            {
+                qDebug() << "Unable to retrieve axial slice " << location.z() << " from the fat or water image. Matrix returned empty.";
+                return;
+            }
+
+            // The normalize function does quite a bit here. It converts the matrix to a 32-bit float and normalizes it
+            // between 0.0f to 1.0f based on the min/max value. This does not affect the original 3D matrix in fatImage/waterImage
+            cv::normalize(fatTemp.clone(), fatTemp, 0.0f, 1.0f, cv::NORM_MINMAX, CV_32FC1);
+            cv::normalize(waterTemp.clone(), waterTemp, 0.0f, 1.0f, cv::NORM_MINMAX, CV_32FC1);
+
+            matrix = fatTemp / (fatTemp + waterTemp);
+        }
+        break;
+
+        case SliceDisplayType::WaterFraction:
+        {
+            // Get the slice for the fat/water image. If the result is empty then there was an error retrieving the slice
+            cv::Mat fatTemp = fatImage->getAxialSlice(location.z(), true);
+            cv::Mat waterTemp = waterImage->getAxialSlice(location.z(), true);
+            if (fatTemp.empty() || waterTemp.empty())
+            {
+                qDebug() << "Unable to retrieve axial slice " << location.z() << " from the fat or water image. Matrix returned empty.";
+                return;
+            }
+
+            // The normalize function does quite a bit here. It converts the matrix to a 32-bit float and normalizes it
+            // between 0.0f to 1.0f based on the min/max value. This does not affect the original 3D matrix in fatImage/waterImage
+            cv::normalize(fatTemp.clone(), fatTemp, 0.0f, 1.0f, cv::NORM_MINMAX, CV_32FC1);
+            cv::normalize(waterTemp.clone(), waterTemp, 0.0f, 1.0f, cv::NORM_MINMAX, CV_32FC1);
+
+            matrix = waterTemp / (fatTemp + waterTemp);
+        }
+        break;
+    }
+
+    // Bind the texture and setup the parameters for it
+    glBindTexture(GL_TEXTURE_2D, texture);
+    // These parameters basically say the pixel value is equal to the average of the nearby pixel values when magnifying or minifying the values
+    // Essentially, when stretching or shrinking the texture to the screen, it will smooth out the pixel values instead of making it look blocky
+    // like GL_NEAREST would.
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    // Get the OpenGL datatype of the matrix
+    GLenum *dataType = NIFTImage::openCVToOpenGLDatatype(matrix.type());
+    // Upload the texture data from the matrix to the texture. The internal format is 32 bit floats with one channel for red
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, fatImage->getXDim(), fatImage->getYDim(), 0, dataType[1], dataType[2], matrix.data);
+
+    // If there was an error, then say something
+    GLenum err;
+    if ((err = glGetError()) != GL_NO_ERROR)
+        qDebug() << "Unable to upload texture image for axial slice " << location.z() << ". Error code: " << err;
+
+    update();
 }
 
 void AxialSliceWidget::resizeGL(int w, int h)
@@ -350,22 +413,17 @@ void AxialSliceWidget::paintGL()
     // Create the MVP matrix by M * V * P
     mvpMatrix = modelMatrix * viewMatrix * projectionMatrix;
 
-    // Get the current shader program, bind it, and set the brightness, contrast, and MVP
-    // Note: I did quite a bit of research on this and updating the uniform values in this function is
-    // likely going to be the best results. Yes, it may be redundant and slow down the program when it
-    // doesn't change much but when the program is quickly working, it will be updating this regardless
-    // Until I see performance issues with this method, I believe it is the best method
-    QOpenGLShaderProgram *curProgram = program[(int)curColorMap];
-    curProgram->bind();
-    curProgram->setUniformValue("brightness", curBrightness);
-    curProgram->setUniformValue("contrast", curContrast);
-    curProgram->setUniformValue("MVP", mvpMatrix);
+    program->bind();
+    program->setUniformValue("brightness", curBrightness);
+    program->setUniformValue("contrast", curContrast);
+    program->setUniformValue("MVP", mvpMatrix);
 
     // Bind the VAO, bind texture to GL_TEXTURE0, bind VBO, bind IBO
     // The program that is bound is the index of the curColorMap.
     glBindVertexArray(vertexObject);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture);
+    glBindTexture(GL_TEXTURE_1D, colorMapTexture[(int)curColorMap]);
     glBindBuffer(GL_ARRAY_BUFFER, vertexBuf);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuf);
 
@@ -377,9 +435,10 @@ void AxialSliceWidget::paintGL()
     // explicitly binding the objects
     glBindVertexArray(0);
     glBindTexture(GL_TEXTURE_2D, 0);
+    glBindTexture(GL_TEXTURE_1D, 0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-    curProgram->release();
+    program->release();
 }
 
 void AxialSliceWidget::mouseMoveEvent(QMouseEvent *eventMove)
@@ -396,7 +455,7 @@ void AxialSliceWidget::mouseMoveEvent(QMouseEvent *eventMove)
 
         // Push a new move command on the undoStack. This will call the command but also keep track
         // of it if an undo or redo action is called. redo function is called immediately.
-        undoStack->push(new MoveCommand(delta, this, moveID));
+        undoStack->push(new AxialMoveCommand(delta, this, moveID));
 
         // Set last mouse position to this one
         lastMousePos = eventMove->pos();
@@ -436,7 +495,7 @@ void AxialSliceWidget::mousePressEvent(QMouseEvent *eventPress)
         // Flag to indicate that panning is occuring
         // The starting position is stored so to know how much movement has occurred
         startPan = true;
-        moveID = (CommandID)((moveID + 1) % CommandID::MoveEnd);
+        moveID = ((moveID + 1) > CommandID::AxialMoveEnd) ? CommandID::AxialMove : (CommandID)(moveID + 1);
         lastMousePos = eventPress->pos();
     }
 }
@@ -470,7 +529,7 @@ void AxialSliceWidget::wheelEvent(QWheelEvent *event)
 
         // Push a new scale command on the undo stack which will immediately call redo for an action.
         // This keeps track of it if an undo or redo command is called
-        undoStack->push(new ScaleCommand(scaleDelta, this));
+        undoStack->push(new AxialScaleCommand(scaleDelta, this));
     }
 }
 
@@ -480,6 +539,7 @@ AxialSliceWidget::~AxialSliceWidget()
     glDeleteVertexArrays(1, &vertexObject);
     glDeleteBuffers(1, &vertexBuf);
     glDeleteBuffers(1, &indexBuf);
-    for (int i = 0; i < ColorMap::Count; ++i)
-        delete program[i];
+    glDeleteTextures(1, &texture);
+    glDeleteTextures((int)ColorMap::Count, &colorMapTexture[0]);
+    delete program;
 }

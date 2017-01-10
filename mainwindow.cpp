@@ -23,7 +23,8 @@ MainWindow::MainWindow(QWidget *parent) :
     this->undoStack = new QUndoStack(this);
     connect(undoStack, SIGNAL(canUndoChanged(bool)), this, SLOT(undoStack_canUndoChanged(bool)));
     connect(undoStack, SIGNAL(canRedoChanged(bool)), this, SLOT(undoStack_canRedoChanged(bool)));
-    ui->glWidgetSlice->setUndoStack(undoStack);
+    ui->glWidgetAxial->setUndoStack(undoStack);
+    ui->glWidgetCoronal->setUndoStack(undoStack);
 
     // Read window settings(size of window from last time application was used) upon initialization
     readSettings();
@@ -131,49 +132,54 @@ void MainWindow::on_actionOpen_triggered()
         if (!fatImage->compatible(waterImage))
             EXCEPTION("Fat and water image are incompatible", "The fat and water image are incompatible in some way. Please check the NIFTI file format of the files and try again.");
 
+        setWindowTitle(QCoreApplication::applicationName() + " - " + path);
+
         // The settings box is disabled to prevent moving stuff before anything is loaded
         ui->settingsBox->setEnabled(true);
 
         // The default slice that it will go to is half of the zDim
-        int defaultSlice = floor(fatImage->getZDim() / 2);
-        // In the OpenGL widget, set the images and default axial slice
-        ui->glWidgetSlice->setImages(fatImage, waterImage);
-        ui->glWidgetSlice->setAxialSlice(defaultSlice);
+        QVector4D defaultLocation = QVector4D(Location::NoChange, floor(fatImage->getYDim() / 2), floor(fatImage->getZDim() / 2), Location::NoChange);
+        // In the OpenGL widget, set the images and default location
+        ui->glWidgetAxial->setImages(fatImage, waterImage);
+        ui->glWidgetAxial->setLocation(defaultLocation);
+
+        ui->glWidgetCoronal->setImages(fatImage, waterImage);
+        ui->glWidgetCoronal->setLocation(defaultLocation);
 
         // Set the range of the slice spin box to be 0 to the height of the fatImage (this is upper + lower z-height
         ui->sliceSpinBox->setRange(0, fatImage->getZDim() - 1);
         // Set the value of the slice spin box to be what the defaultSlice is.
-        ui->sliceSpinBox->setValue(defaultSlice);
+        ui->sliceSpinBox->setValue(defaultLocation.z());
 
         // Set the range of the slice slider to be 0 to the height of the fatImage (this is upper + lower z-height
         ui->sliceSlider->setRange(0, fatImage->getZDim() - 1);
         // Set the value of the slice slider to be what the defaultSlice is.
-        ui->sliceSlider->setValue(defaultSlice);
+        ui->sliceSlider->setValue(defaultLocation.z());
 
         // Set the colormap value in the combo box to the current color map
-        ui->colorMapComboBox->setCurrentIndex(ui->glWidgetSlice->getColorMap());
+        ui->primColorMapComboBox->setCurrentIndex(ui->glWidgetAxial->getColorMap());
 
         // Set the brightness slider value to the default brightness
-        ui->brightnessSlider->setValue(int(ui->glWidgetSlice->getBrightness() * 100.0f));
+        ui->brightnessSlider->setValue(int(ui->glWidgetAxial->getBrightness() * 100.0f));
         // Set the brightness spin box value to the default brightness
-        ui->brightnessSpinBox->setValue(int(ui->glWidgetSlice->getBrightness() * 100.0f));
+        ui->brightnessSpinBox->setValue(int(ui->glWidgetAxial->getBrightness() * 100.0f));
 
         // Set the contrast slider value to the default contrast
-        ui->contrastSlider->setValue(int(ui->glWidgetSlice->getContrast() * 100.0f));
+        ui->contrastSlider->setValue(int(ui->glWidgetAxial->getContrast() * 100.0f));
         // Set the contrast spin box value to the default contrast
-        ui->contrastSpinBox->setValue(int(ui->glWidgetSlice->getContrast() * 100.0f));
+        ui->contrastSpinBox->setValue(int(ui->glWidgetAxial->getContrast() * 100.0f));
 
         // Set the EAT radio button for the default layer to be drawing with
         ui->EATRadioBtn->setChecked(true);
 
         // Read the current display type for the axial slice widget and check
         // the appropiate radio button for the current axial view
-        switch (ui->glWidgetSlice->getDisplayType())
+        switch (ui->glWidgetAxial->getDisplayType())
         {
-            case AxialDisplayType::FatOnly: ui->fatRadioBtn->setChecked(true); break;
-            case AxialDisplayType::WaterOnly: ui->waterRadioBtn->setChecked(true); break;
-            case AxialDisplayType::FatFraction: ui->fatFracRadioBtn->setChecked(true); break;
-            case AxialDisplayType::WaterFraction: ui->waterFracRadioBtn->setChecked(true); break;
+            case SliceDisplayType::FatOnly: ui->fatRadioBtn->setChecked(true); break;
+            case SliceDisplayType::WaterOnly: ui->waterRadioBtn->setChecked(true); break;
+            case SliceDisplayType::FatFraction: ui->fatFracRadioBtn->setChecked(true); break;
+            case SliceDisplayType::WaterFraction: ui->waterFracRadioBtn->setChecked(true); break;
         }
 
         // Since the NIFTI files were successfully opened, the default path in the FileChooser dialog next time will be this path
@@ -204,71 +210,73 @@ void MainWindow::on_actionOpen_triggered()
 void MainWindow::on_sliceSlider_valueChanged(int value)
 {
     // If the new value is equal to the current slice, then do nothing
-    if (ui->glWidgetSlice->getCurSlice() == value)
+    if (ui->glWidgetAxial->getLocation().z() == value)
         return;
 
     // Add a SliceChangeCommand to change the axial slice
-    undoStack->push(new SliceChangeCommand(ui->glWidgetSlice->getCurSlice(), value, ui->glWidgetSlice, ui->sliceSlider, ui->sliceSpinBox));
+    undoStack->push(new LocationChangeCommand(ui->glWidgetAxial->getLocation(), QVector4D(Location::NoChange, Location::NoChange, value, Location::NoChange),
+                                              ui->glWidgetAxial, ui->glWidgetCoronal, ui->sliceSlider, ui->sliceSpinBox, NULL, NULL, NULL, NULL));
 }
 
 void MainWindow::on_sliceSpinBox_valueChanged(int value)
 {
     // If the new value is equal to the current slice, then do nothing
-    if (ui->glWidgetSlice->getCurSlice() == value)
+    if (ui->glWidgetAxial->getLocation().z() == value)
         return;
 
     // Add a SliceChangeCommand to change the axial slice
-    undoStack->push(new SliceChangeCommand(ui->glWidgetSlice->getCurSlice(), value, ui->glWidgetSlice, ui->sliceSlider, ui->sliceSpinBox));
+    undoStack->push(new LocationChangeCommand(ui->glWidgetAxial->getLocation(), QVector4D(Location::NoChange, Location::NoChange, value, Location::NoChange),
+                                              ui->glWidgetAxial, ui->glWidgetCoronal, ui->sliceSlider, ui->sliceSpinBox, NULL, NULL, NULL, NULL));
 }
 
 void MainWindow::on_brightnessSlider_valueChanged(int value)
 {
     // If the new value is equal to the current value, then do nothing
-    if (ui->glWidgetSlice->getBrightness() == value / 100.0f)
+    if (ui->glWidgetAxial->getBrightness() == value / 100.0f)
         return;
 
     // Add a BrightnessChangeCommand to change the brightness
-    undoStack->push(new BrightnessChangeCommand(ui->glWidgetSlice->getBrightness(), value / 100.0f, ui->glWidgetSlice, ui->brightnessSlider, ui->brightnessSpinBox));
+    undoStack->push(new BrightnessChangeCommand(ui->glWidgetAxial->getBrightness(), value / 100.0f, ui->glWidgetAxial, ui->brightnessSlider, ui->brightnessSpinBox));
 }
 
 void MainWindow::on_brightnessSpinBox_valueChanged(int value)
 {
     // If the new value is equal to the current value, then do nothing
-    if (ui->glWidgetSlice->getBrightness() == value / 100.0f)
+    if (ui->glWidgetAxial->getBrightness() == value / 100.0f)
         return;
 
     // Add a BrightnessChangeCommand to change the brightness
-    undoStack->push(new BrightnessChangeCommand(ui->glWidgetSlice->getBrightness(), value / 100.0f, ui->glWidgetSlice, ui->brightnessSlider, ui->brightnessSpinBox));
+    undoStack->push(new BrightnessChangeCommand(ui->glWidgetAxial->getBrightness(), value / 100.0f, ui->glWidgetAxial, ui->brightnessSlider, ui->brightnessSpinBox));
 }
 
 void MainWindow::on_contrastSlider_valueChanged(int value)
 {
     // If the new value is equal to the current value, then do nothing
-    if (ui->glWidgetSlice->getContrast() == value / 100.0f)
+    if (ui->glWidgetAxial->getContrast() == value / 100.0f)
         return;
 
     // Add a ContrastChangeCommand to change the brightness
-    undoStack->push(new ContrastChangeCommand(ui->glWidgetSlice->getContrast(), value / 100.0f, ui->glWidgetSlice, ui->contrastSlider, ui->contrastSpinBox));
+    undoStack->push(new ContrastChangeCommand(ui->glWidgetAxial->getContrast(), value / 100.0f, ui->glWidgetAxial, ui->contrastSlider, ui->contrastSpinBox));
 }
 
 void MainWindow::on_contrastSpinBox_valueChanged(int value)
 {
     // If the new value is equal to the current value, then do nothing
-    if (ui->glWidgetSlice->getContrast() == value / 100.0f)
+    if (ui->glWidgetAxial->getContrast() == value / 100.0f)
         return;
 
     // Add a ContrastChangeCommand to change the brightness
-    undoStack->push(new ContrastChangeCommand(ui->glWidgetSlice->getContrast(), value / 100.0f, ui->glWidgetSlice, ui->contrastSlider, ui->contrastSpinBox));
+    undoStack->push(new ContrastChangeCommand(ui->glWidgetAxial->getContrast(), value / 100.0f, ui->glWidgetAxial, ui->contrastSlider, ui->contrastSpinBox));
 }
 
-void MainWindow::on_colorMapComboBox_currentIndexChanged(int index)
+void MainWindow::on_primColorMapComboBox_currentIndexChanged(int index)
 {
     // If the index is out of the acceptable bounds for the ColorMap, then do nothing
-    if (ui->glWidgetSlice->getColorMap() == (ColorMap)index || index < (int)ColorMap::Autumn || index >= (int)ColorMap::Count)
+    if (ui->glWidgetAxial->getColorMap() == (ColorMap)index || index < (int)ColorMap::Autumn || index >= (int)ColorMap::Count)
         return;
 
     // Add a ColorMapChangeCommand to change the color map
-    undoStack->push(new ColorMapChangeCommand(ui->glWidgetSlice->getColorMap(), (ColorMap)index, ui->glWidgetSlice, ui->colorMapComboBox));
+    undoStack->push(new ColorMapChangeCommand(ui->glWidgetAxial->getColorMap(), (ColorMap)index, ui->glWidgetAxial, ui->primColorMapComboBox));
 }
 
 void MainWindow::on_fatRadioBtn_toggled(bool checked)
@@ -276,15 +284,15 @@ void MainWindow::on_fatRadioBtn_toggled(bool checked)
     if (checked)
     {
         QRadioButton *oldBtn = NULL;
-        switch (ui->glWidgetSlice->getDisplayType())
+        switch (ui->glWidgetAxial->getDisplayType())
         {
-            case AxialDisplayType::FatOnly: return; // Old state and new state are same, do nothing
-            case AxialDisplayType::WaterOnly: oldBtn = ui->waterRadioBtn; break;
-            case AxialDisplayType::FatFraction: oldBtn = ui->fatFracRadioBtn; break;
-            case AxialDisplayType::WaterFraction: oldBtn = ui->waterFracRadioBtn; break;
+            case SliceDisplayType::FatOnly: return; // Old state and new state are same, do nothing
+            case SliceDisplayType::WaterOnly: oldBtn = ui->waterRadioBtn; break;
+            case SliceDisplayType::FatFraction: oldBtn = ui->fatFracRadioBtn; break;
+            case SliceDisplayType::WaterFraction: oldBtn = ui->waterFracRadioBtn; break;
         }
 
-        undoStack->push(new SliceViewChangeCommand(ui->glWidgetSlice->getDisplayType(), AxialDisplayType::FatOnly, ui->glWidgetSlice, oldBtn, ui->fatRadioBtn));
+        undoStack->push(new SliceViewChangeCommand(ui->glWidgetAxial->getDisplayType(), SliceDisplayType::FatOnly, ui->glWidgetAxial, oldBtn, ui->fatRadioBtn));
     }
 }
 
@@ -293,15 +301,15 @@ void MainWindow::on_waterRadioBtn_toggled(bool checked)
     if (checked)
     {
         QRadioButton *oldBtn = NULL;
-        switch (ui->glWidgetSlice->getDisplayType())
+        switch (ui->glWidgetAxial->getDisplayType())
         {
-            case AxialDisplayType::FatOnly: oldBtn = ui->fatRadioBtn; break;
-            case AxialDisplayType::WaterOnly: return; // Old state and new state are same, do nothing
-            case AxialDisplayType::FatFraction: oldBtn = ui->fatFracRadioBtn; break;
-            case AxialDisplayType::WaterFraction: oldBtn = ui->waterFracRadioBtn; break;
+            case SliceDisplayType::FatOnly: oldBtn = ui->fatRadioBtn; break;
+            case SliceDisplayType::WaterOnly: return; // Old state and new state are same, do nothing
+            case SliceDisplayType::FatFraction: oldBtn = ui->fatFracRadioBtn; break;
+            case SliceDisplayType::WaterFraction: oldBtn = ui->waterFracRadioBtn; break;
         }
 
-        undoStack->push(new SliceViewChangeCommand(ui->glWidgetSlice->getDisplayType(), AxialDisplayType::WaterOnly, ui->glWidgetSlice, oldBtn, ui->waterRadioBtn));
+        undoStack->push(new SliceViewChangeCommand(ui->glWidgetAxial->getDisplayType(), SliceDisplayType::WaterOnly, ui->glWidgetAxial, oldBtn, ui->waterRadioBtn));
     }
 }
 
@@ -310,15 +318,15 @@ void MainWindow::on_fatFracRadioBtn_toggled(bool checked)
     if (checked)
     {
         QRadioButton *oldBtn = NULL;
-        switch (ui->glWidgetSlice->getDisplayType())
+        switch (ui->glWidgetAxial->getDisplayType())
         {
-            case AxialDisplayType::FatOnly: oldBtn = ui->fatRadioBtn; break;
-            case AxialDisplayType::WaterOnly: oldBtn = ui->waterRadioBtn; break;
-            case AxialDisplayType::FatFraction: return; // Old state and new state are same, do nothing
-            case AxialDisplayType::WaterFraction: oldBtn = ui->waterFracRadioBtn; break;
+            case SliceDisplayType::FatOnly: oldBtn = ui->fatRadioBtn; break;
+            case SliceDisplayType::WaterOnly: oldBtn = ui->waterRadioBtn; break;
+            case SliceDisplayType::FatFraction: return; // Old state and new state are same, do nothing
+            case SliceDisplayType::WaterFraction: oldBtn = ui->waterFracRadioBtn; break;
         }
 
-        undoStack->push(new SliceViewChangeCommand(ui->glWidgetSlice->getDisplayType(), AxialDisplayType::FatFraction, ui->glWidgetSlice, oldBtn, ui->fatFracRadioBtn));
+        undoStack->push(new SliceViewChangeCommand(ui->glWidgetAxial->getDisplayType(), SliceDisplayType::FatFraction, ui->glWidgetAxial, oldBtn, ui->fatFracRadioBtn));
     }
 }
 
@@ -327,21 +335,21 @@ void MainWindow::on_waterFracRadioBtn_toggled(bool checked)
     if (checked)
     {
         QRadioButton *oldBtn = NULL;
-        switch (ui->glWidgetSlice->getDisplayType())
+        switch (ui->glWidgetAxial->getDisplayType())
         {
-            case AxialDisplayType::FatOnly: oldBtn = ui->fatRadioBtn; break;
-            case AxialDisplayType::WaterOnly: oldBtn = ui->waterRadioBtn; break;
-            case AxialDisplayType::FatFraction: oldBtn = ui->fatFracRadioBtn; break;
-            case AxialDisplayType::WaterFraction: return; // Old state and new state are same, do nothing
+            case SliceDisplayType::FatOnly: oldBtn = ui->fatRadioBtn; break;
+            case SliceDisplayType::WaterOnly: oldBtn = ui->waterRadioBtn; break;
+            case SliceDisplayType::FatFraction: oldBtn = ui->fatFracRadioBtn; break;
+            case SliceDisplayType::WaterFraction: return; // Old state and new state are same, do nothing
         }
 
-        undoStack->push(new SliceViewChangeCommand(ui->glWidgetSlice->getDisplayType(), AxialDisplayType::WaterFraction, ui->glWidgetSlice, oldBtn, ui->waterFracRadioBtn));
+        undoStack->push(new SliceViewChangeCommand(ui->glWidgetAxial->getDisplayType(), SliceDisplayType::WaterFraction, ui->glWidgetAxial, oldBtn, ui->waterFracRadioBtn));
     }
 }
 
 void MainWindow::on_resetViewBtn_clicked()
 {
-    ui->glWidgetSlice->resetView();
+    ui->glWidgetAxial->resetView();
 }
 
 void MainWindow::undoStack_canUndoChanged(bool canUndo)
@@ -395,7 +403,6 @@ MainWindow::~MainWindow()
     if (undoView)
         delete undoView;
 
-    //undoStack->clear();
     delete undoStack;
 
     // Save current window settings for next time

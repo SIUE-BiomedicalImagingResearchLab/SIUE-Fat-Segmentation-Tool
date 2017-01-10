@@ -10,6 +10,7 @@
 #include <QDesktopWidget>
 #include <QUndoStack>
 #include <QUndoView>
+#include <QVector4D>
 
 #include <nifti/nifti1.h>
 #include <nifti/nifti1_io.h>
@@ -61,7 +62,7 @@ private slots:
     void on_contrastSlider_valueChanged(int value);
     void on_contrastSpinBox_valueChanged(int value);
 
-    void on_colorMapComboBox_currentIndexChanged(int index);
+    void on_primColorMapComboBox_currentIndexChanged(int index);
 
     void on_fatRadioBtn_toggled(bool checked);
 
