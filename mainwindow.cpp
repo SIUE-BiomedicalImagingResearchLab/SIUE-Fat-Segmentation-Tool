@@ -15,6 +15,11 @@ MainWindow::MainWindow(QWidget *parent) :
     this->ui->actionUndo->setShortcuts(QKeySequence::Undo);
     this->ui->actionRedo->setShortcuts(QKeySequence::Redo);
 
+    // Disable the settingsWidget (because you cannot edit it in designer when it is disabled so I just leave
+    // it enabled there). And set current tab to zero in case I am on a different tab in designer.
+    this->ui->settingsWidget->setEnabled(false);
+    this->ui->settingsWidget->setCurrentIndex(0);
+
     this->subConfig = new SubjectConfig();
     this->fatImage = new NIFTImage(subConfig);
     this->waterImage = new NIFTImage(subConfig);
@@ -54,6 +59,8 @@ void MainWindow::readSettings()
     {
         restoreGeometry(geometry);
     }
+
+    this->resize(1024, 768);
 
     defaultOpenDir = settings.value("defaultDir", QDir::homePath()).toString();
 }
@@ -135,7 +142,7 @@ void MainWindow::on_actionOpen_triggered()
         setWindowTitle(QCoreApplication::applicationName() + " - " + path);
 
         // The settings box is disabled to prevent moving stuff before anything is loaded
-        ui->settingsBox->setEnabled(true);
+        ui->settingsWidget->setEnabled(true);
 
         // The default slice that it will go to is half of the zDim
         QVector4D defaultLocation = QVector4D(Location::NoChange, floor(fatImage->getYDim() / 2), floor(fatImage->getZDim() / 2), Location::NoChange);
@@ -146,19 +153,34 @@ void MainWindow::on_actionOpen_triggered()
         ui->glWidgetCoronal->setImages(fatImage, waterImage);
         ui->glWidgetCoronal->setLocation(defaultLocation);
 
-        // Set the range of the slice spin box to be 0 to the height of the fatImage (this is upper + lower z-height
-        ui->sliceSpinBox->setRange(0, fatImage->getZDim() - 1);
+        // -------------------------------------------- Setup Home Tab --------------------------------------------
+        // Set the range of the slice spin box to be 0 to the height of the fatImage (this is upper + lower z-height)
+        ui->axialSliceSpinBox->setRange(0, fatImage->getZDim() - 1);
         // Set the value of the slice spin box to be what the defaultSlice is.
-        ui->sliceSpinBox->setValue(defaultLocation.z());
+        ui->axialSliceSpinBox->setValue(defaultLocation.z());
 
-        // Set the range of the slice slider to be 0 to the height of the fatImage (this is upper + lower z-height
-        ui->sliceSlider->setRange(0, fatImage->getZDim() - 1);
+        // Set the range of the slice slider to be 0 to the height of the fatImage (this is upper + lower z-height)
+        ui->axialSliceSlider->setRange(0, fatImage->getZDim() - 1);
         // Set the value of the slice slider to be what the defaultSlice is.
-        ui->sliceSlider->setValue(defaultLocation.z());
+        ui->axialSliceSlider->setValue(defaultLocation.z());
 
-        // Set the colormap value in the combo box to the current color map
-        ui->primColorMapComboBox->setCurrentIndex(ui->glWidgetAxial->getColorMap());
+        // Coronal slice spin box range is 0 to 1 minus the maximum Y dimension. Set value to default location
+        ui->coronalSliceSpinBox->setRange(0, fatImage->getYDim() - 1);
+        ui->coronalSliceSpinBox->setValue(defaultLocation.y());
 
+        // Coronal slice slider range is 0 to 1 minus the maximum Y dimension. Set value to default location
+        ui->coronalSliceSlider->setRange(0, fatImage->getYDim() - 1);
+        ui->coronalSliceSlider->setValue(defaultLocation.y());
+
+        // Saggital slice spin box range is 0 to 1 minus the maximum X dimension. Set value to default location
+        ui->saggitalSliceSpinBox->setRange(0, fatImage->getXDim() - 1);
+        ui->saggitalSliceSpinBox->setValue(defaultLocation.x());
+
+        // Saggital slice slider range is 0 to 1 minus the maximum X dimension. Set value to default location
+        ui->saggitalSliceSlider->setRange(0, fatImage->getXDim() - 1);
+        ui->saggitalSliceSlider->setValue(defaultLocation.x());
+
+        // ---------------------------------------- Setup Axial Display Tab ----------------------------------------
         // Set the brightness slider value to the default brightness
         ui->brightnessSlider->setValue(int(ui->glWidgetAxial->getBrightness() * 100.0f));
         // Set the brightness spin box value to the default brightness
@@ -169,8 +191,15 @@ void MainWindow::on_actionOpen_triggered()
         // Set the contrast spin box value to the default contrast
         ui->contrastSpinBox->setValue(int(ui->glWidgetAxial->getContrast() * 100.0f));
 
-        // Set the EAT radio button for the default layer to be drawing with
-        ui->EATRadioBtn->setChecked(true);
+        // Set the primary colormap value to the current color map and set the transparency
+        ui->primColorMapComboBox->setCurrentIndex(ui->glWidgetAxial->getColorMap());
+        ui->primTransparencySlider->setValue(12);
+        ui->primTransparencySpinBox->setValue(12);
+
+        // Set the secondary colormap value to the current color map and set the transparency
+        ui->secdColorMapComboBox->setCurrentIndex(ui->glWidgetAxial->getColorMap());
+        ui->secdTransparencySlider->setValue(12);
+        ui->secdTransparencySpinBox->setValue(12);
 
         // Read the current display type for the axial slice widget and check
         // the appropiate radio button for the current axial view
@@ -180,7 +209,13 @@ void MainWindow::on_actionOpen_triggered()
             case SliceDisplayType::WaterOnly: ui->waterRadioBtn->setChecked(true); break;
             case SliceDisplayType::FatFraction: ui->fatFracRadioBtn->setChecked(true); break;
             case SliceDisplayType::WaterFraction: ui->waterFracRadioBtn->setChecked(true); break;
+            case SliceDisplayType::FatWater: ui->fatWaterRadioBtn->setChecked(true); break;
+            case SliceDisplayType::WaterFat: ui->waterFatRadioBtn->setChecked(true); break;
         }
+
+        // ------------------------------------------- Setup Tracing Tab -------------------------------------------
+        // Set the EAT radio button for the default layer to be drawing with
+        ui->EATRadioBtn->setChecked(true);
 
         // Since the NIFTI files were successfully opened, the default path in the FileChooser dialog next time will be this path
         defaultOpenDir = path;
@@ -207,7 +242,10 @@ void MainWindow::on_actionOpen_triggered()
     }
 }
 
-void MainWindow::on_sliceSlider_valueChanged(int value)
+
+
+
+void MainWindow::on_axialSliceSlider_valueChanged(int value)
 {
     // If the new value is equal to the current slice, then do nothing
     if (ui->glWidgetAxial->getLocation().z() == value)
@@ -215,10 +253,11 @@ void MainWindow::on_sliceSlider_valueChanged(int value)
 
     // Add a SliceChangeCommand to change the axial slice
     undoStack->push(new LocationChangeCommand(ui->glWidgetAxial->getLocation(), QVector4D(Location::NoChange, Location::NoChange, value, Location::NoChange),
-                                              ui->glWidgetAxial, ui->glWidgetCoronal, ui->sliceSlider, ui->sliceSpinBox, NULL, NULL, NULL, NULL));
+                                              ui->glWidgetAxial, ui->glWidgetCoronal, ui->axialSliceSlider, ui->axialSliceSpinBox, ui->coronalSliceSlider,
+                                              ui->coronalSliceSpinBox, ui->saggitalSliceSlider, ui->saggitalSliceSpinBox));
 }
 
-void MainWindow::on_sliceSpinBox_valueChanged(int value)
+void MainWindow::on_axialSliceSpinBox_valueChanged(int value)
 {
     // If the new value is equal to the current slice, then do nothing
     if (ui->glWidgetAxial->getLocation().z() == value)
@@ -226,7 +265,56 @@ void MainWindow::on_sliceSpinBox_valueChanged(int value)
 
     // Add a SliceChangeCommand to change the axial slice
     undoStack->push(new LocationChangeCommand(ui->glWidgetAxial->getLocation(), QVector4D(Location::NoChange, Location::NoChange, value, Location::NoChange),
-                                              ui->glWidgetAxial, ui->glWidgetCoronal, ui->sliceSlider, ui->sliceSpinBox, NULL, NULL, NULL, NULL));
+                                              ui->glWidgetAxial, ui->glWidgetCoronal, ui->axialSliceSlider, ui->axialSliceSpinBox, ui->coronalSliceSlider,
+                                              ui->coronalSliceSpinBox, ui->saggitalSliceSlider, ui->saggitalSliceSpinBox));
+}
+
+void MainWindow::on_coronalSliceSlider_valueChanged(int value)
+{
+    // If the new value is equal to the current slice, then do nothing
+    if (ui->glWidgetAxial->getLocation().y() == value)
+        return;
+
+    // Add a SliceChangeCommand to change the coronal slice
+    undoStack->push(new LocationChangeCommand(ui->glWidgetAxial->getLocation(), QVector4D(Location::NoChange, value, Location::NoChange, Location::NoChange),
+                                              ui->glWidgetAxial, ui->glWidgetCoronal, ui->axialSliceSlider, ui->axialSliceSpinBox, ui->coronalSliceSlider,
+                                              ui->coronalSliceSpinBox, ui->saggitalSliceSlider, ui->saggitalSliceSpinBox));
+}
+
+void MainWindow::on_coronalSliceSpinBox_valueChanged(int value)
+{
+    // If the new value is equal to the current slice, then do nothing
+    if (ui->glWidgetAxial->getLocation().y() == value)
+        return;
+
+    // Add a SliceChangeCommand to change the coronal slice
+    undoStack->push(new LocationChangeCommand(ui->glWidgetAxial->getLocation(), QVector4D(Location::NoChange, value, Location::NoChange, Location::NoChange),
+                                              ui->glWidgetAxial, ui->glWidgetCoronal, ui->axialSliceSlider, ui->axialSliceSpinBox, ui->coronalSliceSlider,
+                                              ui->coronalSliceSpinBox, ui->saggitalSliceSlider, ui->saggitalSliceSpinBox));
+}
+
+void MainWindow::on_saggitalSliceSlider_valueChanged(int value)
+{
+    // If the new value is equal to the current slice, then do nothing
+    if (ui->glWidgetAxial->getLocation().x() == value)
+        return;
+
+    // Add a SliceChangeCommand to change the saggital slice
+    undoStack->push(new LocationChangeCommand(ui->glWidgetAxial->getLocation(), QVector4D(value, Location::NoChange, Location::NoChange, Location::NoChange),
+                                              ui->glWidgetAxial, ui->glWidgetCoronal, ui->axialSliceSlider, ui->axialSliceSpinBox, ui->coronalSliceSlider,
+                                              ui->coronalSliceSpinBox, ui->saggitalSliceSlider, ui->saggitalSliceSpinBox));
+}
+
+void MainWindow::on_saggitalSliceSpinBox_valueChanged(int value)
+{
+    // If the new value is equal to the current slice, then do nothing
+    if (ui->glWidgetAxial->getLocation().x() == value)
+        return;
+
+    // Add a SliceChangeCommand to change the saggital slice
+    undoStack->push(new LocationChangeCommand(ui->glWidgetAxial->getLocation(), QVector4D(value, Location::NoChange, Location::NoChange, Location::NoChange),
+                                              ui->glWidgetAxial, ui->glWidgetCoronal, ui->axialSliceSlider, ui->axialSliceSpinBox, ui->coronalSliceSlider,
+                                              ui->coronalSliceSpinBox, ui->saggitalSliceSlider, ui->saggitalSliceSpinBox));
 }
 
 void MainWindow::on_brightnessSlider_valueChanged(int value)

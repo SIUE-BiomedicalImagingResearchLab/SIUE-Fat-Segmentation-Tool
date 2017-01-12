@@ -53,8 +53,14 @@ private slots:
 
     void on_actionOpen_triggered();
 
-    void on_sliceSlider_valueChanged(int value);
-    void on_sliceSpinBox_valueChanged(int value);
+    void on_axialSliceSlider_valueChanged(int value);
+    void on_axialSliceSpinBox_valueChanged(int value);
+
+    void on_coronalSliceSlider_valueChanged(int value);
+    void on_coronalSliceSpinBox_valueChanged(int value);
+
+    void on_saggitalSliceSlider_valueChanged(int value);
+    void on_saggitalSliceSpinBox_valueChanged(int value);
 
     void on_brightnessSlider_valueChanged(int value);
     void on_brightnessSpinBox_valueChanged(int value);

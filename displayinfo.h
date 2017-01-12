@@ -6,7 +6,9 @@ enum SliceDisplayType
     FatOnly,
     WaterOnly,
     FatFraction,
-    WaterFraction
+    WaterFraction,
+    FatWater,
+    WaterFat
 };
 
 enum ColorMap
