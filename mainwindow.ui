@@ -251,15 +251,15 @@
                <item row="1" column="0" colspan="2">
                 <widget class="QLabel" name="label_25">
                  <property name="text">
-                  <string>Transparency</string>
+                  <string>Opacity</string>
                  </property>
                  <property name="buddy">
-                  <cstring>primTransparencySlider</cstring>
+                  <cstring>primOpacitySlider</cstring>
                  </property>
                 </widget>
                </item>
                <item row="1" column="2">
-                <widget class="QSlider" name="primTransparencySlider">
+                <widget class="QSlider" name="primOpacitySlider">
                  <property name="maximum">
                   <number>100</number>
                  </property>
@@ -269,7 +269,7 @@
                 </widget>
                </item>
                <item row="1" column="3">
-                <widget class="QSpinBox" name="primTransparencySpinBox">
+                <widget class="QSpinBox" name="primOpacitySpinBox">
                  <property name="suffix">
                   <string>%</string>
                  </property>
@@ -384,15 +384,15 @@
                <item row="1" column="0" colspan="2">
                 <widget class="QLabel" name="label_13">
                  <property name="text">
-                  <string>Transparency</string>
+                  <string>Opacity</string>
                  </property>
                  <property name="buddy">
-                  <cstring>secdTransparencySlider</cstring>
+                  <cstring>secdOpacitySlider</cstring>
                  </property>
                 </widget>
                </item>
                <item row="1" column="2">
-                <widget class="QSlider" name="secdTransparencySlider">
+                <widget class="QSlider" name="secdOpacitySlider">
                  <property name="maximum">
                   <number>100</number>
                  </property>
@@ -402,7 +402,7 @@
                 </widget>
                </item>
                <item row="1" column="3">
-                <widget class="QSpinBox" name="secdTransparencySpinBox">
+                <widget class="QSpinBox" name="secdOpacitySpinBox">
                  <property name="suffix">
                   <string>%</string>
                  </property>
@@ -1131,11 +1131,11 @@
   <tabstop>contrastSlider</tabstop>
   <tabstop>contrastSpinBox</tabstop>
   <tabstop>primColorMapComboBox</tabstop>
-  <tabstop>primTransparencySlider</tabstop>
-  <tabstop>primTransparencySpinBox</tabstop>
+  <tabstop>primOpacitySlider</tabstop>
+  <tabstop>primOpacitySpinBox</tabstop>
   <tabstop>secdColorMapComboBox</tabstop>
-  <tabstop>secdTransparencySlider</tabstop>
-  <tabstop>secdTransparencySpinBox</tabstop>
+  <tabstop>secdOpacitySlider</tabstop>
+  <tabstop>secdOpacitySpinBox</tabstop>
   <tabstop>fatRadioBtn</tabstop>
   <tabstop>waterRadioBtn</tabstop>
   <tabstop>fatFracRadioBtn</tabstop>

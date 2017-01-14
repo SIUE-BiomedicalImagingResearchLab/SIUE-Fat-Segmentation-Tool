@@ -80,7 +80,7 @@ void CoronalSliceWidget::setDisplayType(SliceDisplayType type)
     // If the display type is out of the acceptable range, then do nothing
     if (type < SliceDisplayType::FatOnly || type > SliceDisplayType::WaterFraction)
     {
-        qDebug() << "Invalid display type was specified for AxialSliceWidget: " << type;
+        qDebug() << "Invalid display type was specified for CoronalSliceWidget: " << type;
         return;
     }
 
@@ -181,8 +181,7 @@ void CoronalSliceWidget::initializeSliceView()
     glVertexAttribPointer(0, VertexPT::PosTupleSize, GL_FLOAT, true, VertexPT::stride(), static_cast<const char *>(0) + VertexPT::posOffset());
     glVertexAttribPointer(1, VertexPT::TexPosTupleSize, GL_FLOAT, true, VertexPT::stride(), static_cast<const char *>(0) + VertexPT::texPosOffset());
 
-    // Enable 2D textures and generate a blank texture for the axial slice
-    glEnable(GL_TEXTURE_2D);
+    // Generate a blank texture for the axial slice
     glGenTextures(1, &this->sliceTexture);
 
     // Release (unbind) all
@@ -278,7 +277,6 @@ void CoronalSliceWidget::updateCrosshairLine()
     // Now the start and end points of the line will be calculated
     // Calculate y location of current axial slice in OpenGL coord. system
     float y = (location.z() / (fatImage->getZDim() - 1)) * 2.0f - 1.0f;
-    qDebug() << "Hmm: " << location.z();
 
     // Start line is left of screen at specified y value and end value is right of screen at specified y value
     start = QVector4D(-1.0f, y, 0.0f, 1.0f);
@@ -301,7 +299,6 @@ void CoronalSliceWidget::updateCrosshairLine()
     lineEnd = end.toPoint();
 
     update();
-    qDebug() << "Update crosshair line in Coronal view: " << lineStart << lineEnd;
 }
 
 void CoronalSliceWidget::resizeGL(int w, int h)
@@ -324,7 +321,6 @@ void CoronalSliceWidget::paintGL()
         return;
 
     QPainter painter(this);
-    qDebug() << "Paint coronal " << location;
 
     painter.beginNativePainting();
     glClear(GL_COLOR_BUFFER_BIT);

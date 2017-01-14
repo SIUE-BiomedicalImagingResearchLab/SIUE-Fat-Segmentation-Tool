@@ -29,7 +29,9 @@ enum CommandID : int
     CoronalScale,
     LocationChange,
     BrightnessChange,
-    ContrastChange
+    ContrastChange,
+    PrimOpacityChange,
+    SecdOpacityChange
 };
 
 class AxialMoveCommand : public QUndoCommand
@@ -166,7 +168,7 @@ public:
     int id() const override { return CommandID::ContrastChange; }
 };
 
-class ColorMapChangeCommand : public QUndoCommand
+class PrimColorMapChangeCommand : public QUndoCommand
 {
 private:
     ColorMap oldColor;
@@ -175,11 +177,65 @@ private:
     QComboBox *comboBox;
 
 public:
-    ColorMapChangeCommand(ColorMap oldColor, ColorMap newColor, AxialSliceWidget *widget, QComboBox *comboBox, QUndoCommand *parent = NULL);
-    ~ColorMapChangeCommand();
+    PrimColorMapChangeCommand(ColorMap oldColor, ColorMap newColor, AxialSliceWidget *widget, QComboBox *comboBox, QUndoCommand *parent = NULL);
+    ~PrimColorMapChangeCommand();
 
     void undo() override;
     void redo() override;
+};
+
+class SecdColorMapChangeCommand : public QUndoCommand
+{
+private:
+    ColorMap oldColor;
+    ColorMap newColor;
+    AxialSliceWidget *widget;
+    QComboBox *comboBox;
+
+public:
+    SecdColorMapChangeCommand(ColorMap oldColor, ColorMap newColor, AxialSliceWidget *widget, QComboBox *comboBox, QUndoCommand *parent = NULL);
+    ~SecdColorMapChangeCommand();
+
+    void undo() override;
+    void redo() override;
+};
+
+class PrimOpacityChangeCommand : public QUndoCommand
+{
+private:
+    float oldOpacity;
+    float newOpacity;
+    AxialSliceWidget *widget;
+    QSlider *slider;
+    QSpinBox *spinBox;
+
+public:
+    PrimOpacityChangeCommand(float oldOpacity, float newOpacity, AxialSliceWidget *widget, QSlider *slider, QSpinBox *spinBox, QUndoCommand *parent = NULL);
+    ~PrimOpacityChangeCommand();
+
+    void undo() override;
+    void redo() override;
+    bool mergeWith(const QUndoCommand *command) override;
+    int id() const override { return CommandID::PrimOpacityChange; }
+};
+
+class SecdOpacityChangeCommand : public QUndoCommand
+{
+private:
+    float oldOpacity;
+    float newOpacity;
+    AxialSliceWidget *widget;
+    QSlider *slider;
+    QSpinBox *spinBox;
+
+public:
+    SecdOpacityChangeCommand(float oldOpacity, float newOpacity, AxialSliceWidget *widget, QSlider *slider, QSpinBox *spinBox, QUndoCommand *parent = NULL);
+    ~SecdOpacityChangeCommand();
+
+    void undo() override;
+    void redo() override;
+    bool mergeWith(const QUndoCommand *command) override;
+    int id() const override { return CommandID::SecdOpacityChange; }
 };
 
 class SliceViewChangeCommand : public QUndoCommand

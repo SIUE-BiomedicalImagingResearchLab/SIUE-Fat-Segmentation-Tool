@@ -557,9 +557,9 @@ ContrastChangeCommand::~ContrastChangeCommand()
 
 }
 
-// ColorMapChangeCommand
+// PrimColorMapChangeCommand
 // --------------------------------------------------------------------------------------------------------------------
-ColorMapChangeCommand::ColorMapChangeCommand(ColorMap oldColor, ColorMap newColor, AxialSliceWidget *widget, QComboBox *comboBox, QUndoCommand *parent) : QUndoCommand(parent)
+PrimColorMapChangeCommand::PrimColorMapChangeCommand(ColorMap oldColor, ColorMap newColor, AxialSliceWidget *widget, QComboBox *comboBox, QUndoCommand *parent) : QUndoCommand(parent)
 {
     this->oldColor = oldColor;
     this->newColor = newColor;
@@ -567,13 +567,13 @@ ColorMapChangeCommand::ColorMapChangeCommand(ColorMap oldColor, ColorMap newColo
     this->comboBox = comboBox;
 
     // Updates text that is shown on QUndoView
-    setText(QObject::tr("Color map set to %1").arg(comboBox->itemText((int)newColor)));
+    setText(QObject::tr("Primary color map set to %1").arg(comboBox->itemText((int)newColor)));
 }
 
-void ColorMapChangeCommand::undo()
+void PrimColorMapChangeCommand::undo()
 {
     // Go back to the old color map
-    widget->setColorMap(oldColor);
+    widget->setPrimColorMap(oldColor);
 
     // Set the combo box value to be equal to the old color map. It blocks all signals from the setValue
     //so that way the valueChanged is not called again and creates a duplicate ColorMapChangeCommand.
@@ -582,10 +582,10 @@ void ColorMapChangeCommand::undo()
     comboBox->blockSignals(prev);
 }
 
-void ColorMapChangeCommand::redo()
+void PrimColorMapChangeCommand::redo()
 {
     // Go to the new color map
-    widget->setColorMap(newColor);
+    widget->setPrimColorMap(newColor);
 
     // Set the combo box value to be equal to the new color map. It blocks all signals from the setValue
     // so that way the valueChanged is not called again and creates a duplicate ColorMapChangeCommand.
@@ -594,7 +594,193 @@ void ColorMapChangeCommand::redo()
     comboBox->blockSignals(prev);
 }
 
-ColorMapChangeCommand::~ColorMapChangeCommand()
+PrimColorMapChangeCommand::~PrimColorMapChangeCommand()
+{
+
+}
+
+// SecdColorMapChangeCommand
+// --------------------------------------------------------------------------------------------------------------------
+SecdColorMapChangeCommand::SecdColorMapChangeCommand(ColorMap oldColor, ColorMap newColor, AxialSliceWidget *widget, QComboBox *comboBox, QUndoCommand *parent) : QUndoCommand(parent)
+{
+    this->oldColor = oldColor;
+    this->newColor = newColor;
+    this->widget = widget;
+    this->comboBox = comboBox;
+
+    // Updates text that is shown on QUndoView
+    setText(QObject::tr("Secondary color map set to %1").arg(comboBox->itemText((int)newColor)));
+}
+
+void SecdColorMapChangeCommand::undo()
+{
+    // Go back to the old color map
+    widget->setSecdColorMap(oldColor);
+
+    // Set the combo box value to be equal to the old color map. It blocks all signals from the setValue
+    //so that way the valueChanged is not called again and creates a duplicate ColorMapChangeCommand.
+    bool prev = comboBox->blockSignals(true);
+    comboBox->setCurrentIndex((int)oldColor);
+    comboBox->blockSignals(prev);
+}
+
+void SecdColorMapChangeCommand::redo()
+{
+    // Go to the new color map
+    widget->setSecdColorMap(newColor);
+
+    // Set the combo box value to be equal to the new color map. It blocks all signals from the setValue
+    // so that way the valueChanged is not called again and creates a duplicate ColorMapChangeCommand.
+    bool prev = comboBox->blockSignals(true);
+    comboBox->setCurrentIndex((int)newColor);
+    comboBox->blockSignals(prev);
+}
+
+SecdColorMapChangeCommand::~SecdColorMapChangeCommand()
+{
+
+}
+
+// PrimOpacityChangeCommand
+// --------------------------------------------------------------------------------------------------------------------
+PrimOpacityChangeCommand::PrimOpacityChangeCommand(float oldOpacity, float newOpacity, AxialSliceWidget *widget, QSlider *slider, QSpinBox *spinBox, QUndoCommand *parent) : QUndoCommand(parent)
+{
+    this->oldOpacity = oldOpacity;
+    this->newOpacity = newOpacity;
+    this->widget = widget;
+    this->slider = slider;
+    this->spinBox = spinBox;
+
+    // Updates text that is shown on QUndoView
+    setText(QObject::tr("Primary opacity set to %1%").arg(int(newOpacity * 100.0f)));
+}
+
+void PrimOpacityChangeCommand::undo()
+{
+    // Go back to the old opacity
+    widget->setPrimOpacity(oldOpacity);
+
+    // Set the slider value to be equal to the old contrast. It blocks all signals from the setValue so that way
+    // the valueChanged is not called again and creates a new PrimOpacityChangeCommand.
+    bool prev = slider->blockSignals(true);
+    slider->setValue(int(oldOpacity * 100.0f));
+    slider->blockSignals(prev);
+
+    // Set the spin box value to be equal to the old contrast. It blocks all signals from the setValue so that way
+    // the valueChanged is not called again and creates a new PrimOpacityChangeCommand.
+    prev = spinBox->blockSignals(true);
+    spinBox->setValue(int(oldOpacity * 100.0f));
+    spinBox->blockSignals(prev);
+}
+
+void PrimOpacityChangeCommand::redo()
+{
+    // Go to the new brightness
+    widget->setPrimOpacity(newOpacity);
+
+    // Set the slider value to be equal to the new contrast. It blocks all signals from the setValue so that way
+    // the valueChanged is not called again and creates a new PrimOpacityChangeCommand.
+    bool prev = slider->blockSignals(true);
+    slider->setValue(int(newOpacity * 100.0f));
+    slider->blockSignals(prev);
+
+    // Set the spin box value to be equal to the new contrast. It blocks all signals from the setValue so that way
+    // the valueChanged is not called again and creates a new PrimOpacityChangeCommand.
+    prev = spinBox->blockSignals(true);
+    spinBox->setValue(int(newOpacity * 100.0f));
+    spinBox->blockSignals(prev);
+}
+
+bool PrimOpacityChangeCommand::mergeWith(const QUndoCommand *command)
+{
+    const PrimOpacityChangeCommand *primOpacityChangeCommand = static_cast<const PrimOpacityChangeCommand *>(command);
+
+    // Since the newest command will get merged with the older command, this means the oldOpacity of the current command (this) will stay
+    // the same but the newOpacity will change to what the merged command is
+    newOpacity = primOpacityChangeCommand->newOpacity;
+
+    // Updates text that is shown on QUndoView
+    setText(QObject::tr("Primary opacity set to %1%").arg(int(newOpacity * 100.0f)));
+
+    //if (newOpacity == oldOpacity)
+    //    setObsolete(true);
+
+    return true;
+}
+
+PrimOpacityChangeCommand::~PrimOpacityChangeCommand()
+{
+
+}
+
+// SecdOpacityChangeCommand
+// --------------------------------------------------------------------------------------------------------------------
+SecdOpacityChangeCommand::SecdOpacityChangeCommand(float oldOpacity, float newOpacity, AxialSliceWidget *widget, QSlider *slider, QSpinBox *spinBox, QUndoCommand *parent) : QUndoCommand(parent)
+{
+    this->oldOpacity = oldOpacity;
+    this->newOpacity = newOpacity;
+    this->widget = widget;
+    this->slider = slider;
+    this->spinBox = spinBox;
+
+    // Updates text that is shown on QUndoView
+    setText(QObject::tr("Secondary opacity set to %1%").arg(int(newOpacity * 100.0f)));
+}
+
+void SecdOpacityChangeCommand::undo()
+{
+    // Go back to the old opacity
+    widget->setSecdOpacity(oldOpacity);
+
+    // Set the slider value to be equal to the old contrast. It blocks all signals from the setValue so that way
+    // the valueChanged is not called again and creates a new SecdOpacityChangeCommand.
+    bool prev = slider->blockSignals(true);
+    slider->setValue(int(oldOpacity * 100.0f));
+    slider->blockSignals(prev);
+
+    // Set the spin box value to be equal to the old contrast. It blocks all signals from the setValue so that way
+    // the valueChanged is not called again and creates a new SecdOpacityChangeCommand.
+    prev = spinBox->blockSignals(true);
+    spinBox->setValue(int(oldOpacity * 100.0f));
+    spinBox->blockSignals(prev);
+}
+
+void SecdOpacityChangeCommand::redo()
+{
+    // Go to the new brightness
+    widget->setSecdOpacity(newOpacity);
+
+    // Set the slider value to be equal to the new contrast. It blocks all signals from the setValue so that way
+    // the valueChanged is not called again and creates a new SecdOpacityChangeCommand.
+    bool prev = slider->blockSignals(true);
+    slider->setValue(int(newOpacity * 100.0f));
+    slider->blockSignals(prev);
+
+    // Set the spin box value to be equal to the new contrast. It blocks all signals from the setValue so that way
+    // the valueChanged is not called again and creates a new SecdOpacityChangeCommand.
+    prev = spinBox->blockSignals(true);
+    spinBox->setValue(int(newOpacity * 100.0f));
+    spinBox->blockSignals(prev);
+}
+
+bool SecdOpacityChangeCommand::mergeWith(const QUndoCommand *command)
+{
+    const SecdOpacityChangeCommand *secdOpacityChangeCommand = static_cast<const SecdOpacityChangeCommand *>(command);
+
+    // Since the newest command will get merged with the older command, this means the oldOpacity of the current command (this) will stay
+    // the same but the newOpacity will change to what the merged command is
+    newOpacity = secdOpacityChangeCommand->newOpacity;
+
+    // Updates text that is shown on QUndoView
+    setText(QObject::tr("Secondary opacity set to %1%").arg(int(newOpacity * 100.0f)));
+
+    //if (newOpacity == oldOpacity)
+    //    setObsolete(true);
+
+    return true;
+}
+
+SecdOpacityChangeCommand::~SecdOpacityChangeCommand()
 {
 
 }

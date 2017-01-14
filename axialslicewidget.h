@@ -42,7 +42,8 @@ private:
     QOpenGLShaderProgram *program;
     GLuint sliceVertexBuf, sliceIndexBuf;
     GLuint sliceVertexObject;
-    GLuint sliceTexture;
+    GLuint slicePrimTexture;
+    GLuint sliceSecdTexture;
     QVector<VertexPT> sliceVertices;
     QVector<unsigned short> sliceIndices;
 
@@ -55,10 +56,14 @@ private:
     // The format is (X, Y, Z, T) where T is time
     QVector4D location;
 
-    ColorMap curColorMap;
+    ColorMap primColorMap;
+    float primOpacity;
 
-    float curBrightness;
-    float curContrast;
+    ColorMap secdColorMap;
+    float secdOpacity;
+
+    float brightness;
+    float contrast;
 
     bool startDraw;
 
@@ -89,8 +94,17 @@ public:
     SliceDisplayType getDisplayType();
     void setDisplayType(SliceDisplayType type);
 
-    ColorMap getColorMap();
-    void setColorMap(ColorMap map);
+    ColorMap getPrimColorMap();
+    void setPrimColorMap(ColorMap map);
+
+    float getPrimOpacity();
+    void setPrimOpacity(float opacity);
+
+    ColorMap getSecdColorMap();
+    void setSecdColorMap(ColorMap map);
+
+    float getSecdOpacity();
+    void setSecdOpacity(float opacity);
 
     float getContrast();
     void setContrast(float contrast);

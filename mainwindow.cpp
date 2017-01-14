@@ -191,15 +191,15 @@ void MainWindow::on_actionOpen_triggered()
         // Set the contrast spin box value to the default contrast
         ui->contrastSpinBox->setValue(int(ui->glWidgetAxial->getContrast() * 100.0f));
 
-        // Set the primary colormap value to the current color map and set the transparency
-        ui->primColorMapComboBox->setCurrentIndex(ui->glWidgetAxial->getColorMap());
-        ui->primTransparencySlider->setValue(12);
-        ui->primTransparencySpinBox->setValue(12);
+        // Set the primary colormap value to the current color map and set the opacity
+        ui->primColorMapComboBox->setCurrentIndex(ui->glWidgetAxial->getPrimColorMap());
+        ui->primOpacitySlider->setValue(int(ui->glWidgetAxial->getPrimOpacity() * 100.0f));
+        ui->primOpacitySpinBox->setValue(int(ui->glWidgetAxial->getPrimOpacity() * 100.0f));
 
-        // Set the secondary colormap value to the current color map and set the transparency
-        ui->secdColorMapComboBox->setCurrentIndex(ui->glWidgetAxial->getColorMap());
-        ui->secdTransparencySlider->setValue(12);
-        ui->secdTransparencySpinBox->setValue(12);
+        // Set the secondary colormap value to the current color map and set the opacity
+        ui->secdColorMapComboBox->setCurrentIndex(ui->glWidgetAxial->getSecdColorMap());
+        ui->secdOpacitySlider->setValue(int(ui->glWidgetAxial->getSecdOpacity() * 100.0f));
+        ui->secdOpacitySpinBox->setValue(int(ui->glWidgetAxial->getSecdOpacity() * 100.0f));
 
         // Read the current display type for the axial slice widget and check
         // the appropiate radio button for the current axial view
@@ -212,6 +212,9 @@ void MainWindow::on_actionOpen_triggered()
             case SliceDisplayType::FatWater: ui->fatWaterRadioBtn->setChecked(true); break;
             case SliceDisplayType::WaterFat: ui->waterFatRadioBtn->setChecked(true); break;
         }
+
+        // Enable the secondary image box if FatWater or WaterFat selected, otherwise disable
+        ui->secondaryImageBox->setEnabled((ui->glWidgetAxial->getDisplayType() == SliceDisplayType::FatWater || ui->glWidgetAxial->getDisplayType() == SliceDisplayType::WaterFat));
 
         // ------------------------------------------- Setup Tracing Tab -------------------------------------------
         // Set the EAT radio button for the default layer to be drawing with
@@ -241,9 +244,6 @@ void MainWindow::on_actionOpen_triggered()
         throw;
     }
 }
-
-
-
 
 void MainWindow::on_axialSliceSlider_valueChanged(int value)
 {
@@ -343,7 +343,7 @@ void MainWindow::on_contrastSlider_valueChanged(int value)
     if (ui->glWidgetAxial->getContrast() == value / 100.0f)
         return;
 
-    // Add a ContrastChangeCommand to change the brightness
+    // Add a ContrastChangeCommand to change the contrast
     undoStack->push(new ContrastChangeCommand(ui->glWidgetAxial->getContrast(), value / 100.0f, ui->glWidgetAxial, ui->contrastSlider, ui->contrastSpinBox));
 }
 
@@ -353,86 +353,137 @@ void MainWindow::on_contrastSpinBox_valueChanged(int value)
     if (ui->glWidgetAxial->getContrast() == value / 100.0f)
         return;
 
-    // Add a ContrastChangeCommand to change the brightness
+    // Add a ContrastChangeCommand to change the contrast
     undoStack->push(new ContrastChangeCommand(ui->glWidgetAxial->getContrast(), value / 100.0f, ui->glWidgetAxial, ui->contrastSlider, ui->contrastSpinBox));
 }
 
 void MainWindow::on_primColorMapComboBox_currentIndexChanged(int index)
 {
     // If the index is out of the acceptable bounds for the ColorMap, then do nothing
-    if (ui->glWidgetAxial->getColorMap() == (ColorMap)index || index < (int)ColorMap::Autumn || index >= (int)ColorMap::Count)
+    if (ui->glWidgetAxial->getPrimColorMap() == (ColorMap)index || index < (int)ColorMap::Autumn || index >= (int)ColorMap::Count)
         return;
 
     // Add a ColorMapChangeCommand to change the color map
-    undoStack->push(new ColorMapChangeCommand(ui->glWidgetAxial->getColorMap(), (ColorMap)index, ui->glWidgetAxial, ui->primColorMapComboBox));
+    undoStack->push(new PrimColorMapChangeCommand(ui->glWidgetAxial->getPrimColorMap(), (ColorMap)index, ui->glWidgetAxial, ui->primColorMapComboBox));
+}
+
+void MainWindow::on_primOpacitySlider_valueChanged(int value)
+{
+    // If the new value is equal to the current value, then do nothing
+    if (ui->glWidgetAxial->getPrimOpacity() == value / 100.0f)
+        return;
+
+    // Add a PrimOpacityChangeCommand to change the primary opacity
+    undoStack->push(new PrimOpacityChangeCommand(ui->glWidgetAxial->getPrimOpacity(), value / 100.0f, ui->glWidgetAxial, ui->primOpacitySlider, ui->primOpacitySpinBox));
+}
+
+void MainWindow::on_primOpacitySpinBox_valueChanged(int value)
+{
+    // If the new value is equal to the current value, then do nothing
+    if (ui->glWidgetAxial->getPrimOpacity() == value / 100.0f)
+        return;
+
+    // Add a PrimOpacityChangeCommand to change the primary opacity
+    undoStack->push(new PrimOpacityChangeCommand(ui->glWidgetAxial->getPrimOpacity(), value / 100.0f, ui->glWidgetAxial, ui->primOpacitySlider, ui->primOpacitySpinBox));
+}
+
+void MainWindow::on_secdColorMapComboBox_currentIndexChanged(int index)
+{
+    // If the index is out of the acceptable bounds for the ColorMap, then do nothing
+    if (ui->glWidgetAxial->getSecdColorMap() == (ColorMap)index || index < (int)ColorMap::Autumn || index >= (int)ColorMap::Count)
+        return;
+
+    // Add a ColorMapChangeCommand to change the color map
+    undoStack->push(new SecdColorMapChangeCommand(ui->glWidgetAxial->getPrimColorMap(), (ColorMap)index, ui->glWidgetAxial, ui->secdColorMapComboBox));
+}
+
+void MainWindow::on_secdOpacitySlider_valueChanged(int value)
+{
+    // If the new value is equal to the current value, then do nothing
+    if (ui->glWidgetAxial->getSecdOpacity() == value / 100.0f)
+        return;
+
+    // Add a SecdOpacityChangeCommand to change the secondary opacity
+    undoStack->push(new SecdOpacityChangeCommand(ui->glWidgetAxial->getSecdOpacity(), value / 100.0f, ui->glWidgetAxial, ui->secdOpacitySlider, ui->secdOpacitySpinBox));
+}
+
+void MainWindow::on_secdOpacitySpinBox_valueChanged(int value)
+{
+    // If the new value is equal to the current value, then do nothing
+    if (ui->glWidgetAxial->getSecdOpacity() == value / 100.0f)
+        return;
+
+    // Add a SecdOpacityChangeCommand to change the secondary opacity
+    undoStack->push(new SecdOpacityChangeCommand(ui->glWidgetAxial->getSecdOpacity(), value / 100.0f, ui->glWidgetAxial, ui->secdOpacitySlider, ui->secdOpacitySpinBox));
+}
+
+void MainWindow::changeSliceView(SliceDisplayType newType)
+{
+    if (newType == ui->glWidgetAxial->getDisplayType())
+        return; // If old and new type are same, do nothing
+
+    QRadioButton *newBtn = NULL;
+    switch (newType)
+    {
+        case SliceDisplayType::FatOnly: newBtn = ui->fatRadioBtn; break;
+        case SliceDisplayType::WaterOnly: newBtn = ui->waterRadioBtn; break;
+        case SliceDisplayType::FatFraction: newBtn = ui->fatFracRadioBtn; break;
+        case SliceDisplayType::WaterFraction: newBtn = ui->waterFracRadioBtn; break;
+        case SliceDisplayType::FatWater: newBtn = ui->fatWaterRadioBtn; break;
+        case SliceDisplayType::WaterFat: newBtn = ui->waterFatRadioBtn; break;
+    }
+
+    QRadioButton *oldBtn = NULL;
+    switch (ui->glWidgetAxial->getDisplayType())
+    {
+        case SliceDisplayType::FatOnly: oldBtn = ui->fatRadioBtn; break;
+        case SliceDisplayType::WaterOnly: oldBtn = ui->waterRadioBtn; break;
+        case SliceDisplayType::FatFraction: oldBtn = ui->fatFracRadioBtn; break;
+        case SliceDisplayType::WaterFraction: oldBtn = ui->waterFracRadioBtn; break;
+        case SliceDisplayType::FatWater: oldBtn = ui->fatWaterRadioBtn; break;
+        case SliceDisplayType::WaterFat: oldBtn = ui->waterFatRadioBtn; break;
+    }
+
+    // Enable the secondary image box if FatWater or WaterFat selected, otherwise disable
+    ui->secondaryImageBox->setEnabled((newType == SliceDisplayType::FatWater || newType == SliceDisplayType::WaterFat));
+
+    undoStack->push(new SliceViewChangeCommand(ui->glWidgetAxial->getDisplayType(), newType, ui->glWidgetAxial, oldBtn, newBtn));
 }
 
 void MainWindow::on_fatRadioBtn_toggled(bool checked)
 {
     if (checked)
-    {
-        QRadioButton *oldBtn = NULL;
-        switch (ui->glWidgetAxial->getDisplayType())
-        {
-            case SliceDisplayType::FatOnly: return; // Old state and new state are same, do nothing
-            case SliceDisplayType::WaterOnly: oldBtn = ui->waterRadioBtn; break;
-            case SliceDisplayType::FatFraction: oldBtn = ui->fatFracRadioBtn; break;
-            case SliceDisplayType::WaterFraction: oldBtn = ui->waterFracRadioBtn; break;
-        }
-
-        undoStack->push(new SliceViewChangeCommand(ui->glWidgetAxial->getDisplayType(), SliceDisplayType::FatOnly, ui->glWidgetAxial, oldBtn, ui->fatRadioBtn));
-    }
+        changeSliceView(SliceDisplayType::FatOnly);
 }
 
 void MainWindow::on_waterRadioBtn_toggled(bool checked)
 {
     if (checked)
-    {
-        QRadioButton *oldBtn = NULL;
-        switch (ui->glWidgetAxial->getDisplayType())
-        {
-            case SliceDisplayType::FatOnly: oldBtn = ui->fatRadioBtn; break;
-            case SliceDisplayType::WaterOnly: return; // Old state and new state are same, do nothing
-            case SliceDisplayType::FatFraction: oldBtn = ui->fatFracRadioBtn; break;
-            case SliceDisplayType::WaterFraction: oldBtn = ui->waterFracRadioBtn; break;
-        }
-
-        undoStack->push(new SliceViewChangeCommand(ui->glWidgetAxial->getDisplayType(), SliceDisplayType::WaterOnly, ui->glWidgetAxial, oldBtn, ui->waterRadioBtn));
-    }
+        changeSliceView(SliceDisplayType::WaterOnly);
 }
 
 void MainWindow::on_fatFracRadioBtn_toggled(bool checked)
 {
     if (checked)
-    {
-        QRadioButton *oldBtn = NULL;
-        switch (ui->glWidgetAxial->getDisplayType())
-        {
-            case SliceDisplayType::FatOnly: oldBtn = ui->fatRadioBtn; break;
-            case SliceDisplayType::WaterOnly: oldBtn = ui->waterRadioBtn; break;
-            case SliceDisplayType::FatFraction: return; // Old state and new state are same, do nothing
-            case SliceDisplayType::WaterFraction: oldBtn = ui->waterFracRadioBtn; break;
-        }
-
-        undoStack->push(new SliceViewChangeCommand(ui->glWidgetAxial->getDisplayType(), SliceDisplayType::FatFraction, ui->glWidgetAxial, oldBtn, ui->fatFracRadioBtn));
-    }
+        changeSliceView(SliceDisplayType::FatFraction);
 }
 
 void MainWindow::on_waterFracRadioBtn_toggled(bool checked)
 {
     if (checked)
-    {
-        QRadioButton *oldBtn = NULL;
-        switch (ui->glWidgetAxial->getDisplayType())
-        {
-            case SliceDisplayType::FatOnly: oldBtn = ui->fatRadioBtn; break;
-            case SliceDisplayType::WaterOnly: oldBtn = ui->waterRadioBtn; break;
-            case SliceDisplayType::FatFraction: oldBtn = ui->fatFracRadioBtn; break;
-            case SliceDisplayType::WaterFraction: return; // Old state and new state are same, do nothing
-        }
+        changeSliceView(SliceDisplayType::WaterFraction);
+}
 
-        undoStack->push(new SliceViewChangeCommand(ui->glWidgetAxial->getDisplayType(), SliceDisplayType::WaterFraction, ui->glWidgetAxial, oldBtn, ui->waterFracRadioBtn));
-    }
+void MainWindow::on_fatWaterRadioBtn_toggled(bool checked)
+{
+    if (checked)
+        changeSliceView(SliceDisplayType::FatWater);
+}
+
+void MainWindow::on_waterFatRadioBtn_toggled(bool checked)
+{
+    if (checked)
+        changeSliceView(SliceDisplayType::WaterFat);
 }
 
 void MainWindow::on_resetViewBtn_clicked()

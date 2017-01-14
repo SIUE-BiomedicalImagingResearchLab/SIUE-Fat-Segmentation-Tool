@@ -15,6 +15,7 @@
 #include <nifti/nifti1.h>
 #include <nifti/nifti1_io.h>
 
+#include "displayinfo.h"
 #include "niftimage.h"
 #include "util.h"
 #include "exception.h"
@@ -48,6 +49,8 @@ public:
     void readSettings();
     void writeSettings();
 
+    void changeSliceView(SliceDisplayType newType);
+
 private slots:
     void on_actionExit_triggered();
 
@@ -69,14 +72,20 @@ private slots:
     void on_contrastSpinBox_valueChanged(int value);
 
     void on_primColorMapComboBox_currentIndexChanged(int index);
+    void on_secdColorMapComboBox_currentIndexChanged(int index);
+
+    void on_primOpacitySlider_valueChanged(int value);
+    void on_primOpacitySpinBox_valueChanged(int value);
+
+    void on_secdOpacitySlider_valueChanged(int value);
+    void on_secdOpacitySpinBox_valueChanged(int value);
 
     void on_fatRadioBtn_toggled(bool checked);
-
     void on_waterRadioBtn_toggled(bool checked);
-
     void on_fatFracRadioBtn_toggled(bool checked);
-
     void on_waterFracRadioBtn_toggled(bool checked);
+    void on_fatWaterRadioBtn_toggled(bool checked);
+    void on_waterFatRadioBtn_toggled(bool checked);
 
     void on_resetViewBtn_clicked();
 

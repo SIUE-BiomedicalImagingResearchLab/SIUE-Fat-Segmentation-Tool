@@ -8,12 +8,16 @@ AxialSliceWidget::AxialSliceWidget(QWidget *parent) : QOpenGLWidget(parent)
     this->fatImage = NULL;
     this->waterImage = NULL;
 
-    this->sliceTexture = NULL;
+    this->slicePrimTexture = NULL;
+    this->sliceSecdTexture = NULL;
 
     this->location = QVector4D(0, 0, 0, 0);
-    this->curColorMap = ColorMap::Gray;
-    this->curBrightness = 0.0f;
-    this->curContrast = 1.0f;
+    this->primColorMap = ColorMap::Gray;
+    this->primOpacity = 1.0f;
+    this->secdColorMap = ColorMap::Gray;
+    this->secdOpacity = 1.0f;
+    this->brightness = 0.0f;
+    this->contrast = 1.0f;
 
     this->startDraw = false;
     this->startPan = false;
@@ -83,7 +87,7 @@ SliceDisplayType AxialSliceWidget::getDisplayType()
 void AxialSliceWidget::setDisplayType(SliceDisplayType type)
 {
     // If the display type is out of the acceptable range, then do nothing
-    if (type < SliceDisplayType::FatOnly || type > SliceDisplayType::WaterFraction)
+    if (type < SliceDisplayType::FatOnly || type > SliceDisplayType::WaterFat)
     {
         qDebug() << "Invalid display type was specified for AxialSliceWidget: " << type;
         return;
@@ -95,29 +99,87 @@ void AxialSliceWidget::setDisplayType(SliceDisplayType type)
     updateTexture();
 }
 
-ColorMap AxialSliceWidget::getColorMap()
+ColorMap AxialSliceWidget::getPrimColorMap()
 {
-    return curColorMap;
+    return primColorMap;
 }
 
-void AxialSliceWidget::setColorMap(ColorMap map)
+void AxialSliceWidget::setPrimColorMap(ColorMap map)
 {
     // If the map given is out of the acceptable range, then do nothing
     if (map < ColorMap::Autumn || map >= ColorMap::Count)
     {
-        qDebug() << "Invalid color map was specified for AxialSliceWidget: " << map;
+        qDebug() << "Invalid primary color map was specified for AxialSliceWidget: " << map;
         return;
     }
 
-    curColorMap = map;
+    primColorMap = map;
 
     // Redraw the screen because the screen colormap has changed
     update();
 }
 
+float AxialSliceWidget::getPrimOpacity()
+{
+    return primOpacity;
+}
+
+void AxialSliceWidget::setPrimOpacity(float opacity)
+{
+    if (opacity < 0.0f || opacity > 1.0f)
+    {
+        qDebug() << "Invalid primary opacity level was specified for AxialSliceWidget: " << opacity;
+        return;
+    }
+
+    primOpacity = opacity;
+
+    // Redraw the screen because the opacity of one of the objects changed
+    update();
+}
+
+ColorMap AxialSliceWidget::getSecdColorMap()
+{
+    return secdColorMap;
+}
+
+void AxialSliceWidget::setSecdColorMap(ColorMap map)
+{
+    // If the map given is out of the acceptable range, then do nothing
+    if (map < ColorMap::Autumn || map >= ColorMap::Count)
+    {
+        qDebug() << "Invalid secondary color map was specified for AxialSliceWidget: " << map;
+        return;
+    }
+
+    secdColorMap = map;
+
+    // Redraw the screen because the screen colormap has changed
+    update();
+}
+
+float AxialSliceWidget::getSecdOpacity()
+{
+    return secdOpacity;
+}
+
+void AxialSliceWidget::setSecdOpacity(float opacity)
+{
+    if (opacity < 0.0f || opacity > 1.0f)
+    {
+        qDebug() << "Invalid secondary opacity level was specified for AxialSliceWidget: " << opacity;
+        return;
+    }
+
+    secdOpacity = opacity;
+
+    // Redraw the screen because the opacity of one of the objects changed
+    update();
+}
+
 float AxialSliceWidget::getContrast()
 {
-    return curContrast;
+    return contrast;
 }
 
 void AxialSliceWidget::setContrast(float contrast)
@@ -129,7 +191,7 @@ void AxialSliceWidget::setContrast(float contrast)
         return;
     }
 
-    curContrast = contrast;
+    this->contrast = contrast;
 
     // Redraw the screen because the contrast has changed
     update();
@@ -137,7 +199,7 @@ void AxialSliceWidget::setContrast(float contrast)
 
 float AxialSliceWidget::getBrightness()
 {
-    return curBrightness;
+    return brightness;
 }
 
 void AxialSliceWidget::setBrightness(float brightness)
@@ -149,7 +211,7 @@ void AxialSliceWidget::setBrightness(float brightness)
         return;
     }
 
-    curBrightness = brightness;
+    this->brightness = brightness;
 
     // Redraw the screen because the brightness has changed
     update();
@@ -247,9 +309,9 @@ void AxialSliceWidget::initializeSliceView()
     glVertexAttribPointer(0, VertexPT::PosTupleSize, GL_FLOAT, true, VertexPT::stride(), static_cast<const char *>(0) + VertexPT::posOffset());
     glVertexAttribPointer(1, VertexPT::TexPosTupleSize, GL_FLOAT, true, VertexPT::stride(), static_cast<const char *>(0) + VertexPT::texPosOffset());
 
-    // Enable 2D textures and generate a blank texture for the axial slice
-    glEnable(GL_TEXTURE_2D);
-    glGenTextures(1, &this->sliceTexture);
+    // Generate a blank texture for the axial slice
+    glGenTextures(1, &this->slicePrimTexture);
+    glGenTextures(1, &this->sliceSecdTexture);
 
     // Release (unbind) all
     glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -360,14 +422,15 @@ void AxialSliceWidget::initializeColorMaps()
 
 void AxialSliceWidget::updateTexture()
 {
-    cv::Mat matrix;
+    cv::Mat primMatrix;
+    cv::Mat secdMatrix;
     switch (displayType)
     {
         case SliceDisplayType::FatOnly:
         {
             // Get the slice for the fat image. If the result is empty then there was an error retrieving the slice
-            matrix = fatImage->getAxialSlice(location.z(), true);
-            if (matrix.empty())
+            primMatrix = fatImage->getAxialSlice(location.z(), true);
+            if (primMatrix.empty())
             {
                 qDebug() << "Unable to retrieve axial slice " << location.z() << " from the fat image. Matrix returned empty.";
                 return;
@@ -375,23 +438,23 @@ void AxialSliceWidget::updateTexture()
 
             // The normalize function does quite a bit here. It converts the matrix to a 32-bit float and normalizes it
             // between 0.0f to 1.0f based on the min/max value. This does not affect the original 3D matrix in fatImage
-            cv::normalize(matrix.clone(), matrix, 0.0f, 1.0f, cv::NORM_MINMAX, CV_32FC1);
+            cv::normalize(primMatrix.clone(), primMatrix, 0.0f, 1.0f, cv::NORM_MINMAX, CV_32FC1);
         }
         break;
 
         case SliceDisplayType::WaterOnly:
         {
             // Get the slice for the water image. If the result is empty then there was an error retrieving the slice
-            matrix = waterImage->getAxialSlice(location.z(), true);
-            if (matrix.empty())
+            primMatrix = waterImage->getAxialSlice(location.z(), true);
+            if (primMatrix.empty())
             {
-                qDebug() << "Unable to retrieve axial slice " << location.z() << " from the fat image. Matrix returned empty.";
+                qDebug() << "Unable to retrieve axial slice " << location.z() << " from the water image. Matrix returned empty.";
                 return;
             }
 
             // The normalize function does quite a bit here. It converts the matrix to a 32-bit float and normalizes it
             // between 0.0f to 1.0f based on the min/max value. This does not affect the original 3D matrix in waterImage
-            cv::normalize(matrix.clone(), matrix, 0.0f, 1.0f, cv::NORM_MINMAX, CV_32FC1);
+            cv::normalize(primMatrix.clone(), primMatrix, 0.0f, 1.0f, cv::NORM_MINMAX, CV_32FC1);
         }
         break;
 
@@ -411,7 +474,7 @@ void AxialSliceWidget::updateTexture()
             cv::normalize(fatTemp.clone(), fatTemp, 0.0f, 1.0f, cv::NORM_MINMAX, CV_32FC1);
             cv::normalize(waterTemp.clone(), waterTemp, 0.0f, 1.0f, cv::NORM_MINMAX, CV_32FC1);
 
-            matrix = fatTemp / (fatTemp + waterTemp);
+            primMatrix = fatTemp / (fatTemp + waterTemp);
         }
         break;
 
@@ -431,13 +494,71 @@ void AxialSliceWidget::updateTexture()
             cv::normalize(fatTemp.clone(), fatTemp, 0.0f, 1.0f, cv::NORM_MINMAX, CV_32FC1);
             cv::normalize(waterTemp.clone(), waterTemp, 0.0f, 1.0f, cv::NORM_MINMAX, CV_32FC1);
 
-            matrix = waterTemp / (fatTemp + waterTemp);
+            primMatrix = waterTemp / (fatTemp + waterTemp);
+        }
+        break;
+
+        case SliceDisplayType::FatWater:
+        {
+            // Get the slice for the fat image. If the result is empty then there was an error retrieving the slice
+            primMatrix = fatImage->getAxialSlice(location.z(), true);
+            if (primMatrix.empty())
+            {
+                qDebug() << "Unable to retrieve axial slice " << location.z() << " from the fat image. Matrix returned empty.";
+                return;
+            }
+
+            // The normalize function does quite a bit here. It converts the matrix to a 32-bit float and normalizes it
+            // between 0.0f to 1.0f based on the min/max value. This does not affect the original 3D matrix in fatImage
+            cv::normalize(primMatrix.clone(), primMatrix, 0.0f, 1.0f, cv::NORM_MINMAX, CV_32FC1);
+
+            // Get the slice for the water image. If the result is empty then there was an error retrieving the slice
+            // The secondary matrix is the water image in this case
+            secdMatrix = waterImage->getAxialSlice(location.z(), true);
+            if (secdMatrix.empty())
+            {
+                qDebug() << "Unable to retrieve axial slice " << location.z() << " from the water image. Matrix returned empty.";
+                return;
+            }
+
+            // The normalize function does quite a bit here. It converts the matrix to a 32-bit float and normalizes it
+            // between 0.0f to 1.0f based on the min/max value. This does not affect the original 3D matrix in waterImage
+            cv::normalize(secdMatrix.clone(), secdMatrix, 0.0f, 1.0f, cv::NORM_MINMAX, CV_32FC1);
+        }
+        break;
+
+        case SliceDisplayType::WaterFat:
+        {
+            // Get the slice for the fat image. If the result is empty then there was an error retrieving the slice
+            primMatrix = waterImage->getAxialSlice(location.z(), true);
+            if (primMatrix.empty())
+            {
+                qDebug() << "Unable to retrieve axial slice " << location.z() << " from the water image. Matrix returned empty.";
+                return;
+            }
+
+            // The normalize function does quite a bit here. It converts the matrix to a 32-bit float and normalizes it
+            // between 0.0f to 1.0f based on the min/max value. This does not affect the original 3D matrix in fatImage
+            cv::normalize(primMatrix.clone(), primMatrix, 0.0f, 1.0f, cv::NORM_MINMAX, CV_32FC1);
+
+            // Get the slice for the water image. If the result is empty then there was an error retrieving the slice
+            // The secondary matrix is the water image in this case
+            secdMatrix = fatImage->getAxialSlice(location.z(), true);
+            if (secdMatrix.empty())
+            {
+                qDebug() << "Unable to retrieve axial slice " << location.z() << " from the fat image. Matrix returned empty.";
+                return;
+            }
+
+            // The normalize function does quite a bit here. It converts the matrix to a 32-bit float and normalizes it
+            // between 0.0f to 1.0f based on the min/max value. This does not affect the original 3D matrix in waterImage
+            cv::normalize(secdMatrix.clone(), secdMatrix, 0.0f, 1.0f, cv::NORM_MINMAX, CV_32FC1);
         }
         break;
     }
 
     // Bind the texture and setup the parameters for it
-    glBindTexture(GL_TEXTURE_2D, sliceTexture);
+    glBindTexture(GL_TEXTURE_2D, slicePrimTexture);
     // These parameters basically say the pixel value is equal to the average of the nearby pixel values when magnifying or minifying the values
     // Essentially, when stretching or shrinking the texture to the screen, it will smooth out the pixel values instead of making it look blocky
     // like GL_NEAREST would.
@@ -445,9 +566,22 @@ void AxialSliceWidget::updateTexture()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     // Get the OpenGL datatype of the matrix
-    GLenum *dataType = NIFTImage::openCVToOpenGLDatatype(matrix.type());
+    GLenum *dataType = NIFTImage::openCVToOpenGLDatatype(primMatrix.type());
     // Upload the texture data from the matrix to the texture. The internal format is 32 bit floats with one channel for red
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, fatImage->getXDim(), fatImage->getYDim(), 0, dataType[1], dataType[2], matrix.data);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, fatImage->getXDim(), fatImage->getYDim(), 0, dataType[1], dataType[2], primMatrix.data);
+
+    // Repeat the process if the second matrix is available
+    if (!secdMatrix.empty())
+    {
+        glBindTexture(GL_TEXTURE_2D, sliceSecdTexture);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        GLenum *dataType = NIFTImage::openCVToOpenGLDatatype(primMatrix.type());
+
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, fatImage->getXDim(), fatImage->getYDim(), 0, dataType[1], dataType[2], secdMatrix.data);
+    }
 
     // If there was an error, then say something
     GLenum err;
@@ -548,6 +682,14 @@ void AxialSliceWidget::paintGL()
 
     // With painter, call beginNativePainting before doing any custom OpenGL commands
     painter.beginNativePainting();
+
+    // Sets up transparency for the primary and secondary textures
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    // Disable depth testing with blending setup
+    glDisable(GL_DEPTH_TEST);
+
     glClear(GL_COLOR_BUFFER_BIT);
 
     // Calculate the ModelViewProjection (MVP) matrix to transform the location of the axial slices
@@ -563,21 +705,36 @@ void AxialSliceWidget::paintGL()
     mvpMatrix = modelMatrix * viewMatrix * projectionMatrix;
 
     program->bind();
-    program->setUniformValue("brightness", curBrightness);
-    program->setUniformValue("contrast", curContrast);
+    program->setUniformValue("brightness", brightness);
+    program->setUniformValue("contrast", contrast);
     program->setUniformValue("MVP", mvpMatrix);
 
+    program->setUniformValue("opacity", primOpacity);
+
     // Bind the VAO, bind texture to GL_TEXTURE0, bind VBO, bind IBO
-    // The program that is bound is the index of the curColorMap.
     glBindVertexArray(sliceVertexObject);
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, sliceTexture);
-    glBindTexture(GL_TEXTURE_1D, colorMapTexture[(int)curColorMap]);
     glBindBuffer(GL_ARRAY_BUFFER, sliceVertexBuf);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, sliceIndexBuf);
 
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, slicePrimTexture);
+    glBindTexture(GL_TEXTURE_1D, colorMapTexture[(int)primColorMap]);
+
     // Draw a triangle strip of 4 elements which is two triangles. The indices are unsigned shorts
     glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_SHORT, 0);
+
+    if (displayType == SliceDisplayType::FatWater || displayType == SliceDisplayType::WaterFat)
+    {
+        program->setUniformValue("opacity", secdOpacity);
+
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, sliceSecdTexture);
+        glBindTexture(GL_TEXTURE_1D, colorMapTexture[(int)secdColorMap]);
+
+        // Draw a triangle strip of 4 elements which is two triangles. The indices are unsigned shorts
+        // Drawing again for the secondary image
+        glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_SHORT, 0);
+    }
 
     // Release (unbind) the binded objects in reverse order
     // This is a simple protocol to prevent anything happening to the objects outside of this function without
@@ -756,7 +913,8 @@ AxialSliceWidget::~AxialSliceWidget()
     glDeleteVertexArrays(1, &sliceVertexObject);
     glDeleteBuffers(1, &sliceVertexBuf);
     glDeleteBuffers(1, &sliceIndexBuf);
-    glDeleteTextures(1, &sliceTexture);
+    glDeleteTextures(1, &slicePrimTexture);
+    glDeleteTextures(1, &sliceSecdTexture);
     glDeleteTextures((int)ColorMap::Count, &colorMapTexture[0]);
     delete program;
 }
