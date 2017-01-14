@@ -10,7 +10,7 @@ CoronalSliceWidget::CoronalSliceWidget(QWidget *parent) : QOpenGLWidget(parent)
 
     this->sliceTexture = NULL;
 
-    this->location = QVector4D(-1, 1, 1, -1);
+    this->location = QVector4D(0, 0, 0, 0);
     this->startPan = false;
     this->moveID = CommandID::CoronalMove;
 }
@@ -23,7 +23,7 @@ void CoronalSliceWidget::setImages(NIFTImage *fat, NIFTImage *water)
     fatImage = fat;
     waterImage = water;
 
-    location = QVector4D(-1, 1, 1, -1);
+    location = QVector4D(0, 0, 0, 0);
 
     projectionMatrix.setToIdentity();
     viewMatrix.setToIdentity();
@@ -42,35 +42,32 @@ void CoronalSliceWidget::setLocation(QVector4D location)
     if (!isLoaded())
         return;
 
-    QVector4D delta = location - this->location;
+    QVector4D transformedLocation = transformLocation(location);
+    QVector4D delta = transformedLocation - this->location;
 
-    // Update the location variables for each component
-    // For each component, if its not equal to Location::NoChange and is different from the old value,
-    // then the value is updated
-    if (location.x() != Location::NoChange && (location.x() >= 0 && location.x() < fatImage->getXDim()))
-        this->location.setX(location.x());
-
-    if (location.y() != Location::NoChange && (location.y() >= 0 && location.y() < fatImage->getYDim()))
-        this->location.setY(location.y());
-
-    if (location.z() != Location::NoChange && (location.z() >= 0 && location.z() < fatImage->getZDim()))
-        this->location.setZ(location.z());
-
-    if (location.w() != Location::NoChange && (location.w() >= 0))
-        this->location.setW(location.w());
+    this->location = transformedLocation;
 
     // If Y value changed, then update the texture
-    if (location.y() != Location::NoChange && delta.y())
+    if (delta.y())
         updateTexture();
 
     // If Z value changed, then update the crosshair line
-    if (location.z() != Location::NoChange && delta.z())
+    if (delta.z())
         updateCrosshairLine();
 }
 
 QVector4D CoronalSliceWidget::getLocation()
 {
     return location;
+}
+
+QVector4D CoronalSliceWidget::transformLocation(QVector4D location)
+{
+    // This function returns a QVector4D that replaces Location::NoChange's from location variable with actual location value
+
+    QVector4D temp(location.x() == Location::NoChange, location.y() == Location::NoChange, location.z() == Location::NoChange, location.w() == Location::NoChange);
+    QVector4D notTemp = QVector4D(1.0f, 1.0f, 1.0f, 1.0f) - temp;
+    return (location * notTemp) + (this->location * temp);
 }
 
 SliceDisplayType CoronalSliceWidget::getDisplayType()
@@ -281,6 +278,7 @@ void CoronalSliceWidget::updateCrosshairLine()
     // Now the start and end points of the line will be calculated
     // Calculate y location of current axial slice in OpenGL coord. system
     float y = (location.z() / (fatImage->getZDim() - 1)) * 2.0f - 1.0f;
+    qDebug() << "Hmm: " << location.z();
 
     // Start line is left of screen at specified y value and end value is right of screen at specified y value
     start = QVector4D(-1.0f, y, 0.0f, 1.0f);
@@ -303,6 +301,7 @@ void CoronalSliceWidget::updateCrosshairLine()
     lineEnd = end.toPoint();
 
     update();
+    qDebug() << "Update crosshair line in Coronal view: " << lineStart << lineEnd;
 }
 
 void CoronalSliceWidget::resizeGL(int w, int h)
@@ -311,9 +310,11 @@ void CoronalSliceWidget::resizeGL(int w, int h)
     (void)w;
     (void)h;
 
-    /* Because of the simplicity of this program, A.K.A because it is in 2D, there is no need to do anything when the window itself is resized.
-     * This is automatically handled and it is typically only useful when doing 3D applications I believe.
-     */
+    // Do nothing if fat/water images are not loaded
+    if (!isLoaded())
+        return;
+
+    updateCrosshairLine();
 }
 
 void CoronalSliceWidget::paintGL()
@@ -323,6 +324,7 @@ void CoronalSliceWidget::paintGL()
         return;
 
     QPainter painter(this);
+    qDebug() << "Paint coronal " << location;
 
     painter.beginNativePainting();
     glClear(GL_COLOR_BUFFER_BIT);

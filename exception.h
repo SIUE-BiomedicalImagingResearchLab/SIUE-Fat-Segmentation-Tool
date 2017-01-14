@@ -18,22 +18,10 @@ class Exception : std::exception
             return this->title_;
         }
 
-        /*const char *title() const
-        {
-            return "";
-            //return this->title_.toStdString().c_str();
-        }*/
-
         const QString message() const
         {
             return this->message_;
         }
-
-        /*const char *message() const
-        {
-            return "";
-            //return this->message_.toStdString().c_str();
-        }*/
 
         ~Exception() throw() {}
 };

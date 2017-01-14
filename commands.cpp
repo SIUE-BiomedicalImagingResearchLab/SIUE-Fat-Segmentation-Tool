@@ -250,7 +250,7 @@ LocationChangeCommand::LocationChangeCommand(QVector4D oldLocation, QVector4D ne
                                              QSlider *saggitalSlider, QSpinBox *saggitalSpinBox, QUndoCommand *parent) : QUndoCommand(parent)
 {
     this->oldLocation = oldLocation;
-    this->newLocation = newLocation;
+    this->newLocation = axialWidget->transformLocation(newLocation);
     this->axialWidget = axialWidget;
     this->coronalWidget = coronalWidget;
 
@@ -263,8 +263,24 @@ LocationChangeCommand::LocationChangeCommand(QVector4D oldLocation, QVector4D ne
     this->saggitalSlider = saggitalSlider;
     this->saggitalSpinBox = saggitalSpinBox;
 
-    // Updates text that is shown on QUndoView
-    //setText(QObject::tr("Move to slice %1").arg(newSlice));
+    // Set text shown on QUndoView
+    QVector4D delta = newLocation - oldLocation;
+    QString str("Move to ");
+
+    if (delta.x())
+        str += QObject::tr("saggital slice %1, ").arg(newLocation.x());
+
+    if (delta.y())
+        str += QObject::tr("coronal slice %1, ").arg(newLocation.y());
+
+    if (delta.z())
+        str += QObject::tr("axial slice %1, ").arg(newLocation.z());
+
+    if (delta.w())
+        str += QObject::tr("time slice %1, ").arg(newLocation.w());
+
+    str.remove(str.length() - 2, 2);
+    setText(str);
 }
 
 void LocationChangeCommand::undo()
@@ -321,7 +337,7 @@ void LocationChangeCommand::redo()
 
     QVector4D delta = newLocation - oldLocation;
 
-    if (delta.z() != Location::NoChange && delta.z() && axialSlider && axialSpinBox)
+    if (delta.z() && axialSlider && axialSpinBox)
     {
         // Set the slider value to be equal to the new slice. It blocks all signals from the setValue so that way
         // the valueChanged is not called again and creates a new LocationChangeCommand.
@@ -336,7 +352,7 @@ void LocationChangeCommand::redo()
         axialSpinBox->blockSignals(prev);
     }
 
-    if (delta.y() != Location::NoChange && delta.y() && coronalSlider && coronalSpinBox)
+    if (delta.y() && coronalSlider && coronalSpinBox)
     {
         bool prev = coronalSlider->blockSignals(true);
         coronalSlider->setValue(newLocation.y());
@@ -347,7 +363,7 @@ void LocationChangeCommand::redo()
         coronalSpinBox->blockSignals(prev);
     }
 
-    if (delta.x() != Location::NoChange && delta.x() && saggitalSlider && saggitalSpinBox)
+    if (delta.x() && saggitalSlider && saggitalSpinBox)
     {
         bool prev = saggitalSlider->blockSignals(true);
         saggitalSlider->setValue(newLocation.x());
@@ -367,8 +383,24 @@ bool LocationChangeCommand::mergeWith(const QUndoCommand *command)
     // the same but the newLocation will change to what the merged command is
     newLocation = sliceChangeCommand->newLocation;
 
-    // Updates text that is shown on QUndoView
-    //setText(QObject::tr("Move to slice %1").arg(newSlice));
+    // Update text shown on QUndoView
+    QVector4D delta = newLocation - oldLocation;
+    QString str("Move to ");
+
+    if (delta.x())
+        str.append(QObject::tr("saggital slice %1, ").arg(newLocation.x()));
+
+    if (delta.y())
+        str.append(QObject::tr("coronal slice %1, ").arg(newLocation.y()));
+
+    if (delta.z())
+        str.append(QObject::tr("axial slice %1, ").arg(newLocation.z()));
+
+    if (delta.w())
+        str.append(QObject::tr("time slice %1, ").arg(newLocation.w()));
+
+    str.remove(str.length() - 2, 2);
+    setText(str);
 
     //if (newLocation == oldLocation)
     //    setObsolete(true);

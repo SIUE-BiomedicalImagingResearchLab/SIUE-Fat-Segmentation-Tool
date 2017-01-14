@@ -68,6 +68,7 @@ public:
     // A value of Location::NoChange(-1) means no change for the location
     void setLocation(QVector4D location);
     QVector4D getLocation();
+    QVector4D transformLocation(QVector4D location);
 
     void setImages(NIFTImage *fat, NIFTImage *water);
     bool isLoaded();

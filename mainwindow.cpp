@@ -480,7 +480,7 @@ void MainWindow::on_actionShow_History_triggered()
         undoView->setWindowTitle(tr("History"));
         undoView->setWindowModality(Qt::NonModal);
         undoView->show();
-        undoView->setAttribute( Qt::WA_QuitOnClose, false );
+        undoView->setAttribute(Qt::WA_QuitOnClose, false);
     }
 }
 
