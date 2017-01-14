@@ -54,11 +54,6 @@ bool AxialMoveCommand::mergeWith(const QUndoCommand *command)
     return true;
 }
 
-AxialMoveCommand::~AxialMoveCommand()
-{
-
-}
-
 // CoronalMoveCommand
 // --------------------------------------------------------------------------------------------------------------------
 CoronalMoveCommand::CoronalMoveCommand(QPointF delta, CoronalSliceWidget *widget, CommandID ID, QUndoCommand *parent) : QUndoCommand(parent)
@@ -108,11 +103,6 @@ bool CoronalMoveCommand::mergeWith(const QUndoCommand *command)
     //    setObsolete(true);
 
     return true;
-}
-
-CoronalMoveCommand::~CoronalMoveCommand()
-{
-
 }
 
 // AxialScaleCommand
@@ -174,11 +164,6 @@ bool AxialScaleCommand::mergeWith(const QUndoCommand *command)
     return true;
 }
 
-AxialScaleCommand::~AxialScaleCommand()
-{
-
-}
-
 // CoronalScaleCommand
 // --------------------------------------------------------------------------------------------------------------------
 CoronalScaleCommand::CoronalScaleCommand(float scaling, CoronalSliceWidget *widget, QUndoCommand *parent) : QUndoCommand(parent)
@@ -236,11 +221,6 @@ bool CoronalScaleCommand::mergeWith(const QUndoCommand *command)
     //    setObsolete(true);
 
     return true;
-}
-
-CoronalScaleCommand::~CoronalScaleCommand()
-{
-
 }
 
 // LocationChangeCommand
@@ -408,11 +388,6 @@ bool LocationChangeCommand::mergeWith(const QUndoCommand *command)
     return true;
 }
 
-LocationChangeCommand::~LocationChangeCommand()
-{
-
-}
-
 // BrightnessChangeCommand
 // --------------------------------------------------------------------------------------------------------------------
 BrightnessChangeCommand::BrightnessChangeCommand(float oldBrightness, float newBrightness, AxialSliceWidget *widget, QSlider *slider, QSpinBox *spinBox, QUndoCommand *parent) : QUndoCommand(parent)
@@ -478,11 +453,6 @@ bool BrightnessChangeCommand::mergeWith(const QUndoCommand *command)
     //   setObsolete(true);
 
     return true;
-}
-
-BrightnessChangeCommand::~BrightnessChangeCommand()
-{
-
 }
 
 // ContrastChangeCommand
@@ -552,11 +522,6 @@ bool ContrastChangeCommand::mergeWith(const QUndoCommand *command)
     return true;
 }
 
-ContrastChangeCommand::~ContrastChangeCommand()
-{
-
-}
-
 // PrimColorMapChangeCommand
 // --------------------------------------------------------------------------------------------------------------------
 PrimColorMapChangeCommand::PrimColorMapChangeCommand(ColorMap oldColor, ColorMap newColor, AxialSliceWidget *widget, QComboBox *comboBox, QUndoCommand *parent) : QUndoCommand(parent)
@@ -594,11 +559,6 @@ void PrimColorMapChangeCommand::redo()
     comboBox->blockSignals(prev);
 }
 
-PrimColorMapChangeCommand::~PrimColorMapChangeCommand()
-{
-
-}
-
 // SecdColorMapChangeCommand
 // --------------------------------------------------------------------------------------------------------------------
 SecdColorMapChangeCommand::SecdColorMapChangeCommand(ColorMap oldColor, ColorMap newColor, AxialSliceWidget *widget, QComboBox *comboBox, QUndoCommand *parent) : QUndoCommand(parent)
@@ -634,11 +594,6 @@ void SecdColorMapChangeCommand::redo()
     bool prev = comboBox->blockSignals(true);
     comboBox->setCurrentIndex((int)newColor);
     comboBox->blockSignals(prev);
-}
-
-SecdColorMapChangeCommand::~SecdColorMapChangeCommand()
-{
-
 }
 
 // PrimOpacityChangeCommand
@@ -708,11 +663,6 @@ bool PrimOpacityChangeCommand::mergeWith(const QUndoCommand *command)
     return true;
 }
 
-PrimOpacityChangeCommand::~PrimOpacityChangeCommand()
-{
-
-}
-
 // SecdOpacityChangeCommand
 // --------------------------------------------------------------------------------------------------------------------
 SecdOpacityChangeCommand::SecdOpacityChangeCommand(float oldOpacity, float newOpacity, AxialSliceWidget *widget, QSlider *slider, QSpinBox *spinBox, QUndoCommand *parent) : QUndoCommand(parent)
@@ -780,11 +730,6 @@ bool SecdOpacityChangeCommand::mergeWith(const QUndoCommand *command)
     return true;
 }
 
-SecdOpacityChangeCommand::~SecdOpacityChangeCommand()
-{
-
-}
-
 // SliceViewChangeCommand
 // --------------------------------------------------------------------------------------------------------------------
 SliceViewChangeCommand::SliceViewChangeCommand(SliceDisplayType oldDT, SliceDisplayType newDT, AxialSliceWidget *widget, QRadioButton *oldBtn, QRadioButton *newBtn, QUndoCommand *parent) : QUndoCommand(parent)
@@ -821,9 +766,4 @@ void SliceViewChangeCommand::redo()
     bool prev = newBtn->blockSignals(true);
     newBtn->setChecked(true);
     newBtn->blockSignals(prev);
-}
-
-SliceViewChangeCommand::~SliceViewChangeCommand()
-{
-
 }
