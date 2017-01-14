@@ -225,11 +225,11 @@ bool CoronalScaleCommand::mergeWith(const QUndoCommand *command)
 
 // LocationChangeCommand
 // --------------------------------------------------------------------------------------------------------------------
-LocationChangeCommand::LocationChangeCommand(QVector4D oldLocation, QVector4D newLocation, AxialSliceWidget *axialWidget, CoronalSliceWidget *coronalWidget,
+LocationChangeCommand::LocationChangeCommand(QVector4D newLocation, AxialSliceWidget *axialWidget, CoronalSliceWidget *coronalWidget,
                                              QSlider *axialSlider, QSpinBox *axialSpinBox, QSlider *coronalSlider, QSpinBox *coronalSpinBox,
                                              QSlider *saggitalSlider, QSpinBox *saggitalSpinBox, QUndoCommand *parent) : QUndoCommand(parent)
 {
-    this->oldLocation = oldLocation;
+    this->oldLocation = axialWidget->getLocation();
     this->newLocation = axialWidget->transformLocation(newLocation);
     this->axialWidget = axialWidget;
     this->coronalWidget = coronalWidget;
@@ -390,9 +390,9 @@ bool LocationChangeCommand::mergeWith(const QUndoCommand *command)
 
 // BrightnessChangeCommand
 // --------------------------------------------------------------------------------------------------------------------
-BrightnessChangeCommand::BrightnessChangeCommand(float oldBrightness, float newBrightness, AxialSliceWidget *widget, QSlider *slider, QSpinBox *spinBox, QUndoCommand *parent) : QUndoCommand(parent)
+BrightnessChangeCommand::BrightnessChangeCommand(float newBrightness, AxialSliceWidget *widget, QSlider *slider, QSpinBox *spinBox, QUndoCommand *parent) : QUndoCommand(parent)
 {
-    this->oldBrightness = oldBrightness;
+    this->oldBrightness = widget->getBrightness();
     this->newBrightness = newBrightness;
     this->widget = widget;
     this->slider = slider;
@@ -457,9 +457,9 @@ bool BrightnessChangeCommand::mergeWith(const QUndoCommand *command)
 
 // ContrastChangeCommand
 // --------------------------------------------------------------------------------------------------------------------
-ContrastChangeCommand::ContrastChangeCommand(float oldContrast, float newContrast, AxialSliceWidget *widget, QSlider *slider, QSpinBox *spinBox, QUndoCommand *parent) : QUndoCommand(parent)
+ContrastChangeCommand::ContrastChangeCommand(float newContrast, AxialSliceWidget *widget, QSlider *slider, QSpinBox *spinBox, QUndoCommand *parent) : QUndoCommand(parent)
 {
-    this->oldContrast = oldContrast;
+    this->oldContrast = widget->getBrightness();
     this->newContrast = newContrast;
     this->widget = widget;
     this->slider = slider;
@@ -524,9 +524,9 @@ bool ContrastChangeCommand::mergeWith(const QUndoCommand *command)
 
 // PrimColorMapChangeCommand
 // --------------------------------------------------------------------------------------------------------------------
-PrimColorMapChangeCommand::PrimColorMapChangeCommand(ColorMap oldColor, ColorMap newColor, AxialSliceWidget *widget, QComboBox *comboBox, QUndoCommand *parent) : QUndoCommand(parent)
+PrimColorMapChangeCommand::PrimColorMapChangeCommand(ColorMap newColor, AxialSliceWidget *widget, QComboBox *comboBox, QUndoCommand *parent) : QUndoCommand(parent)
 {
-    this->oldColor = oldColor;
+    this->oldColor = widget->getPrimColorMap();
     this->newColor = newColor;
     this->widget = widget;
     this->comboBox = comboBox;
@@ -561,9 +561,9 @@ void PrimColorMapChangeCommand::redo()
 
 // SecdColorMapChangeCommand
 // --------------------------------------------------------------------------------------------------------------------
-SecdColorMapChangeCommand::SecdColorMapChangeCommand(ColorMap oldColor, ColorMap newColor, AxialSliceWidget *widget, QComboBox *comboBox, QUndoCommand *parent) : QUndoCommand(parent)
+SecdColorMapChangeCommand::SecdColorMapChangeCommand(ColorMap newColor, AxialSliceWidget *widget, QComboBox *comboBox, QUndoCommand *parent) : QUndoCommand(parent)
 {
-    this->oldColor = oldColor;
+    this->oldColor = widget->getSecdColorMap();
     this->newColor = newColor;
     this->widget = widget;
     this->comboBox = comboBox;
@@ -598,9 +598,9 @@ void SecdColorMapChangeCommand::redo()
 
 // PrimOpacityChangeCommand
 // --------------------------------------------------------------------------------------------------------------------
-PrimOpacityChangeCommand::PrimOpacityChangeCommand(float oldOpacity, float newOpacity, AxialSliceWidget *widget, QSlider *slider, QSpinBox *spinBox, QUndoCommand *parent) : QUndoCommand(parent)
+PrimOpacityChangeCommand::PrimOpacityChangeCommand(float newOpacity, AxialSliceWidget *widget, QSlider *slider, QSpinBox *spinBox, QUndoCommand *parent) : QUndoCommand(parent)
 {
-    this->oldOpacity = oldOpacity;
+    this->oldOpacity = widget->getPrimOpacity();
     this->newOpacity = newOpacity;
     this->widget = widget;
     this->slider = slider;
@@ -665,9 +665,9 @@ bool PrimOpacityChangeCommand::mergeWith(const QUndoCommand *command)
 
 // SecdOpacityChangeCommand
 // --------------------------------------------------------------------------------------------------------------------
-SecdOpacityChangeCommand::SecdOpacityChangeCommand(float oldOpacity, float newOpacity, AxialSliceWidget *widget, QSlider *slider, QSpinBox *spinBox, QUndoCommand *parent) : QUndoCommand(parent)
+SecdOpacityChangeCommand::SecdOpacityChangeCommand(float newOpacity, AxialSliceWidget *widget, QSlider *slider, QSpinBox *spinBox, QUndoCommand *parent) : QUndoCommand(parent)
 {
-    this->oldOpacity = oldOpacity;
+    this->oldOpacity = widget->getSecdOpacity();
     this->newOpacity = newOpacity;
     this->widget = widget;
     this->slider = slider;
@@ -732,9 +732,9 @@ bool SecdOpacityChangeCommand::mergeWith(const QUndoCommand *command)
 
 // SliceViewChangeCommand
 // --------------------------------------------------------------------------------------------------------------------
-SliceViewChangeCommand::SliceViewChangeCommand(SliceDisplayType oldDT, SliceDisplayType newDT, AxialSliceWidget *widget, QRadioButton *oldBtn, QRadioButton *newBtn, QUndoCommand *parent) : QUndoCommand(parent)
+SliceViewChangeCommand::SliceViewChangeCommand(SliceDisplayType newDT, AxialSliceWidget *widget, QRadioButton *oldBtn, QRadioButton *newBtn, QUndoCommand *parent) : QUndoCommand(parent)
 {
-    this->oldDT = oldDT;
+    this->oldDT = widget->getDisplayType();
     this->newDT = newDT;
     this->widget = widget;
     this->oldBtn = oldBtn;

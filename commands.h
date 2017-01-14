@@ -115,7 +115,7 @@ private:
     QSpinBox *saggitalSpinBox;
 
 public:
-    LocationChangeCommand(QVector4D oldLocation, QVector4D newLocation, AxialSliceWidget *axialWidget, CoronalSliceWidget *coronalWidget,
+    LocationChangeCommand(QVector4D newLocation, AxialSliceWidget *axialWidget, CoronalSliceWidget *coronalWidget,
                           QSlider *axialSlider, QSpinBox *axialSpinBox, QSlider *coronalSlider, QSpinBox *coronalSpinBox,
                           QSlider *saggitalSlider, QSpinBox *saggitalSpinBox, QUndoCommand *parent = NULL);
 
@@ -135,7 +135,7 @@ private:
     QSpinBox *spinBox;
 
 public:
-    BrightnessChangeCommand(float oldBrightness, float newBrightness, AxialSliceWidget *widget, QSlider *slider, QSpinBox *spinBox, QUndoCommand *parent = NULL);
+    BrightnessChangeCommand(float newBrightness, AxialSliceWidget *widget, QSlider *slider, QSpinBox *spinBox, QUndoCommand *parent = NULL);
 
     void undo() override;
     void redo() override;
@@ -153,7 +153,7 @@ private:
     QSpinBox *spinBox;
 
 public:
-    ContrastChangeCommand(float oldContrast, float newContrast, AxialSliceWidget *widget, QSlider *slider, QSpinBox *spinBox, QUndoCommand *parent = NULL);
+    ContrastChangeCommand(float newContrast, AxialSliceWidget *widget, QSlider *slider, QSpinBox *spinBox, QUndoCommand *parent = NULL);
 
     void undo() override;
     void redo() override;
@@ -170,7 +170,7 @@ private:
     QComboBox *comboBox;
 
 public:
-    PrimColorMapChangeCommand(ColorMap oldColor, ColorMap newColor, AxialSliceWidget *widget, QComboBox *comboBox, QUndoCommand *parent = NULL);
+    PrimColorMapChangeCommand(ColorMap newColor, AxialSliceWidget *widget, QComboBox *comboBox, QUndoCommand *parent = NULL);
 
     void undo() override;
     void redo() override;
@@ -185,7 +185,7 @@ private:
     QComboBox *comboBox;
 
 public:
-    SecdColorMapChangeCommand(ColorMap oldColor, ColorMap newColor, AxialSliceWidget *widget, QComboBox *comboBox, QUndoCommand *parent = NULL);
+    SecdColorMapChangeCommand(ColorMap newColor, AxialSliceWidget *widget, QComboBox *comboBox, QUndoCommand *parent = NULL);
 
     void undo() override;
     void redo() override;
@@ -201,7 +201,7 @@ private:
     QSpinBox *spinBox;
 
 public:
-    PrimOpacityChangeCommand(float oldOpacity, float newOpacity, AxialSliceWidget *widget, QSlider *slider, QSpinBox *spinBox, QUndoCommand *parent = NULL);
+    PrimOpacityChangeCommand(float newOpacity, AxialSliceWidget *widget, QSlider *slider, QSpinBox *spinBox, QUndoCommand *parent = NULL);
 
     void undo() override;
     void redo() override;
@@ -219,7 +219,7 @@ private:
     QSpinBox *spinBox;
 
 public:
-    SecdOpacityChangeCommand(float oldOpacity, float newOpacity, AxialSliceWidget *widget, QSlider *slider, QSpinBox *spinBox, QUndoCommand *parent = NULL);
+    SecdOpacityChangeCommand(float newOpacity, AxialSliceWidget *widget, QSlider *slider, QSpinBox *spinBox, QUndoCommand *parent = NULL);
 
     void undo() override;
     void redo() override;
@@ -237,7 +237,7 @@ private:
     QRadioButton *newBtn;
 
 public:
-    SliceViewChangeCommand(SliceDisplayType oldDT, SliceDisplayType newDT, AxialSliceWidget *widget, QRadioButton *oldBtn, QRadioButton *newBtn, QUndoCommand *parent = NULL);
+    SliceViewChangeCommand(SliceDisplayType newDT, AxialSliceWidget *widget, QRadioButton *oldBtn, QRadioButton *newBtn, QUndoCommand *parent = NULL);
 
     void undo() override;
     void redo() override;

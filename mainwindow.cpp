@@ -252,8 +252,8 @@ void MainWindow::on_axialSliceSlider_valueChanged(int value)
         return;
 
     // Add a SliceChangeCommand to change the axial slice
-    undoStack->push(new LocationChangeCommand(ui->glWidgetAxial->getLocation(), QVector4D(Location::NoChange, Location::NoChange, value, Location::NoChange),
-                                              ui->glWidgetAxial, ui->glWidgetCoronal, ui->axialSliceSlider, ui->axialSliceSpinBox, ui->coronalSliceSlider,
+    undoStack->push(new LocationChangeCommand(QVector4D(Location::NoChange, Location::NoChange, value, Location::NoChange), ui->glWidgetAxial, ui->glWidgetCoronal,
+                                              ui->axialSliceSlider, ui->axialSliceSpinBox, ui->coronalSliceSlider,
                                               ui->coronalSliceSpinBox, ui->saggitalSliceSlider, ui->saggitalSliceSpinBox));
 }
 
@@ -264,8 +264,8 @@ void MainWindow::on_axialSliceSpinBox_valueChanged(int value)
         return;
 
     // Add a SliceChangeCommand to change the axial slice
-    undoStack->push(new LocationChangeCommand(ui->glWidgetAxial->getLocation(), QVector4D(Location::NoChange, Location::NoChange, value, Location::NoChange),
-                                              ui->glWidgetAxial, ui->glWidgetCoronal, ui->axialSliceSlider, ui->axialSliceSpinBox, ui->coronalSliceSlider,
+    undoStack->push(new LocationChangeCommand(QVector4D(Location::NoChange, Location::NoChange, value, Location::NoChange), ui->glWidgetAxial, ui->glWidgetCoronal,
+                                              ui->axialSliceSlider, ui->axialSliceSpinBox, ui->coronalSliceSlider,
                                               ui->coronalSliceSpinBox, ui->saggitalSliceSlider, ui->saggitalSliceSpinBox));
 }
 
@@ -276,8 +276,8 @@ void MainWindow::on_coronalSliceSlider_valueChanged(int value)
         return;
 
     // Add a SliceChangeCommand to change the coronal slice
-    undoStack->push(new LocationChangeCommand(ui->glWidgetAxial->getLocation(), QVector4D(Location::NoChange, value, Location::NoChange, Location::NoChange),
-                                              ui->glWidgetAxial, ui->glWidgetCoronal, ui->axialSliceSlider, ui->axialSliceSpinBox, ui->coronalSliceSlider,
+    undoStack->push(new LocationChangeCommand(QVector4D(Location::NoChange, value, Location::NoChange, Location::NoChange), ui->glWidgetAxial, ui->glWidgetCoronal,
+                                              ui->axialSliceSlider, ui->axialSliceSpinBox, ui->coronalSliceSlider,
                                               ui->coronalSliceSpinBox, ui->saggitalSliceSlider, ui->saggitalSliceSpinBox));
 }
 
@@ -288,8 +288,8 @@ void MainWindow::on_coronalSliceSpinBox_valueChanged(int value)
         return;
 
     // Add a SliceChangeCommand to change the coronal slice
-    undoStack->push(new LocationChangeCommand(ui->glWidgetAxial->getLocation(), QVector4D(Location::NoChange, value, Location::NoChange, Location::NoChange),
-                                              ui->glWidgetAxial, ui->glWidgetCoronal, ui->axialSliceSlider, ui->axialSliceSpinBox, ui->coronalSliceSlider,
+    undoStack->push(new LocationChangeCommand(QVector4D(Location::NoChange, value, Location::NoChange, Location::NoChange), ui->glWidgetAxial, ui->glWidgetCoronal,
+                                              ui->axialSliceSlider, ui->axialSliceSpinBox, ui->coronalSliceSlider,
                                               ui->coronalSliceSpinBox, ui->saggitalSliceSlider, ui->saggitalSliceSpinBox));
 }
 
@@ -300,8 +300,8 @@ void MainWindow::on_saggitalSliceSlider_valueChanged(int value)
         return;
 
     // Add a SliceChangeCommand to change the saggital slice
-    undoStack->push(new LocationChangeCommand(ui->glWidgetAxial->getLocation(), QVector4D(value, Location::NoChange, Location::NoChange, Location::NoChange),
-                                              ui->glWidgetAxial, ui->glWidgetCoronal, ui->axialSliceSlider, ui->axialSliceSpinBox, ui->coronalSliceSlider,
+    undoStack->push(new LocationChangeCommand(QVector4D(value, Location::NoChange, Location::NoChange, Location::NoChange), ui->glWidgetAxial, ui->glWidgetCoronal,
+                                              ui->axialSliceSlider, ui->axialSliceSpinBox, ui->coronalSliceSlider,
                                               ui->coronalSliceSpinBox, ui->saggitalSliceSlider, ui->saggitalSliceSpinBox));
 }
 
@@ -312,8 +312,8 @@ void MainWindow::on_saggitalSliceSpinBox_valueChanged(int value)
         return;
 
     // Add a SliceChangeCommand to change the saggital slice
-    undoStack->push(new LocationChangeCommand(ui->glWidgetAxial->getLocation(), QVector4D(value, Location::NoChange, Location::NoChange, Location::NoChange),
-                                              ui->glWidgetAxial, ui->glWidgetCoronal, ui->axialSliceSlider, ui->axialSliceSpinBox, ui->coronalSliceSlider,
+    undoStack->push(new LocationChangeCommand(QVector4D(value, Location::NoChange, Location::NoChange, Location::NoChange), ui->glWidgetAxial, ui->glWidgetCoronal,
+                                              ui->axialSliceSlider, ui->axialSliceSpinBox, ui->coronalSliceSlider,
                                               ui->coronalSliceSpinBox, ui->saggitalSliceSlider, ui->saggitalSliceSpinBox));
 }
 
@@ -324,7 +324,7 @@ void MainWindow::on_brightnessSlider_valueChanged(int value)
         return;
 
     // Add a BrightnessChangeCommand to change the brightness
-    undoStack->push(new BrightnessChangeCommand(ui->glWidgetAxial->getBrightness(), value / 100.0f, ui->glWidgetAxial, ui->brightnessSlider, ui->brightnessSpinBox));
+    undoStack->push(new BrightnessChangeCommand(value / 100.0f, ui->glWidgetAxial, ui->brightnessSlider, ui->brightnessSpinBox));
 }
 
 void MainWindow::on_brightnessSpinBox_valueChanged(int value)
@@ -334,7 +334,7 @@ void MainWindow::on_brightnessSpinBox_valueChanged(int value)
         return;
 
     // Add a BrightnessChangeCommand to change the brightness
-    undoStack->push(new BrightnessChangeCommand(ui->glWidgetAxial->getBrightness(), value / 100.0f, ui->glWidgetAxial, ui->brightnessSlider, ui->brightnessSpinBox));
+    undoStack->push(new BrightnessChangeCommand(value / 100.0f, ui->glWidgetAxial, ui->brightnessSlider, ui->brightnessSpinBox));
 }
 
 void MainWindow::on_contrastSlider_valueChanged(int value)
@@ -344,7 +344,7 @@ void MainWindow::on_contrastSlider_valueChanged(int value)
         return;
 
     // Add a ContrastChangeCommand to change the contrast
-    undoStack->push(new ContrastChangeCommand(ui->glWidgetAxial->getContrast(), value / 100.0f, ui->glWidgetAxial, ui->contrastSlider, ui->contrastSpinBox));
+    undoStack->push(new ContrastChangeCommand(value / 100.0f, ui->glWidgetAxial, ui->contrastSlider, ui->contrastSpinBox));
 }
 
 void MainWindow::on_contrastSpinBox_valueChanged(int value)
@@ -354,7 +354,7 @@ void MainWindow::on_contrastSpinBox_valueChanged(int value)
         return;
 
     // Add a ContrastChangeCommand to change the contrast
-    undoStack->push(new ContrastChangeCommand(ui->glWidgetAxial->getContrast(), value / 100.0f, ui->glWidgetAxial, ui->contrastSlider, ui->contrastSpinBox));
+    undoStack->push(new ContrastChangeCommand(value / 100.0f, ui->glWidgetAxial, ui->contrastSlider, ui->contrastSpinBox));
 }
 
 void MainWindow::on_primColorMapComboBox_currentIndexChanged(int index)
@@ -364,7 +364,7 @@ void MainWindow::on_primColorMapComboBox_currentIndexChanged(int index)
         return;
 
     // Add a ColorMapChangeCommand to change the color map
-    undoStack->push(new PrimColorMapChangeCommand(ui->glWidgetAxial->getPrimColorMap(), (ColorMap)index, ui->glWidgetAxial, ui->primColorMapComboBox));
+    undoStack->push(new PrimColorMapChangeCommand((ColorMap)index, ui->glWidgetAxial, ui->primColorMapComboBox));
 }
 
 void MainWindow::on_primOpacitySlider_valueChanged(int value)
@@ -374,7 +374,7 @@ void MainWindow::on_primOpacitySlider_valueChanged(int value)
         return;
 
     // Add a PrimOpacityChangeCommand to change the primary opacity
-    undoStack->push(new PrimOpacityChangeCommand(ui->glWidgetAxial->getPrimOpacity(), value / 100.0f, ui->glWidgetAxial, ui->primOpacitySlider, ui->primOpacitySpinBox));
+    undoStack->push(new PrimOpacityChangeCommand(value / 100.0f, ui->glWidgetAxial, ui->primOpacitySlider, ui->primOpacitySpinBox));
 }
 
 void MainWindow::on_primOpacitySpinBox_valueChanged(int value)
@@ -384,7 +384,7 @@ void MainWindow::on_primOpacitySpinBox_valueChanged(int value)
         return;
 
     // Add a PrimOpacityChangeCommand to change the primary opacity
-    undoStack->push(new PrimOpacityChangeCommand(ui->glWidgetAxial->getPrimOpacity(), value / 100.0f, ui->glWidgetAxial, ui->primOpacitySlider, ui->primOpacitySpinBox));
+    undoStack->push(new PrimOpacityChangeCommand(value / 100.0f, ui->glWidgetAxial, ui->primOpacitySlider, ui->primOpacitySpinBox));
 }
 
 void MainWindow::on_secdColorMapComboBox_currentIndexChanged(int index)
@@ -394,7 +394,7 @@ void MainWindow::on_secdColorMapComboBox_currentIndexChanged(int index)
         return;
 
     // Add a ColorMapChangeCommand to change the color map
-    undoStack->push(new SecdColorMapChangeCommand(ui->glWidgetAxial->getPrimColorMap(), (ColorMap)index, ui->glWidgetAxial, ui->secdColorMapComboBox));
+    undoStack->push(new SecdColorMapChangeCommand((ColorMap)index, ui->glWidgetAxial, ui->secdColorMapComboBox));
 }
 
 void MainWindow::on_secdOpacitySlider_valueChanged(int value)
@@ -404,7 +404,7 @@ void MainWindow::on_secdOpacitySlider_valueChanged(int value)
         return;
 
     // Add a SecdOpacityChangeCommand to change the secondary opacity
-    undoStack->push(new SecdOpacityChangeCommand(ui->glWidgetAxial->getSecdOpacity(), value / 100.0f, ui->glWidgetAxial, ui->secdOpacitySlider, ui->secdOpacitySpinBox));
+    undoStack->push(new SecdOpacityChangeCommand(value / 100.0f, ui->glWidgetAxial, ui->secdOpacitySlider, ui->secdOpacitySpinBox));
 }
 
 void MainWindow::on_secdOpacitySpinBox_valueChanged(int value)
@@ -414,7 +414,7 @@ void MainWindow::on_secdOpacitySpinBox_valueChanged(int value)
         return;
 
     // Add a SecdOpacityChangeCommand to change the secondary opacity
-    undoStack->push(new SecdOpacityChangeCommand(ui->glWidgetAxial->getSecdOpacity(), value / 100.0f, ui->glWidgetAxial, ui->secdOpacitySlider, ui->secdOpacitySpinBox));
+    undoStack->push(new SecdOpacityChangeCommand(value / 100.0f, ui->glWidgetAxial, ui->secdOpacitySlider, ui->secdOpacitySpinBox));
 }
 
 void MainWindow::changeSliceView(SliceDisplayType newType)
@@ -447,7 +447,7 @@ void MainWindow::changeSliceView(SliceDisplayType newType)
     // Enable the secondary image box if FatWater or WaterFat selected, otherwise disable
     ui->secondaryImageBox->setEnabled((newType == SliceDisplayType::FatWater || newType == SliceDisplayType::WaterFat));
 
-    undoStack->push(new SliceViewChangeCommand(ui->glWidgetAxial->getDisplayType(), newType, ui->glWidgetAxial, oldBtn, newBtn));
+    undoStack->push(new SliceViewChangeCommand(newType, ui->glWidgetAxial, oldBtn, newBtn));
 }
 
 void MainWindow::on_fatRadioBtn_toggled(bool checked)
