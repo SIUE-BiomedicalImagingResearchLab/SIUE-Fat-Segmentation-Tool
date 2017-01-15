@@ -77,8 +77,11 @@ bool NIFTImage::setImage(nifti_image *upper, nifti_image *lower, SubjectConfig *
 
     // Create matrix of zDim x yDim x xDim.
     // The default datatype of the matrix is to match the NIFTI file datatype
+    // NOTE: We want 2 channels: one for the intensity and another for the alpha (used to make voids transparent)
+    int datatypeData = niftiToOpenCVDatatype(upper, 2);
     int datatype = niftiToOpenCVDatatype(upper);
-    data = cv::Mat({zDim, yDim, xDim}, datatype, cv::Scalar(0));
+    qDebug() << "Datatype: " << datatype << " (" << CV_8UC1 << ", " << CV_16UC1 << ", " << CV_16SC1;
+    data = cv::Mat({zDim, yDim, xDim}, datatypeData, cv::Scalar(0, 65000));
 
     /* Upper */
     cv::Mat upperROI = data({cv::Range(lowerLength, zDim), cv::Range::all(), cv::Range::all()});
@@ -87,7 +90,9 @@ bool NIFTImage::setImage(nifti_image *upper, nifti_image *lower, SubjectConfig *
     // Copy imageUpperInferior to imageUpperSuperior to upperMatROI
     cv::Mat upperMatROI = upperMat({cv::Range(subConfig->imageUpperInferior, subConfig->imageUpperSuperior + 1), cv::Range::all(), cv::Range::all()});
 
-    upperMatROI.copyTo(upperROI);
+    // Do mixChannels instead I think
+    cv::mixChannels(std::vector<cv::Mat>({upperMatROI}), std::vector<cv::Mat>({upperROI}), {0,0});
+    //upperMatROI.copyTo(upperROI);
 
     /* Lower */
     cv::Mat lowerROI = data({cv::Range(0, lowerLength), cv::Range::all(), cv::Range::all()});
@@ -97,7 +102,20 @@ bool NIFTImage::setImage(nifti_image *upper, nifti_image *lower, SubjectConfig *
     // Copy imageLowerInferior to imageLowerSuperior to lowerMatROI
     cv::Mat lowerMatROI = lowerMat({cv::Range(subConfig->imageLowerInferior, subConfig->imageLowerSuperior + 1), cv::Range::all(), cv::Range::all()});
 
-    lowerMatROI.copyTo(lowerROI);
+    // Do mixChannels instead I think
+    cv::mixChannels(std::vector<cv::Mat>({lowerMatROI}), std::vector<cv::Mat>({lowerROI}), {0,0});
+    for (int z = 0; z < 20; ++z)
+    {
+        for (int y = 0; y < 20; ++y)
+        {
+            for (int x = 0; x < 20; ++x)
+            {
+                //float lol = voids.at<float>(cv::Vec3i(z, y, x));
+                //qDebug() << "Value: " << lol;
+            }
+        }
+    }
+    //lowerMatROI.copyTo(lowerROI);
 
     // Flip the matrix once it is loaded
     cv::Mat dataFlipped;
@@ -266,6 +284,29 @@ int NIFTImage::getZDim()
     return zDim;
 }
 
+void NIFTImage::setVoids(NIFTImage *otherImage, float threshold)
+{
+    if (!otherImage)
+        return;
+
+    cv::Mat diff;
+    cv::absdiff(data, otherImage->getMat(), diff);
+    cv::Mat voids = (diff < threshold); // > ?
+
+    this->setVoids(voids);
+    otherImage->setVoids(voids);
+}
+
+void NIFTImage::setVoids(cv::Mat voidMatrix)
+{
+    // Do stuff here
+}
+
+cv::Mat NIFTImage::getMat()
+{
+    return data;
+}
+
 /* getRegion returns a region of the data matrix. The region vector can be done using initializer
  * lists in C++11 which makes this a simple function to use. The number of items in the region
  * vector must be 3 because the dimension of the data matrix is 3. The clone parameter is whether
@@ -430,12 +471,12 @@ GLenum *NIFTImage::openCVToOpenGLDatatype(int datatype)
  *      int - OpenCV datatype with necessary channels such as CV_16UC1, CV_16SC1, etc
  *            Returns -1 if the datatype is not supported in OpenCV
  */
-int NIFTImage::niftiToOpenCVDatatype(nifti_image *image)
+int NIFTImage::niftiToOpenCVDatatype(nifti_image *image, int numChannels)
 {
     for (int i = 0; niftiToOpenCVLUT[i] != NULL; ++i)
     {
         if (niftiToOpenCVLUT[i][0] == image->datatype)
-            return niftiToOpenCVLUT[i][1];
+            return CV_MAKETYPE(niftiToOpenCVLUT[i][1], numChannels);
     }
 
     return -1;

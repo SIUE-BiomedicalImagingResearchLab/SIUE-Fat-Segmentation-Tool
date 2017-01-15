@@ -210,7 +210,7 @@ void CoronalSliceWidget::updateTexture()
 
     // The normalize function does quite a bit here. It converts the matrix to a 32-bit float and normalizes it
     // between 0.0f to 1.0f based on the min/max value. This does not affect the original 3D matrix in fatImage
-    cv::normalize(matrix.clone(), matrix, 0.0f, 1.0f, cv::NORM_MINMAX, CV_32FC1);
+    cv::normalize(matrix.clone(), matrix, 0.0f, 1.0f, cv::NORM_MINMAX, CV_32FC2);
 
     // Bind the texture and setup the parameters for it
     glBindTexture(GL_TEXTURE_2D, sliceTexture);
@@ -223,7 +223,7 @@ void CoronalSliceWidget::updateTexture()
     // Get the OpenGL datatype of the matrix
     GLenum *dataType = NIFTImage::openCVToOpenGLDatatype(matrix.type());
     // Upload the texture data from the matrix to the texture. The internal format is 32 bit floats with one channel for red
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, fatImage->getXDim(), fatImage->getZDim(), 0, dataType[1], dataType[2], matrix.data);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RG32F, fatImage->getXDim(), fatImage->getZDim(), 0, dataType[1], dataType[2], matrix.data);
 
     // If there was an error, then say something
     GLenum err;

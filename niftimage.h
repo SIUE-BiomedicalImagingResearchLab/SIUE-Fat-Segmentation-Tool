@@ -5,6 +5,7 @@
 #include <QFile>
 
 #include <opencv2/opencv.hpp>
+
 #include "opencv.h"
 #include "util.h"
 #include "subjectconfig.h"
@@ -30,14 +31,14 @@ static GLenum niftiToOpenGLLUT[][3] =
 
 static int niftiToOpenCVLUT[][2] =
 {
-    {DT_UINT8,      CV_8UC1},
-    {DT_INT8,       CV_8SC1},
-    {DT_UINT16,     CV_16UC1},
-    {DT_INT16,      CV_16SC1},
-    {DT_INT32,      CV_32SC1},
-    {DT_FLOAT32,    CV_32FC1},
-    {DT_RGB24,      CV_8UC3},
-    {DT_RGBA32,     CV_8UC4},
+    {DT_UINT8,      CV_8U},
+    {DT_INT8,       CV_8S},
+    {DT_UINT16,     CV_16U},
+    {DT_INT16,      CV_16S},
+    {DT_INT32,      CV_32S},
+    {DT_FLOAT32,    CV_32F},
+    {DT_RGB24,      CV_8U},
+    {DT_RGBA32,     CV_8U},
     NULL
 };
 
@@ -45,10 +46,16 @@ static GLenum OpenCVToOpenGLLUT[][3] =
 {
     {CV_8UC1,       GL_RED,     GL_UNSIGNED_BYTE},
     {CV_8SC1,       GL_RED,     GL_BYTE},
+    {CV_8UC2,       GL_RG,      GL_UNSIGNED_BYTE},
+    {CV_8SC2,       GL_RG,      GL_BYTE},
     {CV_16UC1,      GL_RED,     GL_UNSIGNED_SHORT},
     {CV_16SC1,      GL_RED,     GL_SHORT},
+    {CV_16UC2,      GL_RG,      GL_UNSIGNED_SHORT},
+    {CV_16SC2,      GL_RG,      GL_SHORT},
     {CV_32SC1,      GL_RED,     GL_INT},
     {CV_32FC1,      GL_RED,     GL_FLOAT},
+    {CV_32SC2,      GL_RG,      GL_INT},
+    {CV_32FC2,      GL_RG,      GL_FLOAT},
     {CV_8UC3,       GL_RGB,     GL_UNSIGNED_BYTE},
     {CV_8UC4,       GL_RGBA,    GL_UNSIGNED_BYTE},
     NULL
@@ -86,6 +93,10 @@ public:
     int getYDim();
     int getZDim();
 
+    void setVoids(NIFTImage *otherImage, float threshold);
+    void setVoids(cv::Mat voidMatrix);
+
+    cv::Mat getMat();
     cv::Mat getRegion(std::vector<cv::Range> region, bool clone = false);
 
     cv::Mat getAxialSlice(int z, bool clone = false);
@@ -96,7 +107,7 @@ public:
 
     static GLenum *niftiToOpenGLDatatype(nifti_image *image);
     static GLenum *openCVToOpenGLDatatype(int datatype);
-    static int niftiToOpenCVDatatype(nifti_image *image);
+    static int niftiToOpenCVDatatype(nifti_image *image, int numChannels = 1);
 };
 
 #endif // NIFTIMAGE_H

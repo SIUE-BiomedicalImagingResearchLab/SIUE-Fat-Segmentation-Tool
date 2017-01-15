@@ -32,6 +32,8 @@ void AxialSliceWidget::setImages(NIFTImage *fat, NIFTImage *water)
     fatImage = fat;
     waterImage = water;
 
+    fatImage->setVoids(waterImage, 0.02f);
+
     location = QVector4D(0, 0, 0, 0);
 
     projectionMatrix.setToIdentity();
@@ -438,7 +440,7 @@ void AxialSliceWidget::updateTexture()
 
             // The normalize function does quite a bit here. It converts the matrix to a 32-bit float and normalizes it
             // between 0.0f to 1.0f based on the min/max value. This does not affect the original 3D matrix in fatImage
-            cv::normalize(primMatrix.clone(), primMatrix, 0.0f, 1.0f, cv::NORM_MINMAX, CV_32FC1);
+            cv::normalize(primMatrix.clone(), primMatrix, 0.0f, 1.0f, cv::NORM_MINMAX, CV_32FC2);
         }
         break;
 
@@ -454,7 +456,7 @@ void AxialSliceWidget::updateTexture()
 
             // The normalize function does quite a bit here. It converts the matrix to a 32-bit float and normalizes it
             // between 0.0f to 1.0f based on the min/max value. This does not affect the original 3D matrix in waterImage
-            cv::normalize(primMatrix.clone(), primMatrix, 0.0f, 1.0f, cv::NORM_MINMAX, CV_32FC1);
+            cv::normalize(primMatrix.clone(), primMatrix, 0.0f, 1.0f, cv::NORM_MINMAX, CV_32FC2);
         }
         break;
 
@@ -471,8 +473,8 @@ void AxialSliceWidget::updateTexture()
 
             // The normalize function does quite a bit here. It converts the matrix to a 32-bit float and normalizes it
             // between 0.0f to 1.0f based on the min/max value. This does not affect the original 3D matrix in fatImage/waterImage
-            cv::normalize(fatTemp.clone(), fatTemp, 0.0f, 1.0f, cv::NORM_MINMAX, CV_32FC1);
-            cv::normalize(waterTemp.clone(), waterTemp, 0.0f, 1.0f, cv::NORM_MINMAX, CV_32FC1);
+            cv::normalize(fatTemp.clone(), fatTemp, 0.0f, 1.0f, cv::NORM_MINMAX, CV_32FC2);
+            cv::normalize(waterTemp.clone(), waterTemp, 0.0f, 1.0f, cv::NORM_MINMAX, CV_32FC2);
 
             primMatrix = fatTemp / (fatTemp + waterTemp);
         }
@@ -491,8 +493,8 @@ void AxialSliceWidget::updateTexture()
 
             // The normalize function does quite a bit here. It converts the matrix to a 32-bit float and normalizes it
             // between 0.0f to 1.0f based on the min/max value. This does not affect the original 3D matrix in fatImage/waterImage
-            cv::normalize(fatTemp.clone(), fatTemp, 0.0f, 1.0f, cv::NORM_MINMAX, CV_32FC1);
-            cv::normalize(waterTemp.clone(), waterTemp, 0.0f, 1.0f, cv::NORM_MINMAX, CV_32FC1);
+            cv::normalize(fatTemp.clone(), fatTemp, 0.0f, 1.0f, cv::NORM_MINMAX, CV_32FC2);
+            cv::normalize(waterTemp.clone(), waterTemp, 0.0f, 1.0f, cv::NORM_MINMAX, CV_32FC2);
 
             primMatrix = waterTemp / (fatTemp + waterTemp);
         }
@@ -510,7 +512,7 @@ void AxialSliceWidget::updateTexture()
 
             // The normalize function does quite a bit here. It converts the matrix to a 32-bit float and normalizes it
             // between 0.0f to 1.0f based on the min/max value. This does not affect the original 3D matrix in fatImage
-            cv::normalize(primMatrix.clone(), primMatrix, 0.0f, 1.0f, cv::NORM_MINMAX, CV_32FC1);
+            cv::normalize(primMatrix.clone(), primMatrix, 0.0f, 1.0f, cv::NORM_MINMAX, CV_32FC2);
 
             // Get the slice for the water image. If the result is empty then there was an error retrieving the slice
             // The secondary matrix is the water image in this case
@@ -523,7 +525,7 @@ void AxialSliceWidget::updateTexture()
 
             // The normalize function does quite a bit here. It converts the matrix to a 32-bit float and normalizes it
             // between 0.0f to 1.0f based on the min/max value. This does not affect the original 3D matrix in waterImage
-            cv::normalize(secdMatrix.clone(), secdMatrix, 0.0f, 1.0f, cv::NORM_MINMAX, CV_32FC1);
+            cv::normalize(secdMatrix.clone(), secdMatrix, 0.0f, 1.0f, cv::NORM_MINMAX, CV_32FC2);
         }
         break;
 
@@ -539,7 +541,7 @@ void AxialSliceWidget::updateTexture()
 
             // The normalize function does quite a bit here. It converts the matrix to a 32-bit float and normalizes it
             // between 0.0f to 1.0f based on the min/max value. This does not affect the original 3D matrix in fatImage
-            cv::normalize(primMatrix.clone(), primMatrix, 0.0f, 1.0f, cv::NORM_MINMAX, CV_32FC1);
+            cv::normalize(primMatrix.clone(), primMatrix, 0.0f, 1.0f, cv::NORM_MINMAX, CV_32FC2);
 
             // Get the slice for the water image. If the result is empty then there was an error retrieving the slice
             // The secondary matrix is the water image in this case
@@ -552,7 +554,7 @@ void AxialSliceWidget::updateTexture()
 
             // The normalize function does quite a bit here. It converts the matrix to a 32-bit float and normalizes it
             // between 0.0f to 1.0f based on the min/max value. This does not affect the original 3D matrix in waterImage
-            cv::normalize(secdMatrix.clone(), secdMatrix, 0.0f, 1.0f, cv::NORM_MINMAX, CV_32FC1);
+            cv::normalize(secdMatrix.clone(), secdMatrix, 0.0f, 1.0f, cv::NORM_MINMAX, CV_32FC2);
         }
         break;
     }
@@ -568,7 +570,7 @@ void AxialSliceWidget::updateTexture()
     // Get the OpenGL datatype of the matrix
     GLenum *dataType = NIFTImage::openCVToOpenGLDatatype(primMatrix.type());
     // Upload the texture data from the matrix to the texture. The internal format is 32 bit floats with one channel for red
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, fatImage->getXDim(), fatImage->getYDim(), 0, dataType[1], dataType[2], primMatrix.data);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RG32F, fatImage->getXDim(), fatImage->getYDim(), 0, dataType[1], dataType[2], primMatrix.data);
 
     // Repeat the process if the second matrix is available
     if (!secdMatrix.empty())
@@ -580,7 +582,7 @@ void AxialSliceWidget::updateTexture()
 
         GLenum *dataType = NIFTImage::openCVToOpenGLDatatype(primMatrix.type());
 
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, fatImage->getXDim(), fatImage->getYDim(), 0, dataType[1], dataType[2], secdMatrix.data);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RG32F, fatImage->getXDim(), fatImage->getYDim(), 0, dataType[1], dataType[2], secdMatrix.data);
     }
 
     // If there was an error, then say something
