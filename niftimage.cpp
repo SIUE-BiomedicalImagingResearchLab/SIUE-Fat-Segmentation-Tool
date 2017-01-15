@@ -77,7 +77,8 @@ bool NIFTImage::setImage(nifti_image *upper, nifti_image *lower, SubjectConfig *
 
     // Create matrix of zDim x yDim x xDim.
     // The default datatype of the matrix is to match the NIFTI file datatype
-    int datatype = niftiToOpenCVDatatype(upper);
+    NumericType *numericType = NumericType::NIFTI(upper->datatype);
+    int datatype = CV_MAKETYPE(numericType->openCVTypeNoChannel, 1);
     data = cv::Mat({zDim, yDim, xDim}, datatype, cv::Scalar(0));
 
     /* Upper */
@@ -168,19 +169,12 @@ bool NIFTImage::checkImage()
         return false;
     }
 
-    // If there is not a valid OpenGL datatype for the upper image, then return false.
+    // If there is not a valid OpenGL/OpenCV datatype for the upper image, then return false.
     // Note: The upper and lower have the same datatypes since the above if statement is true
-    if (niftiToOpenGLDatatype(upper) == NULL)
+    NumericType *type = NumericType::NIFTI(upper->datatype);
+    if (type == NULL || type->openGLFormat == (int)DataType::None || type->openGLType == (int)DataType::None || type->openCVType == (int)DataType::None)
     {
         qDebug() << "Unsupported NIFTI datatype in OpenGL: " << upper->datatype;
-        return false;
-    }
-
-    // If there is not a valid OpenCV datatype for the upper image, then return false.
-    // Note: The upper and lower have the same datatypes since the above if statement is true
-    if (niftiToOpenCVDatatype(upper) == -1)
-    {
-        qDebug() << "Unsupported NIFTI datatype in OpenCV: " << upper->datatype;
         return false;
     }
 
@@ -358,87 +352,19 @@ cv::Mat NIFTImage::getSaggitalSlice(int x, bool clone)
     return ret.reshape(0, 2, dims);
 }
 
-/* getOpenGLDatatype returns the equivalent OpenGL datatype necessary for the data
- * matrix! Note: The NIFTI file datatype is irrelevant because the data matrix is the
- * ultimate source of data. The NIFTI file format is only used initially to import the
- * data and the matrix could be converted to another format.
+/* getType returns a NumericType pointer that stores information about the valid data types
+ * supported across the various libraries included. Some examples include OpenGL and OpenCV
  *
  * Returns:
- *      GLenum * -
- *              GLenum *[0] - OpenCV datatype of the data matrix
- *              GLenum *[1] - OpenGL channels needed such as GL_RED, GL_RGBA, GL_RGB, etc
- *              GLenum *[2] - OpenGL datatype such as GL_UNSIGNED_SHORT, GL_BYTE, etc
- *              Returns NULL pointer if the datatype is not supported in OpenGL
+ *      NumericType * - NULL if data matrix is empty or invalid data type in data matrix is used
+ *                      otherwise, a valid NumericType is returned
  */
-GLenum *NIFTImage::getOpenGLDatatype()
+NumericType *NIFTImage::getType()
 {
     if (data.empty())
         return NULL;
 
-    return openCVToOpenGLDatatype(data.type());
-}
-
-/* niftiToOpenGLDatatype converts a NIFTI datatype into a OpenGL datatype.
- * This is done by simply using a lookup table to map between NIFTI datatypes
- * to OpenGL datatypes.
- *
- * Returns:
- *      GLenum * -
- *              GLenum *[0] - NIFTI datatype
- *              GLenum *[1] - OpenGL channels needed such as GL_RED, GL_RGBA, GL_RGB, etc
- *              GLenum *[2] - OpenGL datatype such as GL_UNSIGNED_SHORT, GL_BYTE, etc
- *              Returns NULL pointer if the datatype is not supported in OpenGL
- */
-GLenum *NIFTImage::niftiToOpenGLDatatype(nifti_image *image)
-{
-    for (int i = 0; niftiToOpenGLLUT[i] != NULL; ++i)
-    {
-        if (niftiToOpenGLLUT[i][0] == image->datatype)
-            return niftiToOpenGLLUT[i];
-    }
-
-    return NULL;
-}
-
-/* openCVToOpenGLDatatype converts an OpenCV datatype into a OpenGL datatype.
- * This is done by simply using a lookup table to map between OpenCV datatypes
- * to OpenGL datatypes.
- *
- * Returns:
- *      GLenum * -
- *              GLenum *[0] - OpenCV datatype
- *              GLenum *[1] - OpenGL channels needed such as GL_RED, GL_RGBA, GL_RGB, etc
- *              GLenum *[2] - OpenGL datatype such as GL_UNSIGNED_SHORT, GL_BYTE, etc
- *              Returns NULL pointer if the datatype is not supported in OpenGL
- */
-GLenum *NIFTImage::openCVToOpenGLDatatype(int datatype)
-{
-    for (int i = 0; OpenCVToOpenGLLUT[i] != NULL; ++i)
-    {
-        if (OpenCVToOpenGLLUT[i][0] == datatype)
-            return OpenCVToOpenGLLUT[i];
-    }
-
-    return NULL;
-}
-
-/* niftiToOpenCVDatatype converts a NIFTI datatype into a OpenCV datatype.
- * This is done by simply using a lookup table to map between NIFTI datatypes
- * to OpenCV datatypes.
- *
- * Returns:
- *      int - OpenCV datatype with necessary channels such as CV_16UC1, CV_16SC1, etc
- *            Returns -1 if the datatype is not supported in OpenCV
- */
-int NIFTImage::niftiToOpenCVDatatype(nifti_image *image)
-{
-    for (int i = 0; niftiToOpenCVLUT[i] != NULL; ++i)
-    {
-        if (niftiToOpenCVLUT[i][0] == image->datatype)
-            return niftiToOpenCVLUT[i][1];
-    }
-
-    return -1;
+    return NumericType::OpenCV(data.type());
 }
 
 NIFTImage::~NIFTImage()

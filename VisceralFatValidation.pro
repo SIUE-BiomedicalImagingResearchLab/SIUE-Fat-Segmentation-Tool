@@ -25,7 +25,8 @@ SOURCES += main.cpp\
     commands.cpp \
     opencv.cpp \
     subjectconfig.cpp \
-    coronalslicewidget.cpp
+    coronalslicewidget.cpp \
+    numerictype.cpp
 
 HEADERS  += mainwindow.h \
     application.h \
@@ -38,7 +39,8 @@ HEADERS  += mainwindow.h \
     util.h \
     subjectconfig.h \
     coronalslicewidget.h \
-    displayinfo.h
+    displayinfo.h \
+    numerictype.h
 
 FORMS    += mainwindow.ui
 

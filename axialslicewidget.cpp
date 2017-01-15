@@ -566,9 +566,9 @@ void AxialSliceWidget::updateTexture()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     // Get the OpenGL datatype of the matrix
-    GLenum *dataType = NIFTImage::openCVToOpenGLDatatype(primMatrix.type());
+    NumericType *dataType = NumericType::OpenCV(primMatrix.type());
     // Upload the texture data from the matrix to the texture. The internal format is 32 bit floats with one channel for red
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, fatImage->getXDim(), fatImage->getYDim(), 0, dataType[1], dataType[2], primMatrix.data);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, fatImage->getXDim(), fatImage->getYDim(), 0, dataType->openGLFormat, dataType->openGLType, primMatrix.data);
 
     // Repeat the process if the second matrix is available
     if (!secdMatrix.empty())
@@ -578,9 +578,9 @@ void AxialSliceWidget::updateTexture()
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-        GLenum *dataType = NIFTImage::openCVToOpenGLDatatype(primMatrix.type());
+        NumericType *dataType = NumericType::OpenCV(primMatrix.type());
 
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, fatImage->getXDim(), fatImage->getYDim(), 0, dataType[1], dataType[2], secdMatrix.data);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, fatImage->getXDim(), fatImage->getYDim(), 0, dataType->openGLFormat, dataType->openGLType, secdMatrix.data);
     }
 
     // If there was an error, then say something

@@ -221,9 +221,9 @@ void CoronalSliceWidget::updateTexture()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     // Get the OpenGL datatype of the matrix
-    GLenum *dataType = NIFTImage::openCVToOpenGLDatatype(matrix.type());
+    NumericType *dataType = NumericType::OpenCV(matrix.type());
     // Upload the texture data from the matrix to the texture. The internal format is 32 bit floats with one channel for red
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, fatImage->getXDim(), fatImage->getZDim(), 0, dataType[1], dataType[2], matrix.data);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, fatImage->getXDim(), fatImage->getZDim(), 0, dataType->openGLFormat, dataType->openGLType, matrix.data);
 
     // If there was an error, then say something
     GLenum err;

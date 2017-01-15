@@ -8,6 +8,7 @@
 #include "opencv.h"
 #include "util.h"
 #include "subjectconfig.h"
+#include "numerictype.h"
 
 #include <QOpenGLFunctions_3_3_Core>
 
@@ -92,11 +93,7 @@ public:
     cv::Mat getCoronalSlice(int y, bool clone = false);
     cv::Mat getSaggitalSlice(int x, bool clone = false);
 
-    GLenum *getOpenGLDatatype();
-
-    static GLenum *niftiToOpenGLDatatype(nifti_image *image);
-    static GLenum *openCVToOpenGLDatatype(int datatype);
-    static int niftiToOpenCVDatatype(nifti_image *image);
+    NumericType *getType();
 };
 
 #endif // NIFTIMAGE_H
