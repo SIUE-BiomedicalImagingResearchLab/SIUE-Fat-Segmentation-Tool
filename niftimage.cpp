@@ -81,7 +81,8 @@ bool NIFTImage::setImage(nifti_image *upper, nifti_image *lower, SubjectConfig *
     int datatypeData = niftiToOpenCVDatatype(upper, 2);
     int datatype = niftiToOpenCVDatatype(upper);
     qDebug() << "Datatype: " << datatype << " (" << CV_8UC1 << ", " << CV_16UC1 << ", " << CV_16SC1;
-    data = cv::Mat({zDim, yDim, xDim}, datatypeData, cv::Scalar(0, 65000));
+    //data = cv::Mat({zDim, yDim, xDim}, datatypeData, cv::Scalar(0, std::numeric_limits<int>::max()));
+    data = cv::Mat({zDim, yDim, xDim}, datatypeData, cv::Scalar(0, 1));
 
     /* Upper */
     cv::Mat upperROI = data({cv::Range(lowerLength, zDim), cv::Range::all(), cv::Range::all()});
@@ -104,12 +105,13 @@ bool NIFTImage::setImage(nifti_image *upper, nifti_image *lower, SubjectConfig *
 
     // Do mixChannels instead I think
     cv::mixChannels(std::vector<cv::Mat>({lowerMatROI}), std::vector<cv::Mat>({lowerROI}), {0,0});
-    for (int z = 0; z < 20; ++z)
+    for (int z = 100; z < 120; ++z)
     {
-        for (int y = 0; y < 20; ++y)
+        for (int y = 120; y < 140; ++y)
         {
-            for (int x = 0; x < 20; ++x)
+            for (int x = 150; x < 170; ++x)
             {
+                qDebug() << "Value: " << data.at<cv::Vec2s>(cv::Vec3i(z, y, x))[0] << ", " << data.at<cv::Vec2s>(cv::Vec3i(z, y, x))[1];
                 //float lol = voids.at<float>(cv::Vec3i(z, y, x));
                 //qDebug() << "Value: " << lol;
             }
@@ -286,19 +288,27 @@ int NIFTImage::getZDim()
 
 void NIFTImage::setVoids(NIFTImage *otherImage, float threshold)
 {
-    if (!otherImage)
+    if (!otherImage || data.empty())
         return;
 
     cv::Mat diff;
     cv::absdiff(data, otherImage->getMat(), diff);
-    cv::Mat voids = (diff < threshold); // > ?
+    qDebug() << "Type222: " << diff.depth();
+    cv::Mat voids = (diff > threshold); // > ?
+    cv::Mat convertedVoids;
+    voids.convertTo(convertedVoids, data.type());
 
-    this->setVoids(voids);
-    otherImage->setVoids(voids);
+    this->setVoids(convertedVoids);
+    otherImage->setVoids(convertedVoids);
 }
 
 void NIFTImage::setVoids(cv::Mat voidMatrix)
 {
+    if (data.empty())
+        return;
+
+    qDebug() << "LOL: " << voidMatrix.depth() << ", " << data.depth();
+    cv::mixChannels(std::vector<cv::Mat>({voidMatrix}), std::vector<cv::Mat>({data}), {0, 1});
     // Do stuff here
 }
 

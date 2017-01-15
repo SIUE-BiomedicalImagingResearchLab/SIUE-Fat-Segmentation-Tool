@@ -32,7 +32,7 @@ void AxialSliceWidget::setImages(NIFTImage *fat, NIFTImage *water)
     fatImage = fat;
     waterImage = water;
 
-    fatImage->setVoids(waterImage, 0.02f);
+    fatImage->setVoids(waterImage, 10.f);
 
     location = QVector4D(0, 0, 0, 0);
 
