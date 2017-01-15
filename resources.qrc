@@ -17,5 +17,10 @@
         <file>colormaps/MATLAB_gray.png</file>
         <file>shaders/coronalslice.frag</file>
         <file>shaders/coronalslice.vert</file>
+        <file>colormaps/blue.png</file>
+        <file>colormaps/green.png</file>
+        <file>colormaps/greenWhite.png</file>
+        <file>colormaps/red.png</file>
+        <file>colormaps/redWhite.png</file>
     </qresource>
 </RCC>

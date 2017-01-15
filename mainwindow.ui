@@ -354,6 +354,31 @@
                    <string>Winter</string>
                   </property>
                  </item>
+                 <item>
+                  <property name="text">
+                   <string>Red</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Green</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Blue</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>RedWhite</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>GreenWhite</string>
+                  </property>
+                 </item>
                 </widget>
                </item>
               </layout>
@@ -485,6 +510,31 @@
                  <item>
                   <property name="text">
                    <string>Winter</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Red</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Green</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Blue</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>RedWhite</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>GreenWhite</string>
                   </property>
                  </item>
                 </widget>

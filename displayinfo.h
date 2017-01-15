@@ -26,6 +26,11 @@ enum ColorMap
     Spring,
     Summer,
     Winter,
+    Red,
+    Green,
+    Blue,
+    RedWhite,
+    GreenWhite,
     Count
 };
 
@@ -43,7 +48,12 @@ static QString colorMapImageName[ColorMap::Count] =
     ":/colormaps/MATLAB_pink.png",
     ":/colormaps/MATLAB_spring.png",
     ":/colormaps/MATLAB_summer.png",
-    ":/colormaps/MATLAB_winter.png"
+    ":/colormaps/MATLAB_winter.png",
+    ":/colormaps/red.png",
+    ":/colormaps/green.png",
+    ":/colormaps/blue.png",
+    ":/colormaps/redWhite.png",
+    ":/colormaps/greenWhite.png"
 };
 
 enum Location : int
