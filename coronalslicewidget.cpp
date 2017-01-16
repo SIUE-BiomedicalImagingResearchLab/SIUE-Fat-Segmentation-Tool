@@ -100,6 +100,20 @@ QVector3D &CoronalSliceWidget::rtranslation()
     return translation;
 }
 
+QMatrix4x4 CoronalSliceWidget::getMVP()
+{
+    // Calculate the ModelViewProjection (MVP) matrix to transform the location of the axial slices
+    QMatrix4x4 modelMatrix;
+
+    // Translate the modelMatrix according to translation vector
+    // Then scale according to scaling factor
+    modelMatrix.translate(translation);
+    modelMatrix.scale(scaling);
+
+    // Create the MVP matrix by M * V * P
+    return (modelMatrix * viewMatrix * projectionMatrix);
+}
+
 void CoronalSliceWidget::setUndoStack(QUndoStack *stack)
 {
     undoStack = stack;
@@ -236,16 +250,7 @@ void CoronalSliceWidget::updateTexture()
 void CoronalSliceWidget::updateCrosshairLine()
 {
     // Calculate the ModelViewProjection (MVP) matrix to transform the location of the axial slices
-    QMatrix4x4 mvpMatrix;
-    QMatrix4x4 modelMatrix;
-
-    // Translate the modelMatrix according to translation vector
-    // Then scale according to scaling factor
-    modelMatrix.translate(translation);
-    modelMatrix.scale(scaling);
-
-    // Create the MVP matrix by M * V * P
-    mvpMatrix = modelMatrix * viewMatrix * projectionMatrix;
+    QMatrix4x4 mvpMatrix = getMVP();
 
     // Start with calculating the thickness of each axial layer according to the translation/scaling factors
     // Need to get this in terms of window coordinates b/c that is the system QPainter uses
@@ -326,16 +331,7 @@ void CoronalSliceWidget::paintGL()
     glClear(GL_COLOR_BUFFER_BIT);
 
     // Calculate the ModelViewProjection (MVP) matrix to transform the location of the axial slices
-    QMatrix4x4 mvpMatrix;
-    QMatrix4x4 modelMatrix;
-
-    // Translate the modelMatrix according to translation vector
-    // Then scale according to scaling factor
-    modelMatrix.translate(translation);
-    modelMatrix.scale(scaling);
-
-    // Create the MVP matrix by M * V * P
-    mvpMatrix = modelMatrix * viewMatrix * projectionMatrix;
+    QMatrix4x4 mvpMatrix = getMVP();
 
     program->bind();
     program->setUniformValue("MVP", mvpMatrix);

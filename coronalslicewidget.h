@@ -87,6 +87,8 @@ public:
     float &rscaling();
     QVector3D &rtranslation();
 
+    QMatrix4x4 getMVP();
+
     void setUndoStack(QUndoStack *stack);
 
     void updateTexture();

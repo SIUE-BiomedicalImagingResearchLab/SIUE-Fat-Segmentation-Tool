@@ -232,6 +232,20 @@ QVector3D &AxialSliceWidget::rtranslation()
     return translation;
 }
 
+QMatrix4x4 AxialSliceWidget::getMVP()
+{
+    // Calculate the ModelViewProjection (MVP) matrix to transform the location of the axial slices
+    QMatrix4x4 modelMatrix;
+
+    modelMatrix.setToIdentity();
+    // Translate the modelMatrix according to translation vector
+    // Then scale according to scaling factor
+    modelMatrix.translate(translation);
+    modelMatrix.scale(scaling);
+
+    return (modelMatrix * viewMatrix * projectionMatrix);
+}
+
 void AxialSliceWidget::setUndoStack(QUndoStack *stack)
 {
     undoStack = stack;
@@ -599,16 +613,7 @@ void AxialSliceWidget::updateTexture()
 void AxialSliceWidget::updateCrosshairLine()
 {
     // Calculate the ModelViewProjection (MVP) matrix to transform the location of the axial slices
-    QMatrix4x4 mvpMatrix;
-    QMatrix4x4 modelMatrix;
-
-    // Translate the modelMatrix according to translation vector
-    // Then scale according to scaling factor
-    modelMatrix.translate(translation);
-    modelMatrix.scale(scaling);
-
-    // Create the MVP matrix by M * V * P
-    mvpMatrix = modelMatrix * viewMatrix * projectionMatrix;
+    QMatrix4x4 mvpMatrix = getMVP();
 
     // Start with calculating the thickness of each axial layer according to the translation/scaling factors
     // Need to get this in terms of window coordinates b/c that is the system QPainter uses
@@ -698,16 +703,7 @@ void AxialSliceWidget::paintGL()
     glClear(GL_COLOR_BUFFER_BIT);
 
     // Calculate the ModelViewProjection (MVP) matrix to transform the location of the axial slices
-    QMatrix4x4 mvpMatrix;
-    QMatrix4x4 modelMatrix;
-
-    // Translate the modelMatrix according to translation vector
-    // Then scale according to scaling factor
-    modelMatrix.translate(translation);
-    modelMatrix.scale(scaling);
-
-    // Create the MVP matrix by M * V * P
-    mvpMatrix = modelMatrix * viewMatrix * projectionMatrix;
+    QMatrix4x4 mvpMatrix = getMVP();
 
     program->bind();
     program->setUniformValue("brightness", brightness);
@@ -764,7 +760,20 @@ void AxialSliceWidget::paintGL()
 
     //test.add
 
-    painter.setPen(QPen(Qt::yellow, 5, Qt::SolidLine, Qt::RoundCap));
+    painter.setPen(QPen(Qt::yellow, 1, Qt::SolidLine, Qt::RoundCap));
+
+    QMatrix4x4 NIFTIToOpenGLCoordMatrix;
+
+    NIFTIToOpenGLCoordMatrix.translate(-1.0f, 1.0f);
+    NIFTIToOpenGLCoordMatrix.scale(2.0f / (fatImage->getXDim() - 1), -2.0f / (fatImage->getYDim() - 1));
+
+    QMatrix4x4 openGLToWindowCoordMatrix;
+
+    openGLToWindowCoordMatrix.scale(width() / 2.0f, -height() / 2.0f);
+    openGLToWindowCoordMatrix.translate(1.0f, -1.0f);
+
+    QMatrix4x4 NIFTIToWindowCoordMatrix = openGLToWindowCoordMatrix * getMVP() * NIFTIToOpenGLCoordMatrix;
+    painter.setTransform(NIFTIToWindowCoordMatrix.toTransform());
 
     auto axialPoints = points[location.z()];
     for (int i = 0; i < (int)TracingLayer::Count; ++i)
@@ -780,9 +789,26 @@ void AxialSliceWidget::mouseMoveEvent(QMouseEvent *eventMove)
 {
     if (startDraw)
     {
-        QPointF filtered = eventMove->pos();
-        auto &layerPoints = points[location.z()][0]; // TODO: Current layer
-        layerPoints.push_back(filtered);
+        QPointF mouseCoord = eventMove->pos();
+
+        QMatrix4x4 windowToOpenGLCoordMatrix;
+
+        windowToOpenGLCoordMatrix.translate(-1.0f, 1.0f);
+        windowToOpenGLCoordMatrix.scale(2.0f / width(), -2.0f / height());
+
+        QMatrix4x4 openGLToNIFTICoordMatrix;
+
+        openGLToNIFTICoordMatrix.scale((fatImage->getXDim() - 1) / 2.0f, (fatImage->getYDim() - 1) / -2.0f);
+        openGLToNIFTICoordMatrix.translate(1.0f, -1.0f);
+
+        QMatrix4x4 windowToNIFTICoordMatrix = openGLToNIFTICoordMatrix * getMVP().inverted() * windowToOpenGLCoordMatrix;
+
+        QPoint NIFTICoord = (windowToNIFTICoordMatrix * mouseCoord).toPoint();
+        if (QRect(0, 0, fatImage->getXDim() - 1, fatImage->getYDim() - 1).contains(NIFTICoord))
+        {
+            auto &layerPoints = points[location.z()][0]; // TODO: Current layer
+            layerPoints.push_back(NIFTICoord);
+        }
         //points.push_back(filtered);
         /*if (points.size() > 8)
         {
