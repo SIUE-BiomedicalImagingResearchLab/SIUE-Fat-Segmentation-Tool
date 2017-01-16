@@ -35,7 +35,8 @@ private:
     NIFTImage *fatImage;
     NIFTImage *waterImage;
 
-    QVector<QPointF> points;
+    std::vector<std::vector<std::vector<QPointF>>> points;
+    //QVector<QPointF> points;
     QPainterPath path;
     bool mouseMoved;
 

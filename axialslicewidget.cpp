@@ -34,6 +34,11 @@ void AxialSliceWidget::setImages(NIFTImage *fat, NIFTImage *water)
 
     location = QVector4D(0, 0, 0, 0);
 
+    // Resize points vector to accomodate layers and axial slices
+    this->points.resize(fatImage->getZDim());
+    for (auto &layers : points)
+        layers.resize((int)TracingLayer::Count);
+
     projectionMatrix.setToIdentity();
     viewMatrix.setToIdentity();
     scaling = 1.0f;
@@ -759,26 +764,15 @@ void AxialSliceWidget::paintGL()
 
     //test.add
 
-    painter.setPen(QPen(Qt::yellow, 1, Qt::SolidLine, Qt::RoundCap));
-    //painter.drawPoints(points);
-    painter.drawLines(points);
-    //painter.drawPoints(points.data(), points.size()); // Not continuous like I thought
-    //painter.drawLines(points);
-    //painter.drawLine(0, 0, this->width(), this->height());
+    painter.setPen(QPen(Qt::yellow, 5, Qt::SolidLine, Qt::RoundCap));
 
-    if (points.size() > 3)
+    auto axialPoints = points[location.z()];
+    for (int i = 0; i < (int)TracingLayer::Count; ++i)
     {
-        //QPainterPath test;
-        //test.moveTo(points[0]);
-
-        for (int i = 1; i < points.size() - 2; i += 2)
-        {
-            //test.cubicTo(points[i], points[i+1], points[i+2]);
-            //test.quadTo(points[i], points[i+1]);
-            //test.quadTo(points[i], points[i+1]);
-        }
-
-        //painter.drawPath(test);
+        // If visible TODO:
+        auto layer = axialPoints[i];
+        if (layer.size() > 0)
+            painter.drawPoints(layer.data(), (int)layer.size()); // Not sure if this will do what I want but ookay. May need drawLines?
     }
 }
 
@@ -787,9 +781,10 @@ void AxialSliceWidget::mouseMoveEvent(QMouseEvent *eventMove)
     if (startDraw)
     {
         QPointF filtered = eventMove->pos();
-        points.push_back(filtered);
-        points.push_back(filtered);
-        if (points.size() > 8)
+        auto &layerPoints = points[location.z()][0]; // TODO: Current layer
+        layerPoints.push_back(filtered);
+        //points.push_back(filtered);
+        /*if (points.size() > 8)
         {
             for (int i = 2; i < 8; i += 2)
             {
@@ -802,13 +797,12 @@ void AxialSliceWidget::mouseMoveEvent(QMouseEvent *eventMove)
                 points[j+1] = pEnd;
             }
             //filtered = (filtered + points[points.size() - 1]  + points[points.size() - 2] + points[points.size() - 3]) / 4;
-        }
+        }*/
         //points.push_back(filtered);
         //points.push_back(filtered);
         //path.quadTo();
         update();
         mouseMoved = true;
-        // Do drawing stuff
     }
     else if (startPan)
     {
@@ -839,9 +833,9 @@ void AxialSliceWidget::mousePressEvent(QMouseEvent *eventPress)
         if (startPan)
             startPan = false;
 
-        // Start drawing stuff here
         startDraw = true;
-        points.push_back(eventPress->pos());
+        //points[location.z()][0].push_back(eventPress->pos()); // Current layer
+        //points.push_back(eventPress->pos());
         mouseMoved = false;
         //path.moveTo(eventPress->pos());
     }
@@ -876,9 +870,10 @@ void AxialSliceWidget::mouseReleaseEvent(QMouseEvent *eventRelease)
         }
         else
         {*/
-            points.removeLast();
+            //points.removeLast();
         //}
         // Stop drawing here
+        //points[location.z()][0].push_back(eventRelease->pos()); // Current layer
         startDraw = false;
     }
     else if (eventRelease->button() == Qt::MiddleButton && startPan)
