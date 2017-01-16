@@ -232,7 +232,7 @@ QVector3D &AxialSliceWidget::rtranslation()
     return translation;
 }
 
-QMatrix4x4 AxialSliceWidget::getMVP()
+QMatrix4x4 AxialSliceWidget::getMVPMatrix()
 {
     // Calculate the ModelViewProjection (MVP) matrix to transform the location of the axial slices
     QMatrix4x4 modelMatrix;
@@ -245,6 +245,38 @@ QMatrix4x4 AxialSliceWidget::getMVP()
 
     return (modelMatrix * viewMatrix * projectionMatrix);
 }
+
+QMatrix4x4 AxialSliceWidget::getWindowToNIFTIMatrix(bool includeMVP)
+{
+    return (getNIFTIToOpenGLMatrix(false).inverted() * getWindowToOpenGLMatrix(includeMVP));
+}
+
+QMatrix4x4 AxialSliceWidget::getWindowToOpenGLMatrix(bool includeMVP)
+{
+    QMatrix4x4 windowToOpenGLMatrix;
+
+    windowToOpenGLMatrix.translate(-1.0f, 1.0f);
+    windowToOpenGLMatrix.scale(2.0f / width(), -2.0f / height());
+
+    if (includeMVP)
+        return (getMVPMatrix().inverted() * windowToOpenGLMatrix);
+    else
+        return windowToOpenGLMatrix;
+}
+
+QMatrix4x4 AxialSliceWidget::getNIFTIToOpenGLMatrix(bool includeMVP)
+{
+    QMatrix4x4 NIFTIToOpenGLMatrix;
+
+    NIFTIToOpenGLMatrix.translate(-1.0f, 1.0f);
+    NIFTIToOpenGLMatrix.scale(2.0f / (fatImage->getXDim() - 1), -2.0f / (fatImage->getYDim() - 1));
+
+    if (includeMVP)
+        return (getMVPMatrix() * NIFTIToOpenGLMatrix);
+    else
+        return NIFTIToOpenGLMatrix;
+}
+
 
 void AxialSliceWidget::setUndoStack(QUndoStack *stack)
 {
@@ -613,7 +645,7 @@ void AxialSliceWidget::updateTexture()
 void AxialSliceWidget::updateCrosshairLine()
 {
     // Calculate the ModelViewProjection (MVP) matrix to transform the location of the axial slices
-    QMatrix4x4 mvpMatrix = getMVP();
+    QMatrix4x4 mvpMatrix = getMVPMatrix();
 
     // Start with calculating the thickness of each axial layer according to the translation/scaling factors
     // Need to get this in terms of window coordinates b/c that is the system QPainter uses
@@ -703,7 +735,7 @@ void AxialSliceWidget::paintGL()
     glClear(GL_COLOR_BUFFER_BIT);
 
     // Calculate the ModelViewProjection (MVP) matrix to transform the location of the axial slices
-    QMatrix4x4 mvpMatrix = getMVP();
+    QMatrix4x4 mvpMatrix = getMVPMatrix();
 
     program->bind();
     program->setUniformValue("brightness", brightness);
@@ -761,19 +793,7 @@ void AxialSliceWidget::paintGL()
     //test.add
 
     painter.setPen(QPen(Qt::yellow, 1, Qt::SolidLine, Qt::RoundCap));
-
-    QMatrix4x4 NIFTIToOpenGLCoordMatrix;
-
-    NIFTIToOpenGLCoordMatrix.translate(-1.0f, 1.0f);
-    NIFTIToOpenGLCoordMatrix.scale(2.0f / (fatImage->getXDim() - 1), -2.0f / (fatImage->getYDim() - 1));
-
-    QMatrix4x4 openGLToWindowCoordMatrix;
-
-    openGLToWindowCoordMatrix.scale(width() / 2.0f, -height() / 2.0f);
-    openGLToWindowCoordMatrix.translate(1.0f, -1.0f);
-
-    QMatrix4x4 NIFTIToWindowCoordMatrix = openGLToWindowCoordMatrix * getMVP() * NIFTIToOpenGLCoordMatrix;
-    painter.setTransform(NIFTIToWindowCoordMatrix.toTransform());
+    painter.setTransform(getWindowToNIFTIMatrix().inverted().toTransform());
 
     auto axialPoints = points[location.z()];
     for (int i = 0; i < (int)TracingLayer::Count; ++i)
@@ -790,25 +810,14 @@ void AxialSliceWidget::mouseMoveEvent(QMouseEvent *eventMove)
     if (startDraw)
     {
         QPointF mouseCoord = eventMove->pos();
+        QPoint NIFTICoord = (getWindowToNIFTIMatrix() * mouseCoord).toPoint();
 
-        QMatrix4x4 windowToOpenGLCoordMatrix;
-
-        windowToOpenGLCoordMatrix.translate(-1.0f, 1.0f);
-        windowToOpenGLCoordMatrix.scale(2.0f / width(), -2.0f / height());
-
-        QMatrix4x4 openGLToNIFTICoordMatrix;
-
-        openGLToNIFTICoordMatrix.scale((fatImage->getXDim() - 1) / 2.0f, (fatImage->getYDim() - 1) / -2.0f);
-        openGLToNIFTICoordMatrix.translate(1.0f, -1.0f);
-
-        QMatrix4x4 windowToNIFTICoordMatrix = openGLToNIFTICoordMatrix * getMVP().inverted() * windowToOpenGLCoordMatrix;
-
-        QPoint NIFTICoord = (windowToNIFTICoordMatrix * mouseCoord).toPoint();
         if (QRect(0, 0, fatImage->getXDim() - 1, fatImage->getYDim() - 1).contains(NIFTICoord))
         {
             auto &layerPoints = points[location.z()][0]; // TODO: Current layer
             layerPoints.push_back(NIFTICoord);
         }
+
         //points.push_back(filtered);
         /*if (points.size() > 8)
         {

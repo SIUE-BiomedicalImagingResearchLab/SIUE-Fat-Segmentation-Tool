@@ -118,7 +118,11 @@ public:
     float &rscaling();
     QVector3D &rtranslation();
 
-    QMatrix4x4 getMVP();
+    QMatrix4x4 getMVPMatrix();
+
+    QMatrix4x4 getWindowToNIFTIMatrix(bool includeMVP = true);
+    QMatrix4x4 getWindowToOpenGLMatrix(bool includeMVP = true);
+    QMatrix4x4 getNIFTIToOpenGLMatrix(bool includeMVP = true);
 
     void setUndoStack(QUndoStack *stack);
 
