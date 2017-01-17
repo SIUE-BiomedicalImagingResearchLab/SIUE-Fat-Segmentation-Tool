@@ -61,4 +61,15 @@ enum Location : int
     NoChange = -1
 };
 
+enum class TracingLayer : int
+{
+    EAT = 0,
+    IMAT,
+    PAAT,
+    PAT,
+    SCAT,
+    VAT,
+    Count
+};
+
 #endif // DISPLAYINFO_H
