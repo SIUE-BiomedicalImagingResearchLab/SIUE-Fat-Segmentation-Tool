@@ -38,11 +38,6 @@ void AxialSliceWidget::setImages(NIFTImage *fat, NIFTImage *water)
     this->points.resize(fatImage->getZDim());
     for (auto &layers : points)
         layers.resize((int)TracingLayer::Count);
-
-    projectionMatrix.setToIdentity();
-    viewMatrix.setToIdentity();
-    scaling = 1.0f;
-    translation = QVector3D(0.0f, 0.0f, 0.0f);
 }
 
 bool AxialSliceWidget::isLoaded()
@@ -237,39 +232,38 @@ QMatrix4x4 AxialSliceWidget::getMVPMatrix()
     // Calculate the ModelViewProjection (MVP) matrix to transform the location of the axial slices
     QMatrix4x4 modelMatrix;
 
-    modelMatrix.setToIdentity();
     // Translate the modelMatrix according to translation vector
     // Then scale according to scaling factor
     modelMatrix.translate(translation);
     modelMatrix.scale(scaling);
 
-    return (modelMatrix * viewMatrix * projectionMatrix);
+    return (projectionMatrix * viewMatrix * modelMatrix);
 }
 
 QMatrix4x4 AxialSliceWidget::getWindowToNIFTIMatrix(bool includeMVP)
 {
-    return (getNIFTIToOpenGLMatrix(false).inverted() * getWindowToOpenGLMatrix(includeMVP));
+    return (getNIFTIToOpenGLMatrix(includeMVP, !includeMVP).inverted() * getWindowToOpenGLMatrix(false, true));
 }
 
-QMatrix4x4 AxialSliceWidget::getWindowToOpenGLMatrix(bool includeMVP)
+QMatrix4x4 AxialSliceWidget::getWindowToOpenGLMatrix(bool includeMVP, bool flipY)
 {
     QMatrix4x4 windowToOpenGLMatrix;
 
-    windowToOpenGLMatrix.translate(-1.0f, 1.0f);
-    windowToOpenGLMatrix.scale(2.0f / width(), -2.0f / height());
+    windowToOpenGLMatrix.translate(-1.0f, (flipY ? 1.0f : -1.0f));
+    windowToOpenGLMatrix.scale(2.0f / width(), (flipY ? -2.0f : 2.0f) / height());
 
     if (includeMVP)
-        return (getMVPMatrix().inverted() * windowToOpenGLMatrix);
+        return (getMVPMatrix() * windowToOpenGLMatrix);
     else
         return windowToOpenGLMatrix;
 }
 
-QMatrix4x4 AxialSliceWidget::getNIFTIToOpenGLMatrix(bool includeMVP)
+QMatrix4x4 AxialSliceWidget::getNIFTIToOpenGLMatrix(bool includeMVP, bool flipY)
 {
     QMatrix4x4 NIFTIToOpenGLMatrix;
 
-    NIFTIToOpenGLMatrix.translate(-1.0f, 1.0f);
-    NIFTIToOpenGLMatrix.scale(2.0f / (fatImage->getXDim() - 1), -2.0f / (fatImage->getYDim() - 1));
+    NIFTIToOpenGLMatrix.translate(-1.0f, flipY ? 1.0f : -1.0f);
+    NIFTIToOpenGLMatrix.scale(2.0f / fatImage->getXDim(), (flipY ? -2.0f : 2.0f) / fatImage->getYDim());
 
     if (includeMVP)
         return (getMVPMatrix() * NIFTIToOpenGLMatrix);
@@ -301,6 +295,7 @@ void AxialSliceWidget::initializeGL()
 
     // Setup matrices and view options
     projectionMatrix.setToIdentity();
+    projectionMatrix.scale(1.0f, -1.0f, 1.0f);
     viewMatrix.setToIdentity();
     scaling = 1.0f;
     translation = QVector3D(0.0f, 0.0f, 0.0f);
@@ -644,55 +639,37 @@ void AxialSliceWidget::updateTexture()
 
 void AxialSliceWidget::updateCrosshairLine()
 {
-    // Calculate the ModelViewProjection (MVP) matrix to transform the location of the axial slices
-    QMatrix4x4 mvpMatrix = getMVPMatrix();
-
     // Start with calculating the thickness of each axial layer according to the translation/scaling factors
     // Need to get this in terms of window coordinates b/c that is the system QPainter uses
 
+    // The NIFTI to Window matrix will be used to simply convert from NIFTI coordinates to window coordinates
+    QMatrix4x4 NIFTIToWindowMatrix = getWindowToNIFTIMatrix().inverted();
+
     // Create a start point at top of screen (coronalSlice 0)
-    // Set the end point to be one slice down (coronalSlice 1)
-    // It needs to be in terms of OpenGL coordinate system [-1.0f, 1.0f]
-    QVector4D start(-1.0f, -1.0f, 0.0f, 1.0f);
-    QVector4D end(-1.0f, ((1.0f / (fatImage->getYDim() - 1)) * 2.0f - 1.0f), 0.0f, 1.0f);
+    // Set the end point to be one slice down (coronalsSlice 1)
+    QVector4D start(0.0f, 0.0f, 0.0f, 1.0f);
+    QVector4D end(0.0f, 1.0f, 0.0f, 1.0f);
 
-    // Transform the points based on the model-view-projection matrix
-    start = mvpMatrix * start;
-    end = mvpMatrix * end;
+    // Transform the start and end points from OpenGL to Window matrix (this takes into account the MVP matrix)
+    start = NIFTIToWindowMatrix * start;
+    end = NIFTIToWindowMatrix * end;
 
-    // Get the difference between the start and end point
+    // Get the difference between the start and end point. The length is the necessary line width to accurately show how
+    // large one coronal slice is
     QVector4D delta = end - start;
-
-    // Transform the points from OpenGL coord. system to window coord. system
-    // The reason this is done first is because the MVP may allow rotation which
-    // means there is an X/Y component of delta. Therefore, since the width/height
-    // of the Window is supposedly different, this must be scaled first
-    delta.setX((delta.x()) * width() / 2.0f);
-    delta.setY((-delta.y()) * height() / 2.0f);
 
     // Set lineWidth to be an integer value of the delta length. However, the
     // lineWidth must be at least 1 so that the pen will be shown
     lineWidth = std::max((int)std::floor(delta.length()), 1);
 
-    // Now the start and end points of the line will be calculated
-    // Calculate y location of current axial slice in OpenGL coord. system
-    float y = (location.y() / (fatImage->getYDim() - 1)) * 2.0f - 1.0f;
-
     // Start line is left of screen at specified y value and end value is right of screen at specified y value
-    start = QVector4D(-1.0f, y, 0.0f, 1.0f);
-    end = QVector4D(1.0f, y, 0.0f, 1.0f);
+    // Note: These are in NIFTI coordinate system (0 -> XDim - 1, 0 -> YDim - 1)
+    start = QVector4D(0, location.y(), 0.0f, 1.0f);
+    end = QVector4D(fatImage->getXDim() - 1, location.y(), 0.0f, 1.0f);
 
-    // Transform the points based on the model-view-projection matrix
-    start = mvpMatrix * start;
-    end = mvpMatrix * end;
-
-    // Transform start to Window coord. system
-    start.setX((start.x() + 1.0f) * width() / 2.0f);
-    start.setY((-start.y() + 1.0f) * height() / 2.0f);
-
-    // Transform end to Window coord. system
-    end.setX((end.x() + 1.0f) * width() / 2.0f);
-    end.setY((-end.y() + 1.0f) * height() / 2.0f);
+    // Transform the points to window matrix (factors in OpenGL MVP)
+    start = NIFTIToWindowMatrix * start;
+    end = NIFTIToWindowMatrix * end;
 
     // Convert to 2D points
     lineStart = start.toPoint();
@@ -790,8 +767,6 @@ void AxialSliceWidget::paintGL()
     //painter.setFont(QFont("Arial", 30));
     //painter.drawText(rect(), Qt::AlignCenter, "Qt");
 
-    //test.add
-
     painter.setPen(QPen(Qt::yellow, 1, Qt::SolidLine, Qt::RoundCap));
     painter.setTransform(getWindowToNIFTIMatrix().inverted().toTransform());
 
@@ -812,7 +787,7 @@ void AxialSliceWidget::mouseMoveEvent(QMouseEvent *eventMove)
         QPointF mouseCoord = eventMove->pos();
         QPoint NIFTICoord = (getWindowToNIFTIMatrix() * mouseCoord).toPoint();
 
-        if (QRect(0, 0, fatImage->getXDim() - 1, fatImage->getYDim() - 1).contains(NIFTICoord))
+        if (QRect(0, 0, fatImage->getXDim(), fatImage->getYDim()).contains(NIFTICoord))
         {
             auto &layerPoints = points[location.z()][0]; // TODO: Current layer
             layerPoints.push_back(NIFTICoord);
