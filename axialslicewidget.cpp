@@ -1,32 +1,15 @@
 #include "axialslicewidget.h"
 #include "commands.h"
 
-AxialSliceWidget::AxialSliceWidget(QWidget *parent) : QOpenGLWidget(parent)
+AxialSliceWidget::AxialSliceWidget(QWidget *parent) : QOpenGLWidget(parent),
+    displayType(SliceDisplayType::FatOnly), fatImage(NULL), waterImage(NULL),
+    tracingLayerColors({ Qt::blue, Qt::darkCyan, Qt::cyan, Qt::magenta, Qt::yellow, Qt::green }), mouseCommand(NULL),
+    slicePrimTexture(NULL), sliceSecdTexture(NULL),
+    location(0, 0, 0, 0), primColorMap(ColorMap::Gray), primOpacity(1.0f), secdColorMap(ColorMap::Gray), secdOpacity(1.0f),
+    brightness(0.0f), contrast(1.0f), tracingLayer(TracingLayer::EAT),
+    startDraw(false), startPan(false), moveID(CommandID::AxialMove)
 {
-    this->displayType = SliceDisplayType::FatOnly;
-
-    this->fatImage = NULL;
-    this->waterImage = NULL;
-
-    this->tracingLayerColors = { Qt::blue, Qt::darkCyan, Qt::cyan, Qt::magenta, Qt::yellow, Qt::green };
-    this->mouseCommand = NULL;
-
-    this->slicePrimTexture = NULL;
-    this->sliceSecdTexture = NULL;
-
-    this->location = QVector4D(0, 0, 0, 0);
-    this->primColorMap = ColorMap::Gray;
-    this->primOpacity = 1.0f;
-    this->secdColorMap = ColorMap::Gray;
-    this->secdOpacity = 1.0f;
-    this->brightness = 0.0f;
-    this->contrast = 1.0f;
-    this->tracingLayer = TracingLayer::EAT;
     this->tracingLayerVisible.fill(true);
-
-    this->startDraw = false;
-    this->startPan = false;
-    this->moveID = CommandID::AxialMove;
 }
 
 void AxialSliceWidget::setImages(NIFTImage *fat, NIFTImage *water)

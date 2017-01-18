@@ -3,7 +3,8 @@
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::MainWindow)
+    ui(new Ui::MainWindow),
+    undoView(NULL), undoStack(new QUndoStack(this))
 {  
     this->ui->setupUi(this);
 
@@ -26,8 +27,6 @@ MainWindow::MainWindow(QWidget *parent) :
     this->fatImage = new NIFTImage(subConfig);
     this->waterImage = new NIFTImage(subConfig);
 
-    this->undoView = NULL;
-    this->undoStack = new QUndoStack(this);
     connect(undoStack, SIGNAL(canUndoChanged(bool)), this, SLOT(undoStack_canUndoChanged(bool)));
     connect(undoStack, SIGNAL(canRedoChanged(bool)), this, SLOT(undoStack_canRedoChanged(bool)));
     ui->glWidgetAxial->setUndoStack(undoStack);

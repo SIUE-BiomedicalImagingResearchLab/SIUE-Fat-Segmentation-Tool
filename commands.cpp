@@ -5,15 +5,9 @@
 
 // AxialMoveCommand
 // --------------------------------------------------------------------------------------------------------------------
-AxialMoveCommand::AxialMoveCommand(QPointF delta, AxialSliceWidget *widget, CommandID ID, QUndoCommand *parent) : QUndoCommand(parent)
+AxialMoveCommand::AxialMoveCommand(QPointF delta, AxialSliceWidget *widget, CommandID ID, QUndoCommand *parent) : QUndoCommand(parent),
+    delta(delta), widget(widget), ID(ID)
 {
-    // Divide delta by respective width/height of screen and multiply by 2.0f
-    // This is because the OpenGL range is -1.0f -> 1.0f(2.0 total) and the width/height of the screen is given.
-    // This converts from window coordinates to OpenGL coordinates
-    this->delta = QVector3D(delta); //QVector3D((delta.x() * 2.0f / widget->width()), (-delta.y() * 2.0f / widget->height()), 0.0f);
-    this->widget = widget;
-    this->ID = ID;
-
     // Updates text that is shown on QUndoView
     setText(QObject::tr("Move axial image by (%1%, %2%)").arg(int(delta.x() * 100.0f)).arg(int(delta.y() * 100.0f)));
 }
@@ -56,16 +50,9 @@ bool AxialMoveCommand::mergeWith(const QUndoCommand *command)
 
 // CoronalMoveCommand
 // --------------------------------------------------------------------------------------------------------------------
-CoronalMoveCommand::CoronalMoveCommand(QPointF delta, CoronalSliceWidget *widget, CommandID ID, QUndoCommand *parent) : QUndoCommand(parent)
+CoronalMoveCommand::CoronalMoveCommand(QPointF delta, CoronalSliceWidget *widget, CommandID ID, QUndoCommand *parent) : QUndoCommand(parent),
+    delta(delta), widget(widget), ID(ID)
 {
-    // Delta is in OpenGL coordinate system already
-    this->delta = QVector3D(delta);
-
-    //this->delta = QVector3D(widget->getWindowToOpenGLMatrix() * delta);
-
-    this->widget = widget;
-    this->ID = ID;
-
     // Updates text that is shown on QUndoView
     setText(QObject::tr("Move coronal image by (%1%, %2%)").arg(int(delta.x() * 100.0f)).arg(int(delta.y() * 100.0f)));
 }
@@ -108,11 +95,9 @@ bool CoronalMoveCommand::mergeWith(const QUndoCommand *command)
 
 // AxialScaleCommand
 // --------------------------------------------------------------------------------------------------------------------
-AxialScaleCommand::AxialScaleCommand(float scaling, AxialSliceWidget *widget, QUndoCommand *parent) : QUndoCommand(parent)
+AxialScaleCommand::AxialScaleCommand(float scaling, AxialSliceWidget *widget, QUndoCommand *parent) : QUndoCommand(parent),
+    scaling(scaling), widget(widget)
 {
-    this->scaling = scaling;
-    this->widget = widget;
-
     // Updates text that is shown on QUndoView
     setText(QObject::tr("Scale axial image by %1%").arg(int(scaling * 100.0f)));
 }
@@ -167,11 +152,9 @@ bool AxialScaleCommand::mergeWith(const QUndoCommand *command)
 
 // CoronalScaleCommand
 // --------------------------------------------------------------------------------------------------------------------
-CoronalScaleCommand::CoronalScaleCommand(float scaling, CoronalSliceWidget *widget, QUndoCommand *parent) : QUndoCommand(parent)
+CoronalScaleCommand::CoronalScaleCommand(float scaling, CoronalSliceWidget *widget, QUndoCommand *parent) : QUndoCommand(parent),
+    scaling(scaling), widget(widget)
 {
-    this->scaling = scaling;
-    this->widget = widget;
-
     // Updates text that is shown on QUndoView
     setText(QObject::tr("Scale coronal image by %1%").arg(int(scaling * 100.0f)));
 }
@@ -228,22 +211,11 @@ bool CoronalScaleCommand::mergeWith(const QUndoCommand *command)
 // --------------------------------------------------------------------------------------------------------------------
 LocationChangeCommand::LocationChangeCommand(QVector4D newLocation, AxialSliceWidget *axialWidget, CoronalSliceWidget *coronalWidget,
                                              QSlider *axialSlider, QSpinBox *axialSpinBox, QSlider *coronalSlider, QSpinBox *coronalSpinBox,
-                                             QSlider *saggitalSlider, QSpinBox *saggitalSpinBox, QUndoCommand *parent) : QUndoCommand(parent)
+                                             QSlider *saggitalSlider, QSpinBox *saggitalSpinBox, QUndoCommand *parent) : QUndoCommand(parent),
+    oldLocation(axialWidget->getLocation()), newLocation(axialWidget->transformLocation(newLocation)), axialWidget(axialWidget), coronalWidget(coronalWidget),
+    axialSlider(axialSlider), axialSpinBox(axialSpinBox), coronalSlider(coronalSlider), coronalSpinBox(coronalSpinBox),
+    saggitalSlider(saggitalSlider), saggitalSpinBox(saggitalSpinBox)
 {
-    this->oldLocation = axialWidget->getLocation();
-    this->newLocation = axialWidget->transformLocation(newLocation);
-    this->axialWidget = axialWidget;
-    this->coronalWidget = coronalWidget;
-
-    this->axialSlider = axialSlider;
-    this->axialSpinBox = axialSpinBox;
-
-    this->coronalSlider = coronalSlider;
-    this->coronalSpinBox = coronalSpinBox;
-
-    this->saggitalSlider = saggitalSlider;
-    this->saggitalSpinBox = saggitalSpinBox;
-
     // Set text shown on QUndoView
     QVector4D delta = newLocation - oldLocation;
     QString str("Move to ");
@@ -391,14 +363,9 @@ bool LocationChangeCommand::mergeWith(const QUndoCommand *command)
 
 // BrightnessChangeCommand
 // --------------------------------------------------------------------------------------------------------------------
-BrightnessChangeCommand::BrightnessChangeCommand(float newBrightness, AxialSliceWidget *widget, QSlider *slider, QSpinBox *spinBox, QUndoCommand *parent) : QUndoCommand(parent)
+BrightnessChangeCommand::BrightnessChangeCommand(float newBrightness, AxialSliceWidget *widget, QSlider *slider, QSpinBox *spinBox, QUndoCommand *parent) : QUndoCommand(parent),
+    oldBrightness(widget->getBrightness()), newBrightness(newBrightness), widget(widget), slider(slider), spinBox(spinBox)
 {
-    this->oldBrightness = widget->getBrightness();
-    this->newBrightness = newBrightness;
-    this->widget = widget;
-    this->slider = slider;
-    this->spinBox = spinBox;
-
     // Updates text that is shown on QUndoView
     setText(QObject::tr("Brightness set to %1%").arg(int(newBrightness * 100.0f)));
 }
@@ -458,14 +425,9 @@ bool BrightnessChangeCommand::mergeWith(const QUndoCommand *command)
 
 // ContrastChangeCommand
 // --------------------------------------------------------------------------------------------------------------------
-ContrastChangeCommand::ContrastChangeCommand(float newContrast, AxialSliceWidget *widget, QSlider *slider, QSpinBox *spinBox, QUndoCommand *parent) : QUndoCommand(parent)
+ContrastChangeCommand::ContrastChangeCommand(float newContrast, AxialSliceWidget *widget, QSlider *slider, QSpinBox *spinBox, QUndoCommand *parent) : QUndoCommand(parent),
+    oldContrast(widget->getContrast()), newContrast(newContrast), widget(widget), slider(slider), spinBox(spinBox)
 {
-    this->oldContrast = widget->getBrightness();
-    this->newContrast = newContrast;
-    this->widget = widget;
-    this->slider = slider;
-    this->spinBox = spinBox;
-
     // Updates text that is shown on QUndoView
     setText(QObject::tr("Contrast set to %1%").arg(int(newContrast * 100.0f)));
 }
@@ -525,13 +487,9 @@ bool ContrastChangeCommand::mergeWith(const QUndoCommand *command)
 
 // PrimColorMapChangeCommand
 // --------------------------------------------------------------------------------------------------------------------
-PrimColorMapChangeCommand::PrimColorMapChangeCommand(ColorMap newColor, AxialSliceWidget *widget, QComboBox *comboBox, QUndoCommand *parent) : QUndoCommand(parent)
+PrimColorMapChangeCommand::PrimColorMapChangeCommand(ColorMap newColor, AxialSliceWidget *widget, QComboBox *comboBox, QUndoCommand *parent) : QUndoCommand(parent),
+    oldColor(widget->getPrimColorMap()), newColor(newColor), widget(widget), comboBox(comboBox)
 {
-    this->oldColor = widget->getPrimColorMap();
-    this->newColor = newColor;
-    this->widget = widget;
-    this->comboBox = comboBox;
-
     // Updates text that is shown on QUndoView
     setText(QObject::tr("Primary color map set to %1").arg(comboBox->itemText((int)newColor)));
 }
@@ -562,13 +520,9 @@ void PrimColorMapChangeCommand::redo()
 
 // SecdColorMapChangeCommand
 // --------------------------------------------------------------------------------------------------------------------
-SecdColorMapChangeCommand::SecdColorMapChangeCommand(ColorMap newColor, AxialSliceWidget *widget, QComboBox *comboBox, QUndoCommand *parent) : QUndoCommand(parent)
+SecdColorMapChangeCommand::SecdColorMapChangeCommand(ColorMap newColor, AxialSliceWidget *widget, QComboBox *comboBox, QUndoCommand *parent) : QUndoCommand(parent),
+    oldColor(widget->getSecdColorMap()), newColor(newColor), widget(widget), comboBox(comboBox)
 {
-    this->oldColor = widget->getSecdColorMap();
-    this->newColor = newColor;
-    this->widget = widget;
-    this->comboBox = comboBox;
-
     // Updates text that is shown on QUndoView
     setText(QObject::tr("Secondary color map set to %1").arg(comboBox->itemText((int)newColor)));
 }
@@ -599,14 +553,9 @@ void SecdColorMapChangeCommand::redo()
 
 // PrimOpacityChangeCommand
 // --------------------------------------------------------------------------------------------------------------------
-PrimOpacityChangeCommand::PrimOpacityChangeCommand(float newOpacity, AxialSliceWidget *widget, QSlider *slider, QSpinBox *spinBox, QUndoCommand *parent) : QUndoCommand(parent)
+PrimOpacityChangeCommand::PrimOpacityChangeCommand(float newOpacity, AxialSliceWidget *widget, QSlider *slider, QSpinBox *spinBox, QUndoCommand *parent) : QUndoCommand(parent),
+    oldOpacity(widget->getPrimOpacity()), newOpacity(newOpacity), widget(widget), slider(slider), spinBox(spinBox)
 {
-    this->oldOpacity = widget->getPrimOpacity();
-    this->newOpacity = newOpacity;
-    this->widget = widget;
-    this->slider = slider;
-    this->spinBox = spinBox;
-
     // Updates text that is shown on QUndoView
     setText(QObject::tr("Primary opacity set to %1%").arg(int(newOpacity * 100.0f)));
 }
@@ -666,14 +615,9 @@ bool PrimOpacityChangeCommand::mergeWith(const QUndoCommand *command)
 
 // SecdOpacityChangeCommand
 // --------------------------------------------------------------------------------------------------------------------
-SecdOpacityChangeCommand::SecdOpacityChangeCommand(float newOpacity, AxialSliceWidget *widget, QSlider *slider, QSpinBox *spinBox, QUndoCommand *parent) : QUndoCommand(parent)
+SecdOpacityChangeCommand::SecdOpacityChangeCommand(float newOpacity, AxialSliceWidget *widget, QSlider *slider, QSpinBox *spinBox, QUndoCommand *parent) : QUndoCommand(parent),
+    oldOpacity(widget->getSecdOpacity()), newOpacity(newOpacity), widget(widget), slider(slider), spinBox(spinBox)
 {
-    this->oldOpacity = widget->getSecdOpacity();
-    this->newOpacity = newOpacity;
-    this->widget = widget;
-    this->slider = slider;
-    this->spinBox = spinBox;
-
     // Updates text that is shown on QUndoView
     setText(QObject::tr("Secondary opacity set to %1%").arg(int(newOpacity * 100.0f)));
 }
@@ -733,14 +677,9 @@ bool SecdOpacityChangeCommand::mergeWith(const QUndoCommand *command)
 
 // SliceViewChangeCommand
 // --------------------------------------------------------------------------------------------------------------------
-SliceViewChangeCommand::SliceViewChangeCommand(SliceDisplayType newDT, AxialSliceWidget *widget, QRadioButton *oldBtn, QRadioButton *newBtn, QUndoCommand *parent) : QUndoCommand(parent)
+SliceViewChangeCommand::SliceViewChangeCommand(SliceDisplayType newDT, AxialSliceWidget *widget, QRadioButton *oldBtn, QRadioButton *newBtn, QUndoCommand *parent) : QUndoCommand(parent),
+    oldDT(widget->getDisplayType()), newDT(newDT), widget(widget), oldBtn(oldBtn), newBtn(newBtn)
 {
-    this->oldDT = widget->getDisplayType();
-    this->newDT = newDT;
-    this->widget = widget;
-    this->oldBtn = oldBtn;
-    this->newBtn = newBtn;
-
     // Updates text that is shown on QUndoView
     setText(QObject::tr("Slice view set to %1").arg(newBtn->text()));
 }
@@ -771,14 +710,9 @@ void SliceViewChangeCommand::redo()
 
 // TracingLayerChangeCommand
 // --------------------------------------------------------------------------------------------------------------------
-TracingLayerChangeCommand::TracingLayerChangeCommand(TracingLayer newTracingLayer, AxialSliceWidget *widget, QRadioButton *oldBtn, QRadioButton *newBtn, QUndoCommand *parent) : QUndoCommand(parent)
+TracingLayerChangeCommand::TracingLayerChangeCommand(TracingLayer newTracingLayer, AxialSliceWidget *widget, QRadioButton *oldBtn, QRadioButton *newBtn, QUndoCommand *parent) : QUndoCommand(parent),
+    oldTracingLayer(widget->getTracingLayer()), newTracingLayer(newTracingLayer), widget(widget), oldBtn(oldBtn), newBtn(newBtn)
 {
-    this->oldTracingLayer = widget->getTracingLayer();
-    this->newTracingLayer = newTracingLayer;
-    this->widget = widget;
-    this->oldBtn = oldBtn;
-    this->newBtn = newBtn;
-
     // Updates text that is shown on QUndoView
     setText(QObject::tr("Tracing layer set to %1").arg(newBtn->text()));
 }
@@ -809,13 +743,9 @@ void TracingLayerChangeCommand::redo()
 
 // TracingLayerVisibleChangeCommand
 // --------------------------------------------------------------------------------------------------------------------
-TracingLayerVisibleChangeCommand::TracingLayerVisibleChangeCommand(TracingLayer tracingLayer, bool newValue, AxialSliceWidget *widget, QCheckBox *btn, QUndoCommand *parent) : QUndoCommand(parent)
+TracingLayerVisibleChangeCommand::TracingLayerVisibleChangeCommand(TracingLayer tracingLayer, bool newValue, AxialSliceWidget *widget, QCheckBox *btn, QUndoCommand *parent) : QUndoCommand(parent),
+    tracingLayer(tracingLayer), newValue(newValue), widget(widget), btn(btn)
 {
-    this->tracingLayer = tracingLayer;
-    this->newValue = newValue;
-    this->widget = widget;
-    this->btn = btn;
-
     // Updates text that is shown on QUndoView
     setText(QObject::tr("%1 tracing layer %2").arg(newValue ? "Show" : "Hide").arg(btn->text()));
 }
@@ -850,11 +780,9 @@ void TracingLayerVisibleChangeCommand::redo()
 
 // TracingPointsAddCommand
 // --------------------------------------------------------------------------------------------------------------------
-TracingPointsAddCommand::TracingPointsAddCommand(int index, AxialSliceWidget *widget, QUndoCommand *parent) : QUndoCommand(parent)
+TracingPointsAddCommand::TracingPointsAddCommand(int index, AxialSliceWidget *widget, QUndoCommand *parent) : QUndoCommand(parent),
+    index(index), widget(widget)
 {
-    this->index = index;
-    this->widget = widget;
-
     // Get a text string based on the layer that points are being added too (current layer)
     QString str;
     switch (widget->getTracingLayer())

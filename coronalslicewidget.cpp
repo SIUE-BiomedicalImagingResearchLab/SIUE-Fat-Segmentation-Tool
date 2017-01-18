@@ -1,18 +1,11 @@
 #include "coronalslicewidget.h"
 #include "commands.h"
 
-CoronalSliceWidget::CoronalSliceWidget(QWidget *parent) : QOpenGLWidget(parent)
+CoronalSliceWidget::CoronalSliceWidget(QWidget *parent) : QOpenGLWidget(parent),
+    displayType(SliceDisplayType::FatOnly), fatImage(NULL), waterImage(NULL),
+    sliceTexture(NULL), location(0, 0, 0, 0), startPan(false), moveID(CommandID::CoronalMove)
 {
-    this->displayType = SliceDisplayType::FatOnly;
 
-    this->fatImage = NULL;
-    this->waterImage = NULL;
-
-    this->sliceTexture = NULL;
-
-    this->location = QVector4D(0, 0, 0, 0);
-    this->startPan = false;
-    this->moveID = CommandID::CoronalMove;
 }
 
 void CoronalSliceWidget::setImages(NIFTImage *fat, NIFTImage *water)
