@@ -11,6 +11,8 @@ MainWindow::MainWindow(QWidget *parent) :
     // key sequence is that it has the list of valid shortcuts for each platform and
     // is applied appropiately. This cannot be done through the Qt GUI Designer
     this->ui->actionOpen->setShortcuts(QKeySequence::Open);
+    this->ui->actionSave->setShortcut(QKeySequence::Save);
+    this->ui->actionSaveAs->setShortcut(QKeySequence::SaveAs);
     this->ui->actionExit->setShortcuts(QKeySequence::Close);
     this->ui->actionUndo->setShortcuts(QKeySequence::Undo);
     this->ui->actionRedo->setShortcuts(QKeySequence::Redo);
@@ -76,13 +78,7 @@ void MainWindow::writeSettings()
     settings.setValue("defaultDir", defaultOpenDir);
 }
 
-void MainWindow::on_actionExit_triggered()
-{
-    // When exit is clicked in menu, close the application
-    this->close();
-}
-
-void MainWindow::on_actionOpen_triggered()
+bool MainWindow::loadImage(QString path)
 {
     nifti_image *fatUpperImage = NULL;
     nifti_image *fatLowerImage = NULL;
@@ -91,11 +87,6 @@ void MainWindow::on_actionOpen_triggered()
 
     try
     {
-        // Start "Select folder" dialog at user's home path.
-        QString path = QFileDialog::getExistingDirectory(this, "Open Directory", defaultOpenDir, QFileDialog::ShowDirsOnly);
-        if (path.isNull())
-            return; // If they hit cancel, do nothing
-
         // Load NIFTI file
         QString fatUpperPath = QDir(path).filePath("fatUpper.nii");
         QString fatLowerPath = QDir(path).filePath("fatLower.nii");
@@ -153,75 +144,10 @@ void MainWindow::on_actionOpen_triggered()
         ui->glWidgetCoronal->setImages(fatImage, waterImage);
         ui->glWidgetCoronal->setLocation(defaultLocation);
 
-        // -------------------------------------------- Setup Home Tab --------------------------------------------
-        // Set the range of the slice spin box to be 0 to the height of the fatImage (this is upper + lower z-height)
-        ui->axialSliceSpinBox->setRange(0, fatImage->getZDim() - 1);
-        // Set the value of the slice spin box to be what the defaultSlice is.
-        ui->axialSliceSpinBox->setValue(defaultLocation.z());
+        // Setup the default controls in the GUI
+        setupDefaults();
 
-        // Set the range of the slice slider to be 0 to the height of the fatImage (this is upper + lower z-height)
-        ui->axialSliceSlider->setRange(0, fatImage->getZDim() - 1);
-        // Set the value of the slice slider to be what the defaultSlice is.
-        ui->axialSliceSlider->setValue(defaultLocation.z());
-
-        // Coronal slice spin box range is 0 to 1 minus the maximum Y dimension. Set value to default location
-        ui->coronalSliceSpinBox->setRange(0, fatImage->getYDim() - 1);
-        ui->coronalSliceSpinBox->setValue(defaultLocation.y());
-
-        // Coronal slice slider range is 0 to 1 minus the maximum Y dimension. Set value to default location
-        ui->coronalSliceSlider->setRange(0, fatImage->getYDim() - 1);
-        ui->coronalSliceSlider->setValue(defaultLocation.y());
-
-        // Saggital slice spin box range is 0 to 1 minus the maximum X dimension. Set value to default location
-        ui->saggitalSliceSpinBox->setRange(0, fatImage->getXDim() - 1);
-        ui->saggitalSliceSpinBox->setValue(defaultLocation.x());
-
-        // Saggital slice slider range is 0 to 1 minus the maximum X dimension. Set value to default location
-        ui->saggitalSliceSlider->setRange(0, fatImage->getXDim() - 1);
-        ui->saggitalSliceSlider->setValue(defaultLocation.x());
-
-        // ---------------------------------------- Setup Axial Display Tab ----------------------------------------
-        // Set the brightness slider value to the default brightness
-        ui->brightnessSlider->setValue(int(ui->glWidgetAxial->getBrightness() * 100.0f));
-        // Set the brightness spin box value to the default brightness
-        ui->brightnessSpinBox->setValue(int(ui->glWidgetAxial->getBrightness() * 100.0f));
-
-        // Set the contrast slider value to the default contrast
-        ui->contrastSlider->setValue(int(ui->glWidgetAxial->getContrast() * 100.0f));
-        // Set the contrast spin box value to the default contrast
-        ui->contrastSpinBox->setValue(int(ui->glWidgetAxial->getContrast() * 100.0f));
-
-        // Set the primary colormap value to the current color map and set the opacity
-        ui->primColorMapComboBox->setCurrentIndex((int)ui->glWidgetAxial->getPrimColorMap());
-        ui->primOpacitySlider->setValue(int(ui->glWidgetAxial->getPrimOpacity() * 100.0f));
-        ui->primOpacitySpinBox->setValue(int(ui->glWidgetAxial->getPrimOpacity() * 100.0f));
-
-        // Set the secondary colormap value to the current color map and set the opacity
-        ui->secdColorMapComboBox->setCurrentIndex((int)ui->glWidgetAxial->getSecdColorMap());
-        ui->secdOpacitySlider->setValue(int(ui->glWidgetAxial->getSecdOpacity() * 100.0f));
-        ui->secdOpacitySpinBox->setValue(int(ui->glWidgetAxial->getSecdOpacity() * 100.0f));
-
-        // Read the current display type for the axial slice widget and check
-        // the appropiate radio button for the current axial view
-        switch (ui->glWidgetAxial->getDisplayType())
-        {
-            case SliceDisplayType::FatOnly: ui->fatRadioBtn->setChecked(true); break;
-            case SliceDisplayType::WaterOnly: ui->waterRadioBtn->setChecked(true); break;
-            case SliceDisplayType::FatFraction: ui->fatFracRadioBtn->setChecked(true); break;
-            case SliceDisplayType::WaterFraction: ui->waterFracRadioBtn->setChecked(true); break;
-            case SliceDisplayType::FatWater: ui->fatWaterRadioBtn->setChecked(true); break;
-            case SliceDisplayType::WaterFat: ui->waterFatRadioBtn->setChecked(true); break;
-        }
-
-        // Enable the secondary image box if FatWater or WaterFat selected, otherwise disable
-        ui->secondaryImageBox->setEnabled((ui->glWidgetAxial->getDisplayType() == SliceDisplayType::FatWater || ui->glWidgetAxial->getDisplayType() == SliceDisplayType::WaterFat));
-
-        // ------------------------------------------- Setup Tracing Tab -------------------------------------------
-        // Set the EAT radio button for the default layer to be drawing with
-        ui->EATRadioBtn->setChecked(true);
-
-        // Since the NIFTI files were successfully opened, the default path in the FileChooser dialog next time will be this path
-        defaultOpenDir = path;
+        return true;
     }
     catch (const Exception &e)
     {
@@ -243,6 +169,110 @@ void MainWindow::on_actionOpen_triggered()
         if (waterLowerImage) nifti_image_free(waterLowerImage);
         throw;
     }
+
+    return false;
+}
+
+void MainWindow::setupDefaults()
+{
+    QVector4D location = ui->glWidgetAxial->getLocation();
+
+    // -------------------------------------------- Setup Home Tab --------------------------------------------
+    // Set the range of the slice spin box to be 0 to the height of the fatImage (this is upper + lower z-height)
+    ui->axialSliceSpinBox->setRange(0, fatImage->getZDim() - 1);
+    // Set the value of the slice spin box to be what the defaultSlice is.
+    ui->axialSliceSpinBox->setValue(location.z());
+
+    // Set the range of the slice slider to be 0 to the height of the fatImage (this is upper + lower z-height)
+    ui->axialSliceSlider->setRange(0, fatImage->getZDim() - 1);
+    // Set the value of the slice slider to be what the defaultSlice is.
+    ui->axialSliceSlider->setValue(location.z());
+
+    // Coronal slice spin box range is 0 to 1 minus the maximum Y dimension. Set value to default location
+    ui->coronalSliceSpinBox->setRange(0, fatImage->getYDim() - 1);
+    ui->coronalSliceSpinBox->setValue(location.y());
+
+    // Coronal slice slider range is 0 to 1 minus the maximum Y dimension. Set value to default location
+    ui->coronalSliceSlider->setRange(0, fatImage->getYDim() - 1);
+    ui->coronalSliceSlider->setValue(location.y());
+
+    // Saggital slice spin box range is 0 to 1 minus the maximum X dimension. Set value to default location
+    ui->saggitalSliceSpinBox->setRange(0, fatImage->getXDim() - 1);
+    ui->saggitalSliceSpinBox->setValue(location.x());
+
+    // Saggital slice slider range is 0 to 1 minus the maximum X dimension. Set value to default location
+    ui->saggitalSliceSlider->setRange(0, fatImage->getXDim() - 1);
+    ui->saggitalSliceSlider->setValue(location.x());
+
+    // ---------------------------------------- Setup Axial Display Tab ----------------------------------------
+    // Set the brightness slider value to the default brightness
+    ui->brightnessSlider->setValue(int(ui->glWidgetAxial->getBrightness() * 100.0f));
+    // Set the brightness spin box value to the default brightness
+    ui->brightnessSpinBox->setValue(int(ui->glWidgetAxial->getBrightness() * 100.0f));
+
+    // Set the contrast slider value to the default contrast
+    ui->contrastSlider->setValue(int(ui->glWidgetAxial->getContrast() * 100.0f));
+    // Set the contrast spin box value to the default contrast
+    ui->contrastSpinBox->setValue(int(ui->glWidgetAxial->getContrast() * 100.0f));
+
+    // Set the primary colormap value to the current color map and set the opacity
+    ui->primColorMapComboBox->setCurrentIndex((int)ui->glWidgetAxial->getPrimColorMap());
+    ui->primOpacitySlider->setValue(int(ui->glWidgetAxial->getPrimOpacity() * 100.0f));
+    ui->primOpacitySpinBox->setValue(int(ui->glWidgetAxial->getPrimOpacity() * 100.0f));
+
+    // Set the secondary colormap value to the current color map and set the opacity
+    ui->secdColorMapComboBox->setCurrentIndex((int)ui->glWidgetAxial->getSecdColorMap());
+    ui->secdOpacitySlider->setValue(int(ui->glWidgetAxial->getSecdOpacity() * 100.0f));
+    ui->secdOpacitySpinBox->setValue(int(ui->glWidgetAxial->getSecdOpacity() * 100.0f));
+
+    // Read the current display type for the axial slice widget and check
+    // the appropiate radio button for the current axial view
+    switch (ui->glWidgetAxial->getDisplayType())
+    {
+        case SliceDisplayType::FatOnly: ui->fatRadioBtn->setChecked(true); break;
+        case SliceDisplayType::WaterOnly: ui->waterRadioBtn->setChecked(true); break;
+        case SliceDisplayType::FatFraction: ui->fatFracRadioBtn->setChecked(true); break;
+        case SliceDisplayType::WaterFraction: ui->waterFracRadioBtn->setChecked(true); break;
+        case SliceDisplayType::FatWater: ui->fatWaterRadioBtn->setChecked(true); break;
+        case SliceDisplayType::WaterFat: ui->waterFatRadioBtn->setChecked(true); break;
+    }
+
+    // Enable the secondary image box if FatWater or WaterFat selected, otherwise disable
+    ui->secondaryImageBox->setEnabled((ui->glWidgetAxial->getDisplayType() == SliceDisplayType::FatWater || ui->glWidgetAxial->getDisplayType() == SliceDisplayType::WaterFat));
+
+    // ------------------------------------------- Setup Tracing Tab -------------------------------------------
+    // Set the EAT radio button for the default layer to be drawing with
+    ui->EATRadioBtn->setChecked(true);
+}
+
+void MainWindow::on_actionOpen_triggered()
+{
+    // Start "Select folder" dialog at user's home path.
+    QString path = QFileDialog::getExistingDirectory(this, "Open Directory", defaultOpenDir, QFileDialog::ShowDirsOnly);
+    if (path.isNull())
+        return; // If they hit cancel, do nothing
+
+    if (loadImage(path))
+    {
+        // Since the NIFTI files were successfully opened, the default path in the FileChooser dialog next time will be this path
+        defaultOpenDir = path;
+    }
+}
+
+void MainWindow::on_actionSave_triggered()
+{
+    //QFileDialog::getSaveFileName(this, "Testing", "directory", "filter");
+}
+
+void MainWindow::on_actionSaveAs_triggered()
+{
+
+}
+
+void MainWindow::on_actionExit_triggered()
+{
+    // When exit is clicked in menu, close the application
+    this->close();
 }
 
 void MainWindow::on_axialSliceSlider_valueChanged(int value)

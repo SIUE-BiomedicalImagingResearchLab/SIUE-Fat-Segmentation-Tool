@@ -49,13 +49,19 @@ public:
     void readSettings();
     void writeSettings();
 
+    bool loadImage(QString path);
+    void setupDefaults();
+
     void changeSliceView(SliceDisplayType newType);
     void changeTracingLayer(TracingLayer newLayer);
 
 private slots:
-    void on_actionExit_triggered();
-
     void on_actionOpen_triggered();
+
+    void on_actionSave_triggered();
+    void on_actionSaveAs_triggered();
+
+    void on_actionExit_triggered();
 
     void on_axialSliceSlider_valueChanged(int value);
     void on_axialSliceSpinBox_valueChanged(int value);
