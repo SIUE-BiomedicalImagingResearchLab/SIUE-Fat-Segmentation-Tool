@@ -9,6 +9,7 @@
 #include <QSpinBox>
 #include <QComboBox>
 #include <QRadioButton>
+#include <QCheckBox>
 
 #include "displayinfo.h"
 
@@ -19,7 +20,7 @@ class CoronalSliceWidget;
 class MainWindow;
 
 // These command IDs are used for merging commands. Only commands with the same ID will be merged.
-enum CommandID : int
+enum class CommandID : int
 {
     AxialMove = 1,
     AxialMoveEnd = 10,
@@ -47,7 +48,7 @@ public:
     void undo() override;
     void redo() override;
     bool mergeWith(const QUndoCommand *command) override;
-    int id() const override { return ID; }
+    int id() const override { return (int)ID; }
 };
 
 class CoronalMoveCommand : public QUndoCommand
@@ -63,7 +64,7 @@ public:
     void undo() override;
     void redo() override;
     bool mergeWith(const QUndoCommand *command) override;
-    int id() const override { return ID; }
+    int id() const override { return (int)ID; }
 };
 
 class AxialScaleCommand : public QUndoCommand
@@ -78,7 +79,7 @@ public:
     void undo() override;
     void redo() override;
     bool mergeWith(const QUndoCommand *command) override;
-    int id() const override { return CommandID::AxialScale; }
+    int id() const override { return (int)CommandID::AxialScale; }
 };
 
 class CoronalScaleCommand : public QUndoCommand
@@ -93,7 +94,7 @@ public:
     void undo() override;
     void redo() override;
     bool mergeWith(const QUndoCommand *command) override;
-    int id() const override { return CommandID::CoronalScale; }
+    int id() const override { return (int)CommandID::CoronalScale; }
 };
 
 class LocationChangeCommand : public QUndoCommand
@@ -122,7 +123,7 @@ public:
     void undo() override;
     void redo() override;
     bool mergeWith(const QUndoCommand *command) override;
-    int id() const override { return CommandID::LocationChange; }
+    int id() const override { return (int)CommandID::LocationChange; }
 };
 
 class BrightnessChangeCommand : public QUndoCommand
@@ -140,7 +141,7 @@ public:
     void undo() override;
     void redo() override;
     bool mergeWith(const QUndoCommand *command) override;
-    int id() const override { return CommandID::BrightnessChange; }
+    int id() const override { return (int)CommandID::BrightnessChange; }
 };
 
 class ContrastChangeCommand : public QUndoCommand
@@ -158,7 +159,7 @@ public:
     void undo() override;
     void redo() override;
     bool mergeWith(const QUndoCommand *command) override;
-    int id() const override { return CommandID::ContrastChange; }
+    int id() const override { return (int)CommandID::ContrastChange; }
 };
 
 class PrimColorMapChangeCommand : public QUndoCommand
@@ -206,7 +207,7 @@ public:
     void undo() override;
     void redo() override;
     bool mergeWith(const QUndoCommand *command) override;
-    int id() const override { return CommandID::PrimOpacityChange; }
+    int id() const override { return (int)CommandID::PrimOpacityChange; }
 };
 
 class SecdOpacityChangeCommand : public QUndoCommand
@@ -224,7 +225,7 @@ public:
     void undo() override;
     void redo() override;
     bool mergeWith(const QUndoCommand *command) override;
-    int id() const override { return CommandID::SecdOpacityChange; }
+    int id() const override { return (int)CommandID::SecdOpacityChange; }
 };
 
 class SliceViewChangeCommand : public QUndoCommand
@@ -243,5 +244,56 @@ public:
     void redo() override;
 };
 
+class TracingLayerChangeCommand : public QUndoCommand
+{
+private:
+    TracingLayer oldTracingLayer;
+    TracingLayer newTracingLayer;
+    AxialSliceWidget *widget;
+    QRadioButton *oldBtn;
+    QRadioButton *newBtn;
+
+public:
+    TracingLayerChangeCommand(TracingLayer newTracingLayer, AxialSliceWidget *widget, QRadioButton *oldBtn, QRadioButton *newBtn, QUndoCommand *parent = NULL);
+
+    void undo() override;
+    void redo() override;
+};
+
+class TracingLayerVisibleChangeCommand : public QUndoCommand
+{
+private:
+    TracingLayer tracingLayer;
+    bool newValue;
+    AxialSliceWidget *widget;
+    QCheckBox *btn;
+
+public:
+    TracingLayerVisibleChangeCommand(TracingLayer tracingLayer, bool newValue, AxialSliceWidget *widget, QCheckBox *btn, QUndoCommand *parent = NULL);
+
+    void undo() override;
+    void redo() override;
+};
+
+/* Note: This class will assume that the layer and axial slice that is being drawn on is the current layer and axial slice.
+ * This is a safe assumption so long as QUndoStack keeps track of all layer changes and axial slice changes. This will cause
+ * a new class to be made for each axial slice AND layer. Also, the user must release their mouse before they can change the
+ * slice or layer. (Which will cause the command to be done)
+ */
+class TracingPointsAddCommand : public QUndoCommand
+{
+private:
+    int index;
+    std::vector<QPointF> points;
+    AxialSliceWidget *widget;
+
+public:
+    TracingPointsAddCommand(int index, AxialSliceWidget *widget, QUndoCommand *parent = NULL);
+
+    void undo() override;
+    void redo() override;
+
+    int getIndex();
+};
 
 #endif // COMMANDS_H

@@ -8,6 +8,9 @@ AxialSliceWidget::AxialSliceWidget(QWidget *parent) : QOpenGLWidget(parent)
     this->fatImage = NULL;
     this->waterImage = NULL;
 
+    this->tracingLayerColors = { Qt::blue, Qt::darkCyan, Qt::cyan, Qt::magenta, Qt::yellow, Qt::green };
+    this->mouseCommand = NULL;
+
     this->slicePrimTexture = NULL;
     this->sliceSecdTexture = NULL;
 
@@ -18,6 +21,8 @@ AxialSliceWidget::AxialSliceWidget(QWidget *parent) : QOpenGLWidget(parent)
     this->secdOpacity = 1.0f;
     this->brightness = 0.0f;
     this->contrast = 1.0f;
+    this->tracingLayer = TracingLayer::EAT;
+    this->tracingLayerVisible.fill(true);
 
     this->startDraw = false;
     this->startPan = false;
@@ -89,7 +94,7 @@ void AxialSliceWidget::setDisplayType(SliceDisplayType type)
     // If the display type is out of the acceptable range, then do nothing
     if (type < SliceDisplayType::FatOnly || type > SliceDisplayType::WaterFat)
     {
-        qDebug() << "Invalid display type was specified for AxialSliceWidget: " << type;
+        qDebug() << "Invalid display type was specified for AxialSliceWidget: " << (int)type;
         return;
     }
 
@@ -109,7 +114,7 @@ void AxialSliceWidget::setPrimColorMap(ColorMap map)
     // If the map given is out of the acceptable range, then do nothing
     if (map < ColorMap::Autumn || map >= ColorMap::Count)
     {
-        qDebug() << "Invalid primary color map was specified for AxialSliceWidget: " << map;
+        qDebug() << "Invalid primary color map was specified for AxialSliceWidget: " << (int)map;
         return;
     }
 
@@ -148,7 +153,7 @@ void AxialSliceWidget::setSecdColorMap(ColorMap map)
     // If the map given is out of the acceptable range, then do nothing
     if (map < ColorMap::Autumn || map >= ColorMap::Count)
     {
-        qDebug() << "Invalid secondary color map was specified for AxialSliceWidget: " << map;
+        qDebug() << "Invalid secondary color map was specified for AxialSliceWidget: " << (int)map;
         return;
     }
 
@@ -177,6 +182,26 @@ void AxialSliceWidget::setSecdOpacity(float opacity)
     update();
 }
 
+float AxialSliceWidget::getBrightness()
+{
+    return brightness;
+}
+
+void AxialSliceWidget::setBrightness(float brightness)
+{
+    // If the brightness is out of the acceptable range, then do nothing
+    if (brightness < 0.0f || brightness > 1.0f)
+    {
+        qDebug() << "Invalid brightness was specified for AxialSliceWidget: " << brightness;
+        return;
+    }
+
+    this->brightness = brightness;
+
+    // Redraw the screen because the brightness has changed
+    update();
+}
+
 float AxialSliceWidget::getContrast()
 {
     return contrast;
@@ -197,24 +222,79 @@ void AxialSliceWidget::setContrast(float contrast)
     update();
 }
 
-float AxialSliceWidget::getBrightness()
+TracingLayer AxialSliceWidget::getTracingLayer()
 {
-    return brightness;
+    return tracingLayer;
 }
 
-void AxialSliceWidget::setBrightness(float brightness)
+void AxialSliceWidget::setTracingLayer(TracingLayer layer)
 {
-    // If the brightness is out of the acceptable range, then do nothing
-    if (brightness < 0.0f || brightness > 1.0f)
+    // If the layer is out of the acceptable range, then do nothing
+    if (layer < TracingLayer::EAT || layer >= TracingLayer::Count)
     {
-        qDebug() << "Invalid brightness was specified for AxialSliceWidget: " << brightness;
+        qDebug() << "Invalid current tracing layer was specified for AxialSliceWidget: " << (int)layer;
         return;
     }
 
-    this->brightness = brightness;
+    tracingLayer = layer;
+}
 
-    // Redraw the screen because the brightness has changed
-    update();
+bool AxialSliceWidget::getTracingLayerVisible(TracingLayer layer)
+{
+    // If the layer is out of the acceptable range, then do nothing
+    if (layer < TracingLayer::EAT || layer >= TracingLayer::Count)
+    {
+        qDebug() << "Invalid current tracing layer was specified for AxialSliceWidget: " << (int)layer;
+        return false;
+    }
+
+    return tracingLayerVisible[(int)layer];
+}
+
+void AxialSliceWidget::setTracingLayerVisible(TracingLayer layer, bool value)
+{
+    // If the layer is out of the acceptable range, then do nothing
+    if (layer < TracingLayer::EAT || layer >= TracingLayer::Count)
+    {
+        qDebug() << "Invalid current tracing layer was specified for AxialSliceWidget: " << (int)layer;
+        return;
+    }
+
+    tracingLayerVisible[(int)layer] = value;
+}
+
+std::vector<std::vector<QPointF>> &AxialSliceWidget::getSlicePoints(int slice)
+{
+    if (slice == Location::NoChange)
+        slice = location.z();
+    else if (slice < 0 || slice >= fatImage->getZDim())
+    {
+        qDebug() << "Invalid slice given for getSlicePoints in AxialSliceWidget: " << slice;
+        slice = 0; // Since a reference is returned, just set a dummy slice
+    }
+
+    return points[slice];
+}
+
+std::vector<QPointF> &AxialSliceWidget::getLayerPoints(int slice, TracingLayer layer)
+{
+    if (slice == Location::NoChange)
+        slice = location.z();
+    else if (slice < 0 || slice >= fatImage->getZDim())
+    {
+        qDebug() << "Invalid slice given for getLayerPoints in AxialSliceWidget: " << slice;
+        slice = 0; // Since a reference is returned, just set a dummy slice
+    }
+
+    if (layer == TracingLayer::Count)
+        layer = tracingLayer;
+    else if (layer < TracingLayer::EAT || layer > TracingLayer::Count)
+    {
+        qDebug() << "Invalid tracing layer given for getLayerPoints in AxialSliceWidget: " << (int)layer;
+        layer = TracingLayer::EAT; // Since a reference is returned, just set a dummy layer
+    }
+
+    return points[slice][(int)layer];
 }
 
 float &AxialSliceWidget::rscaling()
@@ -423,9 +503,9 @@ void AxialSliceWidget::initializeColorMaps()
     const GLenum type = GL_UNSIGNED_BYTE;
 
     // Create textures for each of the color maps
-    glGenTextures(ColorMap::Count, &this->colorMapTexture[0]);
+    glGenTextures((GLsizei)ColorMap::Count, &this->colorMapTexture[0]);
 
-    for (int i = 0; i < ColorMap::Count; ++i)
+    for (int i = 0; i < (int)ColorMap::Count; ++i)
     {
         QPixmap pixmap;
 
@@ -762,21 +842,74 @@ void AxialSliceWidget::paintGL()
     painter.setPen(QPen(Qt::red, lineWidth, Qt::SolidLine, Qt::RoundCap));
     painter.drawLine(lineStart, lineEnd);
 
-    //painter.drawLines(lin)
-    //painter.setPen(Qt::red);
-    //painter.setFont(QFont("Arial", 30));
-    //painter.drawText(rect(), Qt::AlignCenter, "Qt");
-
-    painter.setPen(QPen(Qt::yellow, 1, Qt::SolidLine, Qt::RoundCap));
     painter.setTransform(getWindowToNIFTIMatrix().inverted().toTransform());
 
     auto axialPoints = points[location.z()];
     for (int i = 0; i < (int)TracingLayer::Count; ++i)
     {
-        // If visible TODO:
         auto layer = axialPoints[i];
-        if (layer.size() > 0)
-            painter.drawPoints(layer.data(), (int)layer.size()); // Not sure if this will do what I want but ookay. May need drawLines?
+        if (tracingLayerVisible[i] && layer.size() > 0)
+        {
+            painter.setPen(QPen(tracingLayerColors[i], 1, Qt::SolidLine, Qt::SquareCap));
+            painter.drawPoints(layer.data(), (int)layer.size());
+        }
+    }
+}
+
+void AxialSliceWidget::addPoint(QPointF mouseCoord)
+{
+    QPoint NIFTICoord = (getWindowToNIFTIMatrix() * mouseCoord).toPoint();
+
+    if (QRect(0, 0, fatImage->getXDim(), fatImage->getYDim()).contains(NIFTICoord))
+    {
+        auto &layerPoints = points[location.z()][(int)tracingLayer];
+
+        // Mouse Command Created is a boolean variable to store whether a TracingPointsAddCommand
+        // was added since the mouse has been clicked down. This is necessary because the user can
+        // mouse down outside of the NIFTI image, move around, and end up outside the NIFTI image
+        // without drawing a single point. Therefore, a boolean is checked and a command is created
+        // whenever the first point is to be added to the list.
+        if (!mouseCommand)
+        {
+            mouseCommand = new TracingPointsAddCommand((int)layerPoints.size(), this);
+            undoStack->push(mouseCommand);
+        }
+        else // There must be existing points in the list
+        {
+            // Perform linear interpolation between current point (NIFTICoord)
+            // and last point in layerPoints
+            const QPointF lastPoint = layerPoints.back();
+
+            // The length approximates how many units are between the two points
+            // Therefore, 1/length should be the approximate step value in percent
+            // to get all of the points between currentPoint and lastPoint
+            const float steps = 1 / QVector2D(NIFTICoord - lastPoint).length();
+            float percent = 0.0f;
+
+            while (percent < 1.0f)
+            {
+                QPointF interPoint = util::lerp(lastPoint, NIFTICoord, percent);
+                layerPoints.push_back(interPoint);
+
+                percent += steps;
+            }
+        }
+
+        layerPoints.push_back(NIFTICoord);
+
+        const int smoothPoints = std::min(2, (int)layerPoints.size() - mouseCommand->getIndex());
+        if (smoothPoints > 2)
+        {
+            const float a = 0.25f;
+            const size_t stopLayerPoints = layerPoints.size() - 1 - smoothPoints;
+            for (size_t i = layerPoints.size() - 2; i > stopLayerPoints; i--)
+            {
+                const QPointF pEnd = layerPoints[i] * a + layerPoints[i+1] * (1 - a);
+                layerPoints[i] = pEnd.toPoint();
+            }
+        }
+
+        update();
     }
 }
 
@@ -785,34 +918,7 @@ void AxialSliceWidget::mouseMoveEvent(QMouseEvent *eventMove)
     if (startDraw)
     {
         QPointF mouseCoord = eventMove->pos();
-        QPoint NIFTICoord = (getWindowToNIFTIMatrix() * mouseCoord).toPoint();
-
-        if (QRect(0, 0, fatImage->getXDim(), fatImage->getYDim()).contains(NIFTICoord))
-        {
-            auto &layerPoints = points[location.z()][0]; // TODO: Current layer
-            layerPoints.push_back(NIFTICoord);
-        }
-
-        //points.push_back(filtered);
-        /*if (points.size() > 8)
-        {
-            for (int i = 2; i < 8; i += 2)
-            {
-                const int j = points.size() - i - 2;
-                const QPointF p1 = points[j];
-                const QPointF p2 = points[j+2];
-                const float a = 0.5f;
-                const QPointF pEnd = p1 * a + p2 * (1 - a);
-                points[j] = pEnd;
-                points[j+1] = pEnd;
-            }
-            //filtered = (filtered + points[points.size() - 1]  + points[points.size() - 2] + points[points.size() - 3]) / 4;
-        }*/
-        //points.push_back(filtered);
-        //points.push_back(filtered);
-        //path.quadTo();
-        update();
-        mouseMoved = true;
+        addPoint(mouseCoord);
     }
     else if (startPan)
     {
@@ -844,10 +950,8 @@ void AxialSliceWidget::mousePressEvent(QMouseEvent *eventPress)
             startPan = false;
 
         startDraw = true;
-        //points[location.z()][0].push_back(eventPress->pos()); // Current layer
-        //points.push_back(eventPress->pos());
-        mouseMoved = false;
-        //path.moveTo(eventPress->pos());
+
+        addPoint(eventPress->pos());
     }
     else if (eventPress->button() == Qt::MiddleButton)
     {
@@ -864,7 +968,7 @@ void AxialSliceWidget::mousePressEvent(QMouseEvent *eventPress)
         // Flag to indicate that panning is occuring
         // The starting position is stored so to know how much movement has occurred
         startPan = true;
-        moveID = ((moveID + 1) > CommandID::AxialMoveEnd) ? CommandID::AxialMove : (CommandID)(moveID + 1);
+        moveID = (((int)moveID + 1) > (int)CommandID::AxialMoveEnd) ? CommandID::AxialMove : (CommandID)((int)moveID + 1);
         lastMousePos = eventPress->pos();
     }
 }
@@ -873,18 +977,10 @@ void AxialSliceWidget::mouseReleaseEvent(QMouseEvent *eventRelease)
 {
     if (eventRelease->button() == Qt::LeftButton && startDraw)
     {
-        /*if (!mouseMoved)
-        {
-            // Place a Bezier curve
-            //path.quadTo();
-        }
-        else
-        {*/
-            //points.removeLast();
-        //}
-        // Stop drawing here
-        //points[location.z()][0].push_back(eventRelease->pos()); // Current layer
+        addPoint(eventRelease->pos());
+
         startDraw = false;
+        mouseCommand = NULL;
     }
     else if (eventRelease->button() == Qt::MiddleButton && startPan)
     {

@@ -14,6 +14,7 @@
 #include <QMatrix4x4>
 #include <QUndoStack>
 #include <QPainter>
+#include <array>
 
 #include <nifti/nifti1.h>
 #include <nifti/nifti1_io.h>
@@ -35,10 +36,9 @@ private:
     NIFTImage *fatImage;
     NIFTImage *waterImage;
 
+    std::array<QColor, (size_t)TracingLayer::Count> tracingLayerColors;
     std::vector<std::vector<std::vector<QPointF>>> points;
-    //QVector<QPointF> points;
-    QPainterPath path;
-    bool mouseMoved;
+    TracingPointsAddCommand *mouseCommand;
 
     QOpenGLShaderProgram *program;
     GLuint sliceVertexBuf, sliceIndexBuf;
@@ -78,6 +78,9 @@ private:
     float scaling;
     QVector3D translation;
 
+    TracingLayer tracingLayer;
+    std::array<bool, (size_t)TracingLayer::Count> tracingLayerVisible;
+
     QUndoStack *undoStack;
 
 public:
@@ -107,11 +110,24 @@ public:
     float getSecdOpacity();
     void setSecdOpacity(float opacity);
 
+    float getBrightness();
+    void setBrightness(float brightness);
+
     float getContrast();
     void setContrast(float contrast);
 
-    float getBrightness();
-    void setBrightness(float brightness);
+    TracingLayer getTracingLayer();
+    void setTracingLayer(TracingLayer layer);
+
+    bool getTracingLayerVisible(TracingLayer layer);
+    void setTracingLayerVisible(TracingLayer layer, bool value);
+
+    /* Note: This will retrieve a vector of points for various configurations. The default values:
+     * slice defaulting to Location::NoChange will select the axial slice of the current location (location.z())
+     * layer defaulting to TracingLayer::Count will set the layer to the currently selected layer
+     */
+    std::vector<std::vector<QPointF>> &getSlicePoints(int slice = (int)Location::NoChange);
+    std::vector<QPointF> &getLayerPoints(int slice = (int)Location::NoChange, TracingLayer layer = TracingLayer::Count);
 
     void resetView();
 
@@ -137,6 +153,8 @@ protected:
     void initializeSliceView();
     void initializeCrosshairLine();
     void initializeColorMaps();
+
+    void addPoint(QPointF mouseCoord);
 
     void mouseMoveEvent(QMouseEvent *eventMove);
     void mousePressEvent(QMouseEvent *eventPress);

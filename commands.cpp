@@ -767,3 +767,149 @@ void SliceViewChangeCommand::redo()
     newBtn->setChecked(true);
     newBtn->blockSignals(prev);
 }
+
+// TracingLayerChangeCommand
+// --------------------------------------------------------------------------------------------------------------------
+TracingLayerChangeCommand::TracingLayerChangeCommand(TracingLayer newTracingLayer, AxialSliceWidget *widget, QRadioButton *oldBtn, QRadioButton *newBtn, QUndoCommand *parent) : QUndoCommand(parent)
+{
+    this->oldTracingLayer = widget->getTracingLayer();
+    this->newTracingLayer = newTracingLayer;
+    this->widget = widget;
+    this->oldBtn = oldBtn;
+    this->newBtn = newBtn;
+
+    // Updates text that is shown on QUndoView
+    setText(QObject::tr("Tracing layer set to %1").arg(newBtn->text()));
+}
+
+void TracingLayerChangeCommand::undo()
+{
+    // Go back to the old tracing layer
+    widget->setTracingLayer(oldTracingLayer);
+
+    // Check the old radio button which will automatically deselect the currently selected radio button
+    // It blocks all signals from being called so that a duplicate TracingLayerChangeCommand is not created
+    bool prev = oldBtn->blockSignals(true);
+    oldBtn->setChecked(true);
+    oldBtn->blockSignals(prev);
+}
+
+void TracingLayerChangeCommand::redo()
+{
+    // Go to the new tracing layer
+    widget->setTracingLayer(newTracingLayer);
+
+    // Check the new radio button which will automatically deselect the currently selected radio button
+    // It blocks all signals from being called so that a duplicate TracingLayerChangeCommand is not created
+    bool prev = newBtn->blockSignals(true);
+    newBtn->setChecked(true);
+    newBtn->blockSignals(prev);
+}
+
+// TracingLayerVisibleChangeCommand
+// --------------------------------------------------------------------------------------------------------------------
+TracingLayerVisibleChangeCommand::TracingLayerVisibleChangeCommand(TracingLayer tracingLayer, bool newValue, AxialSliceWidget *widget, QCheckBox *btn, QUndoCommand *parent) : QUndoCommand(parent)
+{
+    this->tracingLayer = tracingLayer;
+    this->newValue = newValue;
+    this->widget = widget;
+    this->btn = btn;
+
+    // Updates text that is shown on QUndoView
+    setText(QObject::tr("%1 tracing layer %2").arg(newValue ? "Show" : "Hide").arg(btn->text()));
+}
+
+void TracingLayerVisibleChangeCommand::undo()
+{
+    // Set the tracing layer to the old visibility value
+    widget->setTracingLayerVisible(tracingLayer, !newValue);
+
+    // Check/Uncheck the checkbox based on old value (!newValue)
+    // It blocks all signals from being called so that a duplicate TracingLayerChangeCommand is not created
+    bool prev = btn->blockSignals(true);
+    btn->setChecked(!newValue);
+    btn->blockSignals(prev);
+
+    widget->update();
+}
+
+void TracingLayerVisibleChangeCommand::redo()
+{
+    // Set the tracing layer to the new visibility value
+    widget->setTracingLayerVisible(tracingLayer, newValue);
+
+    // Check/Uncheck the checkbox based on new value (newValue)
+    // It blocks all signals from being called so that a duplicate TracingLayerChangeCommand is not created
+    bool prev = btn->blockSignals(true);
+    btn->setChecked(newValue);
+    btn->blockSignals(prev);
+
+    widget->update();
+}
+
+// TracingPointsAddCommand
+// --------------------------------------------------------------------------------------------------------------------
+TracingPointsAddCommand::TracingPointsAddCommand(int index, AxialSliceWidget *widget, QUndoCommand *parent) : QUndoCommand(parent)
+{
+    this->index = index;
+    this->widget = widget;
+
+    // Get a text string based on the layer that points are being added too (current layer)
+    QString str;
+    switch (widget->getTracingLayer())
+    {
+        case TracingLayer::EAT: str = "EAT"; break;
+        case TracingLayer::IMAT: str = "IMAT"; break;
+        case TracingLayer::PAAT: str = "PAAT"; break;
+        case TracingLayer::PAT: str = "PAT"; break;
+        case TracingLayer::SCAT: str = "SCAT"; break;
+        case TracingLayer::VAT: str = "VAT"; break;
+    }
+
+    // Updates text that is shown on QUndoView
+    setText(QObject::tr("Added points to %1 layer").arg(str));
+}
+
+void TracingPointsAddCommand::undo()
+{
+    // Get a vector of the points contained in the current layer and axial slice
+    auto &layerPoints = widget->getLayerPoints();
+
+    // If the number of points is below the index number, then something is wrong
+    // because there are no points to copy
+    if (layerPoints.size() <= index)
+    {
+        qDebug() << "Number of points contained in layerPoints is less than index. Layer points size: " << layerPoints.size() << " Index: " << index;
+        return;
+    }
+
+    // Store points start from index to end of vector. Then erase the points from layerPoints.
+    // Note: This is taken as a reference, so this will actually erase the data in AxialSliceWidget points variable
+    points.assign(layerPoints.begin() + index, layerPoints.end());
+    layerPoints.erase(layerPoints.begin() + index, layerPoints.end());
+
+    // Tell AxialSliceWidget to redraw the scene since points were removed
+    widget->update();
+}
+
+void TracingPointsAddCommand::redo()
+{
+    // Get a vector of the points contained in the current layer and axial slice
+    auto &layerPoints = widget->getLayerPoints();
+
+    // If there are no points to restore, do nothing. Presumably, this is the first
+    // call of redo() when inserting on stack.
+    if (points.size() == 0)
+        return;
+
+    layerPoints.insert(layerPoints.end(), points.begin(), points.end());
+    points.clear();
+
+    // Tell AxialSliceWidget to redraw the scene since points were added
+    widget->update();
+}
+
+int TracingPointsAddCommand::getIndex()
+{
+    return index;
+}

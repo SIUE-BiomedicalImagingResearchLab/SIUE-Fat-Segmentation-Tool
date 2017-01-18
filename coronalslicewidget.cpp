@@ -75,7 +75,7 @@ void CoronalSliceWidget::setDisplayType(SliceDisplayType type)
     // If the display type is out of the acceptable range, then do nothing
     if (type < SliceDisplayType::FatOnly || type > SliceDisplayType::WaterFraction)
     {
-        qDebug() << "Invalid display type was specified for CoronalSliceWidget: " << type;
+        qDebug() << "Invalid display type was specified for CoronalSliceWidget: " << (int)type;
         return;
     }
 
@@ -405,7 +405,7 @@ void CoronalSliceWidget::mousePressEvent(QMouseEvent *eventPress)
         // Flag to indicate that panning is occuring
         // The starting position is stored so to know how much movement has occurred
         startPan = true;
-        moveID = ((moveID + 1) > CommandID::CoronalMoveEnd) ? CommandID::CoronalMove : (CommandID)(moveID + 1);
+        moveID = (((int)moveID + 1) > (int)CommandID::CoronalMoveEnd) ? CommandID::CoronalMove : (CommandID)((int)moveID + 1);
         lastMousePos = eventPress->pos();
     }
 }
