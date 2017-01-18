@@ -50,6 +50,7 @@ public:
     void writeSettings();
 
     void changeSliceView(SliceDisplayType newType);
+    void changeTracingLayer(TracingLayer newLayer);
 
 private slots:
     void on_actionExit_triggered();
@@ -87,7 +88,21 @@ private slots:
     void on_fatWaterRadioBtn_toggled(bool checked);
     void on_waterFatRadioBtn_toggled(bool checked);
 
-    void on_resetViewBtn_clicked();
+    void on_resetViewBtn_clicked();    
+
+    void on_EATRadioBtn_toggled(bool checked);
+    void on_IMATRadioBtn_toggled(bool checked);
+    void on_PAATRadioBtn_toggled(bool checked);
+    void on_PATRadioBtn_toggled(bool checked);
+    void on_SCATRadioBtn_toggled(bool checked);
+    void on_VATRadioBtn_toggled(bool checked);
+
+    void on_EATCheckBox_toggled(bool checked);
+    void on_IMATCheckBox_toggled(bool checked);
+    void on_PAATCheckBox_toggled(bool checked);
+    void on_PATCheckBox_toggled(bool checked);
+    void on_SCATCheckBox_toggled(bool checked);
+    void on_VATCheckBox_toggled(bool checked);
 
     void undoStack_canUndoChanged(bool canUndo);
     void undoStack_canRedoChanged(bool canRedo);

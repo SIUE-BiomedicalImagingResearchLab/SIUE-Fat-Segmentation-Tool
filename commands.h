@@ -9,6 +9,7 @@
 #include <QSpinBox>
 #include <QComboBox>
 #include <QRadioButton>
+#include <QCheckBox>
 
 #include "displayinfo.h"
 
@@ -238,6 +239,37 @@ private:
 
 public:
     SliceViewChangeCommand(SliceDisplayType newDT, AxialSliceWidget *widget, QRadioButton *oldBtn, QRadioButton *newBtn, QUndoCommand *parent = NULL);
+
+    void undo() override;
+    void redo() override;
+};
+
+class TracingLayerChangeCommand : public QUndoCommand
+{
+private:
+    TracingLayer oldTracingLayer;
+    TracingLayer newTracingLayer;
+    AxialSliceWidget *widget;
+    QRadioButton *oldBtn;
+    QRadioButton *newBtn;
+
+public:
+    TracingLayerChangeCommand(TracingLayer newTracingLayer, AxialSliceWidget *widget, QRadioButton *oldBtn, QRadioButton *newBtn, QUndoCommand *parent = NULL);
+
+    void undo() override;
+    void redo() override;
+};
+
+class TracingLayerVisibleChangeCommand : public QUndoCommand
+{
+private:
+    TracingLayer tracingLayer;
+    bool newValue;
+    AxialSliceWidget *widget;
+    QCheckBox *btn;
+
+public:
+    TracingLayerVisibleChangeCommand(TracingLayer tracingLayer, bool newValue, AxialSliceWidget *widget, QCheckBox *btn, QUndoCommand *parent = NULL);
 
     void undo() override;
     void redo() override;

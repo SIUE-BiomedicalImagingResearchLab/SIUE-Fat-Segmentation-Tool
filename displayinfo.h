@@ -1,7 +1,7 @@
 #ifndef DISPLAYINFO_H
 #define DISPLAYINFO_H
 
-enum SliceDisplayType
+enum class SliceDisplayType : int
 {
     FatOnly,
     WaterOnly,
@@ -11,7 +11,7 @@ enum SliceDisplayType
     WaterFat
 };
 
-enum ColorMap
+enum class ColorMap : int
 {
     Autumn = 0,
     Bone,

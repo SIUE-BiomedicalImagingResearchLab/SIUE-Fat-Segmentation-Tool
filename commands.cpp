@@ -767,3 +767,82 @@ void SliceViewChangeCommand::redo()
     newBtn->setChecked(true);
     newBtn->blockSignals(prev);
 }
+
+// TracingLayerChangeCommand
+// --------------------------------------------------------------------------------------------------------------------
+TracingLayerChangeCommand::TracingLayerChangeCommand(TracingLayer newTracingLayer, AxialSliceWidget *widget, QRadioButton *oldBtn, QRadioButton *newBtn, QUndoCommand *parent) : QUndoCommand(parent)
+{
+    this->oldTracingLayer = widget->getTracingLayer();
+    this->newTracingLayer = newTracingLayer;
+    this->widget = widget;
+    this->oldBtn = oldBtn;
+    this->newBtn = newBtn;
+
+    // Updates text that is shown on QUndoView
+    setText(QObject::tr("Tracing layer set to %1").arg(newBtn->text()));
+}
+
+void TracingLayerChangeCommand::undo()
+{
+    // Go back to the old tracing layer
+    widget->setTracingLayer(oldTracingLayer);
+
+    // Check the old radio button which will automatically deselect the currently selected radio button
+    // It blocks all signals from being called so that a duplicate TracingLayerChangeCommand is not created
+    bool prev = oldBtn->blockSignals(true);
+    oldBtn->setChecked(true);
+    oldBtn->blockSignals(prev);
+}
+
+void TracingLayerChangeCommand::redo()
+{
+    // Go to the new tracing layer
+    widget->setTracingLayer(newTracingLayer);
+
+    // Check the new radio button which will automatically deselect the currently selected radio button
+    // It blocks all signals from being called so that a duplicate TracingLayerChangeCommand is not created
+    bool prev = newBtn->blockSignals(true);
+    newBtn->setChecked(true);
+    newBtn->blockSignals(prev);
+}
+
+// TracingLayerVisibleChangeCommand
+// --------------------------------------------------------------------------------------------------------------------
+TracingLayerVisibleChangeCommand::TracingLayerVisibleChangeCommand(TracingLayer tracingLayer, bool newValue, AxialSliceWidget *widget, QCheckBox *btn, QUndoCommand *parent) : QUndoCommand(parent)
+{
+    this->tracingLayer = tracingLayer;
+    this->newValue = newValue;
+    this->widget = widget;
+    this->btn = btn;
+
+    // Updates text that is shown on QUndoView
+    setText(QObject::tr("%1 tracing layer %2").arg(newValue ? "Show" : "Hide").arg(btn->text()));
+}
+
+void TracingLayerVisibleChangeCommand::undo()
+{
+    // Set the tracing layer to the old visibility value
+    widget->setTracingLayerVisible(tracingLayer, !newValue);
+
+    // Check/Uncheck the checkbox based on old value (!newValue)
+    // It blocks all signals from being called so that a duplicate TracingLayerChangeCommand is not created
+    bool prev = btn->blockSignals(true);
+    btn->setChecked(!newValue);
+    btn->blockSignals(prev);
+
+    widget->update();
+}
+
+void TracingLayerVisibleChangeCommand::redo()
+{
+    // Set the tracing layer to the new visibility value
+    widget->setTracingLayerVisible(tracingLayer, newValue);
+
+    // Check/Uncheck the checkbox based on new value (newValue)
+    // It blocks all signals from being called so that a duplicate TracingLayerChangeCommand is not created
+    bool prev = btn->blockSignals(true);
+    btn->setChecked(newValue);
+    btn->blockSignals(prev);
+
+    widget->update();
+}

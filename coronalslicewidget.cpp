@@ -75,7 +75,7 @@ void CoronalSliceWidget::setDisplayType(SliceDisplayType type)
     // If the display type is out of the acceptable range, then do nothing
     if (type < SliceDisplayType::FatOnly || type > SliceDisplayType::WaterFraction)
     {
-        qDebug() << "Invalid display type was specified for CoronalSliceWidget: " << type;
+        qDebug() << "Invalid display type was specified for CoronalSliceWidget: " << (int)type;
         return;
     }
 

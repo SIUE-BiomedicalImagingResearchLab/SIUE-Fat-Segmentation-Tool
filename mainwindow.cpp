@@ -192,12 +192,12 @@ void MainWindow::on_actionOpen_triggered()
         ui->contrastSpinBox->setValue(int(ui->glWidgetAxial->getContrast() * 100.0f));
 
         // Set the primary colormap value to the current color map and set the opacity
-        ui->primColorMapComboBox->setCurrentIndex(ui->glWidgetAxial->getPrimColorMap());
+        ui->primColorMapComboBox->setCurrentIndex((int)ui->glWidgetAxial->getPrimColorMap());
         ui->primOpacitySlider->setValue(int(ui->glWidgetAxial->getPrimOpacity() * 100.0f));
         ui->primOpacitySpinBox->setValue(int(ui->glWidgetAxial->getPrimOpacity() * 100.0f));
 
         // Set the secondary colormap value to the current color map and set the opacity
-        ui->secdColorMapComboBox->setCurrentIndex(ui->glWidgetAxial->getSecdColorMap());
+        ui->secdColorMapComboBox->setCurrentIndex((int)ui->glWidgetAxial->getSecdColorMap());
         ui->secdOpacitySlider->setValue(int(ui->glWidgetAxial->getSecdOpacity() * 100.0f));
         ui->secdOpacitySpinBox->setValue(int(ui->glWidgetAxial->getSecdOpacity() * 100.0f));
 
@@ -490,6 +490,102 @@ void MainWindow::on_resetViewBtn_clicked()
 {
     ui->glWidgetAxial->resetView();
     ui->glWidgetCoronal->resetView();
+}
+
+void MainWindow::changeTracingLayer(TracingLayer newLayer)
+{
+    if (newLayer == ui->glWidgetAxial->getTracingLayer())
+        return; // If old and new layer are same, do nothing
+
+    QRadioButton *newBtn = NULL;
+    switch (newLayer)
+    {
+        case TracingLayer::EAT: newBtn = ui->EATRadioBtn; break;
+        case TracingLayer::IMAT: newBtn = ui->IMATRadioBtn; break;
+        case TracingLayer::PAAT: newBtn = ui->PAATRadioBtn; break;
+        case TracingLayer::PAT: newBtn = ui->PATRadioBtn; break;
+        case TracingLayer::SCAT: newBtn = ui->SCATRadioBtn; break;
+        case TracingLayer::VAT: newBtn = ui->VATRadioBtn; break;
+    }
+
+    QRadioButton *oldBtn = NULL;
+    switch (ui->glWidgetAxial->getTracingLayer())
+    {
+        case TracingLayer::EAT: oldBtn = ui->EATRadioBtn; break;
+        case TracingLayer::IMAT: oldBtn = ui->IMATRadioBtn; break;
+        case TracingLayer::PAAT: oldBtn = ui->PAATRadioBtn; break;
+        case TracingLayer::PAT: oldBtn = ui->PATRadioBtn; break;
+        case TracingLayer::SCAT: oldBtn = ui->SCATRadioBtn; break;
+        case TracingLayer::VAT: oldBtn = ui->VATRadioBtn; break;
+    }
+
+    undoStack->push(new TracingLayerChangeCommand(newLayer, ui->glWidgetAxial, oldBtn, newBtn));
+}
+
+void MainWindow::on_EATRadioBtn_toggled(bool checked)
+{
+    if (checked)
+        changeTracingLayer(TracingLayer::EAT);
+}
+
+void MainWindow::on_IMATRadioBtn_toggled(bool checked)
+{
+    if (checked)
+        changeTracingLayer(TracingLayer::IMAT);
+}
+
+void MainWindow::on_PAATRadioBtn_toggled(bool checked)
+{
+    if (checked)
+        changeTracingLayer(TracingLayer::PAAT);
+}
+
+void MainWindow::on_PATRadioBtn_toggled(bool checked)
+{
+    if (checked)
+        changeTracingLayer(TracingLayer::PAT);
+}
+
+void MainWindow::on_SCATRadioBtn_toggled(bool checked)
+{
+    if (checked)
+        changeTracingLayer(TracingLayer::SCAT);
+}
+
+void MainWindow::on_VATRadioBtn_toggled(bool checked)
+{
+    if (checked)
+        changeTracingLayer(TracingLayer::VAT);
+}
+
+void MainWindow::on_EATCheckBox_toggled(bool checked)
+{
+    undoStack->push(new TracingLayerVisibleChangeCommand(TracingLayer::EAT, checked, ui->glWidgetAxial, ui->EATCheckBox));
+}
+
+void MainWindow::on_IMATCheckBox_toggled(bool checked)
+{
+    undoStack->push(new TracingLayerVisibleChangeCommand(TracingLayer::IMAT, checked, ui->glWidgetAxial, ui->IMATCheckBox));
+}
+
+void MainWindow::on_PAATCheckBox_toggled(bool checked)
+{
+    undoStack->push(new TracingLayerVisibleChangeCommand(TracingLayer::PAAT, checked, ui->glWidgetAxial, ui->PAATCheckBox));
+}
+
+void MainWindow::on_PATCheckBox_toggled(bool checked)
+{
+    undoStack->push(new TracingLayerVisibleChangeCommand(TracingLayer::PAT, checked, ui->glWidgetAxial, ui->PATCheckBox));
+}
+
+void MainWindow::on_SCATCheckBox_toggled(bool checked)
+{
+    undoStack->push(new TracingLayerVisibleChangeCommand(TracingLayer::SCAT, checked, ui->glWidgetAxial, ui->SCATCheckBox));
+}
+
+void MainWindow::on_VATCheckBox_toggled(bool checked)
+{
+    undoStack->push(new TracingLayerVisibleChangeCommand(TracingLayer::VAT, checked, ui->glWidgetAxial, ui->VATCheckBox));
 }
 
 void MainWindow::undoStack_canUndoChanged(bool canUndo)
