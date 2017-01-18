@@ -846,3 +846,65 @@ void TracingLayerVisibleChangeCommand::redo()
 
     widget->update();
 }
+
+// TracingPointsAddCommand
+// --------------------------------------------------------------------------------------------------------------------
+TracingPointsAddCommand::TracingPointsAddCommand(int index, AxialSliceWidget *widget, QUndoCommand *parent) : QUndoCommand(parent)
+{
+    this->index = index;
+    this->widget = widget;
+
+    // Get a text string based on the layer that points are being added too (current layer)
+    QString str;
+    switch (widget->getTracingLayer())
+    {
+        case TracingLayer::EAT: str = "EAT"; break;
+        case TracingLayer::IMAT: str = "IMAT"; break;
+        case TracingLayer::PAAT: str = "PAAT"; break;
+        case TracingLayer::PAT: str = "PAT"; break;
+        case TracingLayer::SCAT: str = "SCAT"; break;
+        case TracingLayer::VAT: str = "VAT"; break;
+    }
+
+    // Updates text that is shown on QUndoView
+    setText(QObject::tr("Added points to %1 layer").arg(str));
+}
+
+void TracingPointsAddCommand::undo()
+{
+    // Get a vector of the points contained in the current layer and axial slice
+    auto &layerPoints = widget->getLayerPoints();
+
+    // If the number of points is below the index number, then something is wrong
+    // because there are no points to copy
+    if (layerPoints.size() <= index)
+    {
+        qDebug() << "Number of points contained in layerPoints is less than index. Layer points size: " << layerPoints.size() << " Index: " << index;
+        return;
+    }
+
+    // Store points start from index to end of vector. Then erase the points from layerPoints.
+    // Note: This is taken as a reference, so this will actually erase the data in AxialSliceWidget points variable
+    points.assign(layerPoints.begin() + index, layerPoints.end());
+    layerPoints.erase(layerPoints.begin() + index, layerPoints.end());
+
+    // Tell AxialSliceWidget to redraw the scene since points were removed
+    widget->update();
+}
+
+void TracingPointsAddCommand::redo()
+{
+    // Get a vector of the points contained in the current layer and axial slice
+    auto &layerPoints = widget->getLayerPoints();
+
+    // If there are no points to restore, do nothing. Presumably, this is the first
+    // call of redo() when inserting on stack.
+    if (points.size() == 0)
+        return;
+
+    layerPoints.insert(layerPoints.end(), points.begin(), points.end());
+    points.clear();
+
+    // Tell AxialSliceWidget to redraw the scene since points were added
+    widget->update();
+}

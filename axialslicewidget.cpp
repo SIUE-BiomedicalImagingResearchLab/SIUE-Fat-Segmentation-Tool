@@ -9,6 +9,7 @@ AxialSliceWidget::AxialSliceWidget(QWidget *parent) : QOpenGLWidget(parent)
     this->waterImage = NULL;
 
     this->tracingLayerColors = { Qt::blue, Qt::darkCyan, Qt::cyan, Qt::magenta, Qt::yellow, Qt::green };
+    this->mouseCommandCreated = false;
 
     this->slicePrimTexture = NULL;
     this->sliceSecdTexture = NULL;
@@ -260,6 +261,40 @@ void AxialSliceWidget::setTracingLayerVisible(TracingLayer layer, bool value)
     }
 
     tracingLayerVisible[(int)layer] = value;
+}
+
+std::vector<std::vector<QPointF>> &AxialSliceWidget::getSlicePoints(int slice)
+{
+    if (slice == Location::NoChange)
+        slice = location.z();
+    else if (slice < 0 || slice >= fatImage->getZDim())
+    {
+        qDebug() << "Invalid slice given for getSlicePoints in AxialSliceWidget: " << slice;
+        slice = 0; // Since a reference is returned, just set a dummy slice
+    }
+
+    return points[slice];
+}
+
+std::vector<QPointF> &AxialSliceWidget::getLayerPoints(int slice, TracingLayer layer)
+{
+    if (slice == Location::NoChange)
+        slice = location.z();
+    else if (slice < 0 || slice >= fatImage->getZDim())
+    {
+        qDebug() << "Invalid slice given for getLayerPoints in AxialSliceWidget: " << slice;
+        slice = 0; // Since a reference is returned, just set a dummy slice
+    }
+
+    if (layer == TracingLayer::Count)
+        layer = tracingLayer;
+    else if (layer < TracingLayer::EAT || layer > TracingLayer::Count)
+    {
+        qDebug() << "Invalid tracing layer given for getLayerPoints in AxialSliceWidget: " << (int)layer;
+        layer = TracingLayer::EAT; // Since a reference is returned, just set a dummy layer
+    }
+
+    return points[slice][(int)layer];
 }
 
 float &AxialSliceWidget::rscaling()
@@ -827,33 +862,48 @@ void AxialSliceWidget::paintGL()
     }
 }
 
+void AxialSliceWidget::addPoint(QPointF mouseCoord)
+{
+    QPoint NIFTICoord = (getWindowToNIFTIMatrix() * mouseCoord).toPoint();
+
+    if (QRect(0, 0, fatImage->getXDim(), fatImage->getYDim()).contains(NIFTICoord))
+    {
+        auto &layerPoints = points[location.z()][(int)tracingLayer];
+
+        // Mouse Command Created is a boolean variable to store whether a TracingPointsAddCommand
+        // was added since the mouse has been clicked down. This is necessary because the user can
+        // mouse down outside of the NIFTI image, move around, and end up outside the NIFTI image
+        // without drawing a single point. Therefore, a boolean is checked and a command is created
+        // whenever the first point is to be added to the list.
+        if (!mouseCommandCreated)
+        {
+            undoStack->push(new TracingPointsAddCommand(layerPoints.size(), this));
+            mouseCommandCreated = true;
+        }
+        layerPoints.push_back(NIFTICoord);
+
+        /*const int smoothPoints = 2;
+        if (layerPoints.size() > smoothPoints)
+        {
+            const float a = 0.25f;
+            const size_t stoplayerPoints = layerPoints.size() - 1 - smoothPoints;
+            for (size_t i = layerPoints.size() - 2; i > stoplayerPoints; i--)
+            {
+                const QPointF pEnd = layerPoints[i] * a + layerPoints[i+1] * (1 - a);
+                layerPoints[i] = pEnd.toPoint();
+            }
+        }*/
+
+        update();
+    }
+}
+
 void AxialSliceWidget::mouseMoveEvent(QMouseEvent *eventMove)
 {
     if (startDraw)
     {
         QPointF mouseCoord = eventMove->pos();
-        QPoint NIFTICoord = (getWindowToNIFTIMatrix() * mouseCoord).toPoint();
-
-        if (QRect(0, 0, fatImage->getXDim(), fatImage->getYDim()).contains(NIFTICoord))
-        {
-            auto &layerPoints = points[location.z()][(int)tracingLayer];
-            layerPoints.push_back(NIFTICoord);
-
-            const int smoothPoints = 2;
-            if (layerPoints.size() > smoothPoints)
-            {
-                const float a = 0.25f;
-                const int stoplayerPoints = (int)layerPoints.size() - 1 - smoothPoints;
-                for (int i = layerPoints.size() - 2; i > stoplayerPoints; i--)
-                {
-                    const QPointF pEnd = layerPoints[i] * a + layerPoints[i+1] * (1 - a);
-                    layerPoints[i] = pEnd.toPoint();
-                }
-            }
-        }
-
-        update();
-        mouseMoved = true;
+        addPoint(mouseCoord);
     }
     else if (startPan)
     {
@@ -885,20 +935,8 @@ void AxialSliceWidget::mousePressEvent(QMouseEvent *eventPress)
             startPan = false;
 
         startDraw = true;
-        //points[location.z()][0].push_back(eventPress->pos()); // Current layer
-        //points.push_back(eventPress->pos());
-        mouseMoved = false;
 
-        QPointF mouseCoord = eventPress->pos();
-        QPoint NIFTICoord = (getWindowToNIFTIMatrix() * mouseCoord).toPoint();
-
-        if (QRect(0, 0, fatImage->getXDim(), fatImage->getYDim()).contains(NIFTICoord))
-        {
-            auto &layerPoints = points[location.z()][(int)tracingLayer];
-            layerPoints.push_back(NIFTICoord);
-        }
-
-        update();
+        addPoint(eventPress->pos());
     }
     else if (eventPress->button() == Qt::MiddleButton)
     {
@@ -915,7 +953,7 @@ void AxialSliceWidget::mousePressEvent(QMouseEvent *eventPress)
         // Flag to indicate that panning is occuring
         // The starting position is stored so to know how much movement has occurred
         startPan = true;
-        moveID = ((moveID + 1) > CommandID::AxialMoveEnd) ? CommandID::AxialMove : (CommandID)(moveID + 1);
+        moveID = (((int)moveID + 1) > (int)CommandID::AxialMoveEnd) ? CommandID::AxialMove : (CommandID)((int)moveID + 1);
         lastMousePos = eventPress->pos();
     }
 }
@@ -924,18 +962,10 @@ void AxialSliceWidget::mouseReleaseEvent(QMouseEvent *eventRelease)
 {
     if (eventRelease->button() == Qt::LeftButton && startDraw)
     {
+        addPoint(eventRelease->pos());
+
         startDraw = false;
-
-        QPointF mouseCoord = eventRelease->pos();
-        QPoint NIFTICoord = (getWindowToNIFTIMatrix() * mouseCoord).toPoint();
-
-        if (QRect(0, 0, fatImage->getXDim(), fatImage->getYDim()).contains(NIFTICoord))
-        {
-            auto &layerPoints = points[location.z()][(int)tracingLayer];
-            layerPoints.push_back(NIFTICoord);
-        }
-
-        update();
+        mouseCommandCreated = false;
     }
     else if (eventRelease->button() == Qt::MiddleButton && startPan)
     {
