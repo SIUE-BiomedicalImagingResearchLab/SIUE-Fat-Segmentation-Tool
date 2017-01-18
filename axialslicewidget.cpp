@@ -838,26 +838,20 @@ void AxialSliceWidget::mouseMoveEvent(QMouseEvent *eventMove)
         {
             auto &layerPoints = points[location.z()][(int)tracingLayer];
             layerPoints.push_back(NIFTICoord);
+
+            const int smoothPoints = 2;
+            if (layerPoints.size() > smoothPoints)
+            {
+                const float a = 0.25f;
+                const int stoplayerPoints = (int)layerPoints.size() - 1 - smoothPoints;
+                for (int i = layerPoints.size() - 2; i > stoplayerPoints; i--)
+                {
+                    const QPointF pEnd = layerPoints[i] * a + layerPoints[i+1] * (1 - a);
+                    layerPoints[i] = pEnd.toPoint();
+                }
+            }
         }
 
-        //points.push_back(filtered);
-        /*if (points.size() > 8)
-        {
-            for (int i = 2; i < 8; i += 2)
-            {
-                const int j = points.size() - i - 2;
-                const QPointF p1 = points[j];
-                const QPointF p2 = points[j+2];
-                const float a = 0.5f;
-                const QPointF pEnd = p1 * a + p2 * (1 - a);
-                points[j] = pEnd;
-                points[j+1] = pEnd;
-            }
-            //filtered = (filtered + points[points.size() - 1]  + points[points.size() - 2] + points[points.size() - 3]) / 4;
-        }*/
-        //points.push_back(filtered);
-        //points.push_back(filtered);
-        //path.quadTo();
         update();
         mouseMoved = true;
     }
