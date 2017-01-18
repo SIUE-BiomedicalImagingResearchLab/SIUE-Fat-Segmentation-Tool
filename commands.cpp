@@ -10,7 +10,7 @@ AxialMoveCommand::AxialMoveCommand(QPointF delta, AxialSliceWidget *widget, Comm
     // Divide delta by respective width/height of screen and multiply by 2.0f
     // This is because the OpenGL range is -1.0f -> 1.0f(2.0 total) and the width/height of the screen is given.
     // This converts from window coordinates to OpenGL coordinates
-    this->delta = QVector3D((delta.x() * 2.0f / widget->width()), (-delta.y() * 2.0f / widget->height()), 0.0f);
+    this->delta = QVector3D(delta); //QVector3D((delta.x() * 2.0f / widget->width()), (-delta.y() * 2.0f / widget->height()), 0.0f);
     this->widget = widget;
     this->ID = ID;
 
@@ -58,10 +58,11 @@ bool AxialMoveCommand::mergeWith(const QUndoCommand *command)
 // --------------------------------------------------------------------------------------------------------------------
 CoronalMoveCommand::CoronalMoveCommand(QPointF delta, CoronalSliceWidget *widget, CommandID ID, QUndoCommand *parent) : QUndoCommand(parent)
 {
-    // Divide delta by respective width/height of screen and multiply by 2.0f
-    // This is because the OpenGL range is -1.0f -> 1.0f(2.0 total) and the width/height of the screen is given.
-    // This converts from window coordinates to OpenGL coordinates
-    this->delta = QVector3D((delta.x() * 2.0f / widget->width()), (-delta.y() * 2.0f / widget->height()), 0.0f);
+    // Delta is in OpenGL coordinate system already
+    this->delta = QVector3D(delta);
+
+    //this->delta = QVector3D(widget->getWindowToOpenGLMatrix() * delta);
+
     this->widget = widget;
     this->ID = ID;
 

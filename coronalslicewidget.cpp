@@ -380,7 +380,20 @@ void CoronalSliceWidget::mouseMoveEvent(QMouseEvent *eventMove)
     if (startPan)
     {
         // Change in mouse x/y based on last mouse position
-        QPointF delta = (eventMove->pos() - lastMousePos);
+        QPointF curMousePos = eventMove->pos();
+        QPointF lastMousePos_ = this->lastMousePos;
+
+        // Get matrix for converting from window to OpenGL coordinate system
+        // Note: Do not apply MVP because we do not want to see movement based on
+        // scaling (this means dont flip it either)
+        QMatrix4x4 windowToOpenGLMatrix = this->getWindowToOpenGLMatrix(false, false);
+
+        // Apply transformation to current and last mouse position
+        curMousePos = windowToOpenGLMatrix * curMousePos;
+        lastMousePos_ = windowToOpenGLMatrix * lastMousePos_;
+
+        // Get the delta
+        QPointF delta = (curMousePos - lastMousePos_);
 
         // Push a new move command on the undoStack. This will call the command but also keep track
         // of it if an undo or redo action is called. redo function is called immediately.
