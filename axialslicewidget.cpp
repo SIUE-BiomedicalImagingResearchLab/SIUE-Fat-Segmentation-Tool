@@ -9,7 +9,7 @@ AxialSliceWidget::AxialSliceWidget(QWidget *parent) : QOpenGLWidget(parent)
     this->waterImage = NULL;
 
     this->tracingLayerColors = { Qt::blue, Qt::darkCyan, Qt::cyan, Qt::magenta, Qt::yellow, Qt::green };
-    this->mouseCommandCreated = false;
+    this->mouseCommand = NULL;
 
     this->slicePrimTexture = NULL;
     this->sliceSecdTexture = NULL;
@@ -842,11 +842,6 @@ void AxialSliceWidget::paintGL()
     painter.setPen(QPen(Qt::red, lineWidth, Qt::SolidLine, Qt::RoundCap));
     painter.drawLine(lineStart, lineEnd);
 
-    //painter.drawLines(lin)
-    //painter.setPen(Qt::red);
-    //painter.setFont(QFont("Arial", 30));
-    //painter.drawText(rect(), Qt::AlignCenter, "Qt");
-
     painter.setTransform(getWindowToNIFTIMatrix().inverted().toTransform());
 
     auto axialPoints = points[location.z()];
@@ -855,9 +850,8 @@ void AxialSliceWidget::paintGL()
         auto layer = axialPoints[i];
         if (tracingLayerVisible[i] && layer.size() > 0)
         {
-            painter.setPen(QPen(tracingLayerColors[i], 1, Qt::SolidLine, Qt::RoundCap));
-
-            painter.drawPoints(layer.data(), (int)layer.size()); // Not sure if this will do what I want but ookay. May need drawLines?
+            painter.setPen(QPen(tracingLayerColors[i], 1, Qt::SolidLine, Qt::SquareCap));
+            painter.drawPoints(layer.data(), (int)layer.size());
         }
     }
 }
@@ -875,24 +869,45 @@ void AxialSliceWidget::addPoint(QPointF mouseCoord)
         // mouse down outside of the NIFTI image, move around, and end up outside the NIFTI image
         // without drawing a single point. Therefore, a boolean is checked and a command is created
         // whenever the first point is to be added to the list.
-        if (!mouseCommandCreated)
+        if (!mouseCommand)
         {
-            undoStack->push(new TracingPointsAddCommand(layerPoints.size(), this));
-            mouseCommandCreated = true;
+            mouseCommand = new TracingPointsAddCommand((int)layerPoints.size(), this);
+            undoStack->push(mouseCommand);
         }
+        else // There must be existing points in the list
+        {
+            // Perform linear interpolation between current point (NIFTICoord)
+            // and last point in layerPoints
+            const QPointF lastPoint = layerPoints.back();
+
+            // The length approximates how many units are between the two points
+            // Therefore, 1/length should be the approximate step value in percent
+            // to get all of the points between currentPoint and lastPoint
+            const float steps = 1 / QVector2D(NIFTICoord - lastPoint).length();
+            float percent = 0.0f;
+
+            while (percent < 1.0f)
+            {
+                QPointF interPoint = util::lerp(lastPoint, NIFTICoord, percent);
+                layerPoints.push_back(interPoint);
+
+                percent += steps;
+            }
+        }
+
         layerPoints.push_back(NIFTICoord);
 
-        /*const int smoothPoints = 2;
-        if (layerPoints.size() > smoothPoints)
+        const int smoothPoints = std::min(2, (int)layerPoints.size() - mouseCommand->getIndex());
+        if (smoothPoints > 2)
         {
             const float a = 0.25f;
-            const size_t stoplayerPoints = layerPoints.size() - 1 - smoothPoints;
-            for (size_t i = layerPoints.size() - 2; i > stoplayerPoints; i--)
+            const size_t stopLayerPoints = layerPoints.size() - 1 - smoothPoints;
+            for (size_t i = layerPoints.size() - 2; i > stopLayerPoints; i--)
             {
                 const QPointF pEnd = layerPoints[i] * a + layerPoints[i+1] * (1 - a);
                 layerPoints[i] = pEnd.toPoint();
             }
-        }*/
+        }
 
         update();
     }
@@ -965,7 +980,7 @@ void AxialSliceWidget::mouseReleaseEvent(QMouseEvent *eventRelease)
         addPoint(eventRelease->pos());
 
         startDraw = false;
-        mouseCommandCreated = false;
+        mouseCommand = NULL;
     }
     else if (eventRelease->button() == Qt::MiddleButton && startPan)
     {

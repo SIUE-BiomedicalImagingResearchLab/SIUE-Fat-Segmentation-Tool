@@ -292,6 +292,8 @@ public:
 
     void undo() override;
     void redo() override;
+
+    int getIndex();
 };
 
 #endif // COMMANDS_H

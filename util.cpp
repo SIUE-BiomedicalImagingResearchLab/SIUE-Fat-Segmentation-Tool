@@ -36,4 +36,32 @@ QVector2D clamp(QVector2D vector, QVector2D min, QVector2D max)
     return vector;
 }
 
+QVector4D lerp(QVector4D start, QVector4D end, float percent)
+{
+    return (start + percent * (end - start));
+}
+
+QVector3D lerp(QVector3D start, QVector3D end, float percent)
+{
+    return (start + percent * (end - start));
+}
+
+QVector2D lerp(QVector2D start, QVector2D end, float percent)
+{
+    return (start + percent * (end - start));
+}
+
+QPointF lerp(QPointF start, QPointF end, float percent)
+{
+    return (start + percent * (end - start));
+}
+
+QPoint lerp(QPoint start, QPoint end, float percent)
+{
+    const QPointF start_(start);
+    const QPointF end_(end);
+
+    return lerp(start_, end_, percent).toPoint();
+}
+
 }

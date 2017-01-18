@@ -908,3 +908,8 @@ void TracingPointsAddCommand::redo()
     // Tell AxialSliceWidget to redraw the scene since points were added
     widget->update();
 }
+
+int TracingPointsAddCommand::getIndex()
+{
+    return index;
+}

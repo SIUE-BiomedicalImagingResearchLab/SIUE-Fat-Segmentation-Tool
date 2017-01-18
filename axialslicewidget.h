@@ -38,7 +38,7 @@ private:
 
     std::array<QColor, (size_t)TracingLayer::Count> tracingLayerColors;
     std::vector<std::vector<std::vector<QPointF>>> points;
-    bool mouseCommandCreated;
+    TracingPointsAddCommand *mouseCommand;
 
     QOpenGLShaderProgram *program;
     GLuint sliceVertexBuf, sliceIndexBuf;
