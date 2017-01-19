@@ -92,7 +92,7 @@
                <item row="0" column="1">
                 <widget class="QSlider" name="axialSliceSlider">
                  <property name="toolTip">
-                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Change Axial Slice&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Drag slider left and right to change the axial slice currently displayed on the main widget&lt;/p&gt;&lt;p&gt;The slices are ordered &lt;span style=&quot; font-weight:600;&quot;&gt;Superior to Inferior&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Change Axial Slice&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Drag slider left and right to change the axial slice currently displayed on the main widget&lt;/p&gt;&lt;p&gt;The slices are ordered &lt;span style=&quot; font-weight:600;&quot;&gt;Superior to Inferior&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Shortcut: &lt;/span&gt;Left/Right Keys&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                  </property>
                  <property name="toolTipDuration">
                   <number>4000</number>
@@ -127,7 +127,7 @@
                   <enum>Qt::WheelFocus</enum>
                  </property>
                  <property name="toolTip">
-                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Change Axial Slice&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Enter slice number or use up/down arrows to change the axial slice currently displayed on the main widget.&lt;/p&gt;&lt;p&gt;The slices are ordered &lt;span style=&quot; font-weight:600;&quot;&gt;Superior to Inferior&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Change Axial Slice&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Enter slice number or use up/down arrows to change the axial slice currently displayed on the main widget.&lt;/p&gt;&lt;p&gt;The slices are ordered &lt;span style=&quot; font-weight:600;&quot;&gt;Superior to Inferior&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Shortcut: &lt;/span&gt;Left/Right Keys&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                  </property>
                  <property name="toolTipDuration">
                   <number>4000</number>
@@ -180,7 +180,7 @@
                <item row="1" column="1">
                 <widget class="QSlider" name="coronalSliceSlider">
                  <property name="toolTip">
-                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Change Coronal Slice&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Drag slider left and right to change the coronal slice currently displayed on the minimap widget&lt;/p&gt;&lt;p&gt;The slices are ordered &lt;span style=&quot; font-weight:600;&quot;&gt;Anterior to Posterior&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Change Coronal Slice&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Drag slider left and right to change the coronal slice currently displayed on the minimap widget&lt;/p&gt;&lt;p&gt;The slices are ordered &lt;span style=&quot; font-weight:600;&quot;&gt;Anterior to Posterior&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Shortcut: &lt;/span&gt;Up/Down Keys&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                  </property>
                  <property name="toolTipDuration">
                   <number>4000</number>
@@ -234,7 +234,7 @@
                   <enum>Qt::WheelFocus</enum>
                  </property>
                  <property name="toolTip">
-                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Change Coronal Slice&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Enter slice number or use up/down arrows to change the coronal slice currently displayed on the minimap widget.&lt;/p&gt;&lt;p&gt;The slices are ordered &lt;span style=&quot; font-weight:600;&quot;&gt;Anterior to Posterior&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Change Coronal Slice&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Enter slice number or use up/down arrows to change the coronal slice currently displayed on the minimap widget.&lt;/p&gt;&lt;p&gt;The slices are ordered &lt;span style=&quot; font-weight:600;&quot;&gt;Anterior to Posterior&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Shortcut: &lt;/span&gt;Up/Down Keys&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                  </property>
                  <property name="toolTipDuration">
                   <number>4000</number>
@@ -1090,8 +1090,11 @@
                    <verstretch>0</verstretch>
                   </sizepolicy>
                  </property>
+                 <property name="contextMenuPolicy">
+                  <enum>Qt::ActionsContextMenu</enum>
+                 </property>
                  <property name="toolTip">
-                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Epicardial Adipose Tissue&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Fat within pericardial sac&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Epicardial Adipose Tissue&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Fat within pericardial sac&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Shortcut: &lt;/span&gt;&amp;quot;1&amp;quot; Key&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                  </property>
                  <property name="toolTipDuration">
                   <number>4000</number>
@@ -1113,7 +1116,7 @@
                   </sizepolicy>
                  </property>
                  <property name="toolTip">
-                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Inter&lt;/span&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;M&lt;/span&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;uscular Adipose Tissue&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Fat in between muscles&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;InterMuscular Adipose Tissue&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Fat in between muscles&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Shortcut: &lt;/span&gt;&amp;quot;2&amp;quot; Key&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                  </property>
                  <property name="toolTipDuration">
                   <number>4000</number>
@@ -1132,7 +1135,7 @@
                   </sizepolicy>
                  </property>
                  <property name="toolTip">
-                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Peri-Aortic Adipose Tissue&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Fat surrounding aorta&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Peri-Aortic Adipose Tissue&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Fat surrounding aorta&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Shortcut: &lt;/span&gt;&amp;quot;3&amp;quot; Key&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                  </property>
                  <property name="toolTipDuration">
                   <number>4000</number>
@@ -1151,7 +1154,7 @@
                   </sizepolicy>
                  </property>
                  <property name="toolTip">
-                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Paracardial Adipose Tissue&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Fat outside pericardial sac&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Paracardial Adipose Tissue&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Fat outside pericardial sac&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Shortcut: &lt;/span&gt;&amp;quot;4&amp;quot; Key&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                  </property>
                  <property name="toolTipDuration">
                   <number>4000</number>
@@ -1170,7 +1173,7 @@
                   </sizepolicy>
                  </property>
                  <property name="toolTip">
-                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;SubCutaneous Adipose Tissue&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Fat beneath the skin&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;SubCutaneous Adipose Tissue&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Fat beneath the skin&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Shortcut: &lt;/span&gt;&amp;quot;5&amp;quot; Key&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                  </property>
                  <property name="toolTipDuration">
                   <number>4000</number>
@@ -1189,7 +1192,7 @@
                   </sizepolicy>
                  </property>
                  <property name="toolTip">
-                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Visceral Adipose Tissue&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Fat surrounding organs within abdomen&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Visceral Adipose Tissue&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Fat surrounding organs within abdomen&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Shortcut: &lt;/span&gt;&amp;quot;6&amp;quot; Key&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                  </property>
                  <property name="toolTipDuration">
                   <number>4000</number>

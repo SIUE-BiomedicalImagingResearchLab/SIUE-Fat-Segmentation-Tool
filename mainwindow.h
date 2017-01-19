@@ -12,6 +12,7 @@
 #include <QUndoView>
 #include <QVector4D>
 #include <QWhatsThis>
+#include <QShortcut>
 
 #include <nifti/nifti1.h>
 #include <nifti/nifti1_io.h>
@@ -46,6 +47,18 @@ private:
 
     QString saveTracingResultsPath;
 
+    QShortcut *EATShortcut;
+    QShortcut *IMATShortcut;
+    QShortcut *PAATShortcut;
+    QShortcut *PATShortcut;
+    QShortcut *SCATShortcut;
+    QShortcut *VATShortcut;
+
+    QShortcut *upShortcut;
+    QShortcut *downShortcut;
+    QShortcut *leftShortcut;
+    QShortcut *rightShortcut;
+
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
@@ -54,6 +67,7 @@ public:
     void writeSettings();
 
     bool loadImage(QString path);
+    void enableSettings();
     void setupDefaults();
 
     void changeSliceView(SliceDisplayType newType);
@@ -70,6 +84,11 @@ private slots:
     void on_actionExit_triggered();
 
     void on_actionAbout_triggered();
+
+    void on_upShortcut_triggered();
+    void on_downShortcut_triggered();
+    void on_leftShortcut_triggered();
+    void on_rightShortcut_triggered();
 
     void on_axialSliceSlider_valueChanged(int value);
     void on_axialSliceSpinBox_valueChanged(int value);
@@ -104,12 +123,14 @@ private slots:
 
     void on_resetViewBtn_clicked();    
 
-    void on_EATRadioBtn_toggled(bool checked);
-    void on_IMATRadioBtn_toggled(bool checked);
-    void on_PAATRadioBtn_toggled(bool checked);
-    void on_PATRadioBtn_toggled(bool checked);
-    void on_SCATRadioBtn_toggled(bool checked);
-    void on_VATRadioBtn_toggled(bool checked);
+    // Default to true so that the activated() signal in QShortcut
+    // can call this
+    void on_EATRadioBtn_toggled(bool checked = true);
+    void on_IMATRadioBtn_toggled(bool checked = true);
+    void on_PAATRadioBtn_toggled(bool checked = true);
+    void on_PATRadioBtn_toggled(bool checked = true);
+    void on_SCATRadioBtn_toggled(bool checked = true);
+    void on_VATRadioBtn_toggled(bool checked = true);
 
     void on_EATCheckBox_toggled(bool checked);
     void on_IMATCheckBox_toggled(bool checked);

@@ -5,7 +5,11 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
     undoView(NULL), undoStack(new QUndoStack(this)),
-    saveTracingResultsPath()
+    saveTracingResultsPath(),
+    EATShortcut(new QShortcut(QKeySequence("1"), this)), IMATShortcut(new QShortcut(QKeySequence("2"), this)), PAATShortcut(new QShortcut(QKeySequence("3"), this)),
+    PATShortcut(new QShortcut(QKeySequence("4"), this)), SCATShortcut(new QShortcut(QKeySequence("5"), this)), VATShortcut(new QShortcut(QKeySequence("6"), this)),
+    upShortcut(new QShortcut(QKeySequence("up"), this)), downShortcut(new QShortcut(QKeySequence("down"), this)),
+    leftShortcut(new QShortcut(QKeySequence("left"), this)), rightShortcut(new QShortcut(QKeySequence("right"), this))
 {  
     this->ui->setupUi(this);
 
@@ -37,6 +41,30 @@ MainWindow::MainWindow(QWidget *parent) :
 
     this->ui->statusBar->addPermanentWidget(this->ui->lblStatusLocation);
     this->ui->glWidgetAxial->setLocationLabel(this->ui->lblStatusLocation);
+
+    // Disable the shortcuts because the settings menu is disabled
+    this->EATShortcut->setEnabled(false);
+    this->IMATShortcut->setEnabled(false);
+    this->PAATShortcut->setEnabled(false);
+    this->PATShortcut->setEnabled(false);
+    this->SCATShortcut->setEnabled(false);
+    this->VATShortcut->setEnabled(false);
+    this->upShortcut->setEnabled(false);
+    this->downShortcut->setEnabled(false);
+    this->leftShortcut->setEnabled(false);
+    this->rightShortcut->setEnabled(false);
+
+    // Connect the shortcuts to the respective radio button toggle slot
+    connect(EATShortcut, SIGNAL(activated()), this, SLOT(on_EATRadioBtn_toggled()));
+    connect(IMATShortcut, SIGNAL(activated()), this, SLOT(on_IMATRadioBtn_toggled()));
+    connect(PAATShortcut, SIGNAL(activated()), this, SLOT(on_PAATRadioBtn_toggled()));
+    connect(PATShortcut, SIGNAL(activated()), this, SLOT(on_PATRadioBtn_toggled()));
+    connect(SCATShortcut, SIGNAL(activated()), this, SLOT(on_SCATRadioBtn_toggled()));
+    connect(VATShortcut, SIGNAL(activated()), this, SLOT(on_VATRadioBtn_toggled()));
+    connect(upShortcut, SIGNAL(activated()), this, SLOT(on_upShortcut_triggered()));
+    connect(downShortcut, SIGNAL(activated()), this, SLOT(on_downShortcut_triggered()));
+    connect(leftShortcut, SIGNAL(activated()), this, SLOT(on_leftShortcut_triggered()));
+    connect(rightShortcut, SIGNAL(activated()), this, SLOT(on_rightShortcut_triggered()));
 
     // Read window settings(size of window from last time application was used) upon initialization
     readSettings();
@@ -141,7 +169,7 @@ bool MainWindow::loadImage(QString path)
         setWindowTitle(QCoreApplication::applicationName() + " - " + path);
 
         // The settings box is disabled to prevent moving stuff before anything is loaded
-        ui->settingsWidget->setEnabled(true);
+        enableSettings();
 
         // The default slice that it will go to is half of the zDim
         QVector4D defaultLocation = QVector4D(Location::NoChange, floor(fatImage->getYDim() / 2), floor(fatImage->getZDim() / 2), Location::NoChange);
@@ -179,6 +207,23 @@ bool MainWindow::loadImage(QString path)
     }
 
     return false;
+}
+
+void MainWindow::enableSettings()
+{
+    // The settings box is disabled to prevent moving stuff before anything is loaded
+    ui->settingsWidget->setEnabled(true);
+
+    EATShortcut->setEnabled(true);
+    IMATShortcut->setEnabled(true);
+    PAATShortcut->setEnabled(true);
+    PATShortcut->setEnabled(true);
+    SCATShortcut->setEnabled(true);
+    VATShortcut->setEnabled(true);
+    upShortcut->setEnabled(true);
+    downShortcut->setEnabled(true);
+    leftShortcut->setEnabled(true);
+    rightShortcut->setEnabled(true);
 }
 
 void MainWindow::setupDefaults()
@@ -346,10 +391,58 @@ void MainWindow::on_actionAbout_triggered()
     aboutBox.exec();
 }
 
+void MainWindow::on_upShortcut_triggered()
+{
+    const int value = ui->glWidgetAxial->getLocation().y() + 1;
+    if (value >= fatImage->getYDim())
+        return;
+
+    // Add a SliceChangeCommand to change the coronal slice
+    undoStack->push(new LocationChangeCommand(QVector4D(Location::NoChange, value, Location::NoChange, Location::NoChange), ui->glWidgetAxial, ui->glWidgetCoronal,
+                                              ui->axialSliceSlider, ui->axialSliceSpinBox, ui->coronalSliceSlider,
+                                              ui->coronalSliceSpinBox, ui->saggitalSliceSlider, ui->saggitalSliceSpinBox));
+}
+
+void MainWindow::on_downShortcut_triggered()
+{
+    const int value = ui->glWidgetAxial->getLocation().y() - 1;
+    if (value < 0)
+        return;
+
+    // Add a SliceChangeCommand to change the coronal slice
+    undoStack->push(new LocationChangeCommand(QVector4D(Location::NoChange, value, Location::NoChange, Location::NoChange), ui->glWidgetAxial, ui->glWidgetCoronal,
+                                              ui->axialSliceSlider, ui->axialSliceSpinBox, ui->coronalSliceSlider,
+                                              ui->coronalSliceSpinBox, ui->saggitalSliceSlider, ui->saggitalSliceSpinBox));
+}
+
+void MainWindow::on_leftShortcut_triggered()
+{
+    const int value = ui->glWidgetAxial->getLocation().z() - 1;
+    if (value < 0)
+        return;
+
+    // Add a SliceChangeCommand to change the axial slice
+    undoStack->push(new LocationChangeCommand(QVector4D(Location::NoChange, Location::NoChange, value, Location::NoChange), ui->glWidgetAxial, ui->glWidgetCoronal,
+                                              ui->axialSliceSlider, ui->axialSliceSpinBox, ui->coronalSliceSlider,
+                                              ui->coronalSliceSpinBox, ui->saggitalSliceSlider, ui->saggitalSliceSpinBox));
+}
+
+void MainWindow::on_rightShortcut_triggered()
+{
+    const int value = ui->glWidgetAxial->getLocation().z() + 1;
+    if (value >= fatImage->getZDim())
+        return;
+
+    // Add a SliceChangeCommand to change the axial slice
+    undoStack->push(new LocationChangeCommand(QVector4D(Location::NoChange, Location::NoChange, value, Location::NoChange), ui->glWidgetAxial, ui->glWidgetCoronal,
+                                              ui->axialSliceSlider, ui->axialSliceSpinBox, ui->coronalSliceSlider,
+                                              ui->coronalSliceSpinBox, ui->saggitalSliceSlider, ui->saggitalSliceSpinBox));
+}
+
 void MainWindow::on_axialSliceSlider_valueChanged(int value)
 {
     // If the new value is equal to the current slice, then do nothing
-    if (ui->glWidgetAxial->getLocation().z() == value)
+    if (value == ui->glWidgetAxial->getLocation().z())
         return;
 
     // Add a SliceChangeCommand to change the axial slice
@@ -361,7 +454,7 @@ void MainWindow::on_axialSliceSlider_valueChanged(int value)
 void MainWindow::on_axialSliceSpinBox_valueChanged(int value)
 {
     // If the new value is equal to the current slice, then do nothing
-    if (ui->glWidgetAxial->getLocation().z() == value)
+    if (value == ui->glWidgetAxial->getLocation().z())
         return;
 
     // Add a SliceChangeCommand to change the axial slice
@@ -373,7 +466,7 @@ void MainWindow::on_axialSliceSpinBox_valueChanged(int value)
 void MainWindow::on_coronalSliceSlider_valueChanged(int value)
 {
     // If the new value is equal to the current slice, then do nothing
-    if (ui->glWidgetAxial->getLocation().y() == value)
+    if (value == ui->glWidgetAxial->getLocation().y())
         return;
 
     // Add a SliceChangeCommand to change the coronal slice
@@ -385,7 +478,7 @@ void MainWindow::on_coronalSliceSlider_valueChanged(int value)
 void MainWindow::on_coronalSliceSpinBox_valueChanged(int value)
 {
     // If the new value is equal to the current slice, then do nothing
-    if (ui->glWidgetAxial->getLocation().y() == value)
+    if (value == ui->glWidgetAxial->getLocation().y())
         return;
 
     // Add a SliceChangeCommand to change the coronal slice
@@ -397,7 +490,7 @@ void MainWindow::on_coronalSliceSpinBox_valueChanged(int value)
 void MainWindow::on_saggitalSliceSlider_valueChanged(int value)
 {
     // If the new value is equal to the current slice, then do nothing
-    if (ui->glWidgetAxial->getLocation().x() == value)
+    if (value == ui->glWidgetAxial->getLocation().x())
         return;
 
     // Add a SliceChangeCommand to change the saggital slice
@@ -409,7 +502,7 @@ void MainWindow::on_saggitalSliceSlider_valueChanged(int value)
 void MainWindow::on_saggitalSliceSpinBox_valueChanged(int value)
 {
     // If the new value is equal to the current slice, then do nothing
-    if (ui->glWidgetAxial->getLocation().x() == value)
+    if (value == ui->glWidgetAxial->getLocation().x())
         return;
 
     // Add a SliceChangeCommand to change the saggital slice
@@ -421,7 +514,7 @@ void MainWindow::on_saggitalSliceSpinBox_valueChanged(int value)
 void MainWindow::on_brightnessSlider_valueChanged(int value)
 {
     // If the new value is equal to the current value, then do nothing
-    if (ui->glWidgetAxial->getBrightness() == value / 100.0f)
+    if (value / 100.0f == ui->glWidgetAxial->getBrightness())
         return;
 
     // Add a BrightnessChangeCommand to change the brightness
@@ -431,7 +524,7 @@ void MainWindow::on_brightnessSlider_valueChanged(int value)
 void MainWindow::on_brightnessSpinBox_valueChanged(int value)
 {
     // If the new value is equal to the current value, then do nothing
-    if (ui->glWidgetAxial->getBrightness() == value / 100.0f)
+    if (value / 100.0f == ui->glWidgetAxial->getBrightness())
         return;
 
     // Add a BrightnessChangeCommand to change the brightness
@@ -441,7 +534,7 @@ void MainWindow::on_brightnessSpinBox_valueChanged(int value)
 void MainWindow::on_contrastSlider_valueChanged(int value)
 {
     // If the new value is equal to the current value, then do nothing
-    if (ui->glWidgetAxial->getContrast() == value / 100.0f)
+    if (value / 100.0f == ui->glWidgetAxial->getContrast())
         return;
 
     // Add a ContrastChangeCommand to change the contrast
@@ -451,7 +544,7 @@ void MainWindow::on_contrastSlider_valueChanged(int value)
 void MainWindow::on_contrastSpinBox_valueChanged(int value)
 {
     // If the new value is equal to the current value, then do nothing
-    if (ui->glWidgetAxial->getContrast() == value / 100.0f)
+    if (value / 100.0f == ui->glWidgetAxial->getContrast())
         return;
 
     // Add a ContrastChangeCommand to change the contrast
@@ -461,7 +554,7 @@ void MainWindow::on_contrastSpinBox_valueChanged(int value)
 void MainWindow::on_primColorMapComboBox_currentIndexChanged(int index)
 {
     // If the index is out of the acceptable bounds for the ColorMap, then do nothing
-    if (ui->glWidgetAxial->getPrimColorMap() == (ColorMap)index || index < (int)ColorMap::Autumn || index >= (int)ColorMap::Count)
+    if (index == (int)ui->glWidgetAxial->getPrimColorMap() || index < (int)ColorMap::Autumn || index >= (int)ColorMap::Count)
         return;
 
     // Add a ColorMapChangeCommand to change the color map
@@ -471,7 +564,7 @@ void MainWindow::on_primColorMapComboBox_currentIndexChanged(int index)
 void MainWindow::on_primOpacitySlider_valueChanged(int value)
 {
     // If the new value is equal to the current value, then do nothing
-    if (ui->glWidgetAxial->getPrimOpacity() == value / 100.0f)
+    if (value / 100.0f == ui->glWidgetAxial->getPrimOpacity())
         return;
 
     // Add a PrimOpacityChangeCommand to change the primary opacity
@@ -481,7 +574,7 @@ void MainWindow::on_primOpacitySlider_valueChanged(int value)
 void MainWindow::on_primOpacitySpinBox_valueChanged(int value)
 {
     // If the new value is equal to the current value, then do nothing
-    if (ui->glWidgetAxial->getPrimOpacity() == value / 100.0f)
+    if (value / 100.0f == ui->glWidgetAxial->getPrimOpacity())
         return;
 
     // Add a PrimOpacityChangeCommand to change the primary opacity
@@ -491,7 +584,7 @@ void MainWindow::on_primOpacitySpinBox_valueChanged(int value)
 void MainWindow::on_secdColorMapComboBox_currentIndexChanged(int index)
 {
     // If the index is out of the acceptable bounds for the ColorMap, then do nothing
-    if (ui->glWidgetAxial->getSecdColorMap() == (ColorMap)index || index < (int)ColorMap::Autumn || index >= (int)ColorMap::Count)
+    if (index == (int)ui->glWidgetAxial->getSecdColorMap() || index < (int)ColorMap::Autumn || index >= (int)ColorMap::Count)
         return;
 
     // Add a ColorMapChangeCommand to change the color map
@@ -501,7 +594,7 @@ void MainWindow::on_secdColorMapComboBox_currentIndexChanged(int index)
 void MainWindow::on_secdOpacitySlider_valueChanged(int value)
 {
     // If the new value is equal to the current value, then do nothing
-    if (ui->glWidgetAxial->getSecdOpacity() == value / 100.0f)
+    if (value / 100.0f == ui->glWidgetAxial->getSecdOpacity())
         return;
 
     // Add a SecdOpacityChangeCommand to change the secondary opacity
@@ -511,7 +604,7 @@ void MainWindow::on_secdOpacitySlider_valueChanged(int value)
 void MainWindow::on_secdOpacitySpinBox_valueChanged(int value)
 {
     // If the new value is equal to the current value, then do nothing
-    if (ui->glWidgetAxial->getSecdOpacity() == value / 100.0f)
+    if (value / 100.0f == ui->glWidgetAxial->getSecdOpacity())
         return;
 
     // Add a SecdOpacityChangeCommand to change the secondary opacity
@@ -620,6 +713,7 @@ void MainWindow::changeTracingLayer(TracingLayer newLayer)
         case TracingLayer::VAT: oldBtn = ui->VATRadioBtn; break;
     }
 
+    ui->statusBar->showMessage(QObject::tr("Change tracing layer to %1").arg(newBtn->text()), 4000);
     undoStack->push(new TracingLayerChangeCommand(newLayer, ui->glWidgetAxial, oldBtn, newBtn));
 }
 
@@ -743,6 +837,13 @@ MainWindow::~MainWindow()
         delete undoView;
 
     delete undoStack;
+
+    delete EATShortcut;
+    delete IMATShortcut;
+    delete PAATShortcut;
+    delete PATShortcut;
+    delete SCATShortcut;
+    delete VATShortcut;
 
     // Save current window settings for next time
     writeSettings();
