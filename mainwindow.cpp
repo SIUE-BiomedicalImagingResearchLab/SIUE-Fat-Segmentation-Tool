@@ -19,8 +19,8 @@ MainWindow::MainWindow(QWidget *parent) :
     this->ui->actionImportTracingData->setShortcut(QKeySequence("Ctrl+I"));
     this->ui->actionExit->setShortcut(util::getStandardSequence(QKeySequence::Close, QKeySequence("Alt+F4")));
     this->ui->actionUndo->setShortcut(util::getStandardSequence(QKeySequence::Undo, QKeySequence("Ctrl+Z")));
-    this->ui->actionRedo->setShortcut(util::getStandardSequence(QKeySequence::Redo, QKeySequence("Ctrl+Shift+Z")));
 
+    this->ui->actionRedo->setShortcut(util::getStandardSequence(QKeySequence::Redo, QKeySequence("Ctrl+Shift+Z")));
     // Disable the settingsWidget (because you cannot edit it in designer when it is disabled so I just leave
     // it enabled there). And set current tab to zero in case I am on a different tab in designer.
     this->ui->settingsWidget->setEnabled(false);
@@ -32,8 +32,11 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(undoStack, SIGNAL(canUndoChanged(bool)), this, SLOT(undoStack_canUndoChanged(bool)));
     connect(undoStack, SIGNAL(canRedoChanged(bool)), this, SLOT(undoStack_canRedoChanged(bool)));
-    ui->glWidgetAxial->setUndoStack(undoStack);
-    ui->glWidgetCoronal->setUndoStack(undoStack);
+    this->ui->glWidgetAxial->setUndoStack(undoStack);
+    this->ui->glWidgetCoronal->setUndoStack(undoStack);
+
+    this->ui->statusBar->addPermanentWidget(this->ui->lblStatusLocation);
+    this->ui->glWidgetAxial->setLocationLabel(this->ui->lblStatusLocation);
 
     // Read window settings(size of window from last time application was used) upon initialization
     readSettings();
@@ -261,6 +264,7 @@ void MainWindow::on_actionOpen_triggered()
     {
         // Since the NIFTI files were successfully opened, the default path in the FileChooser dialog next time will be this path
         defaultOpenDir = path;
+        ui->statusBar->showMessage(QObject::tr("Successfully loaded file in %1").arg(path), 4000);
     }
     else
         qDebug() << "Unable to load image data located in path: " << path;
@@ -272,6 +276,8 @@ void MainWindow::on_actionSave_triggered()
         on_actionSaveAs_triggered();
     else if (!ui->glWidgetAxial->saveTracingData(saveTracingResultsPath, false))
         qDebug() << "Unable to save tracing data in file: " << saveTracingResultsPath;
+    else
+        ui->statusBar->showMessage(QObject::tr("Successfully saved file at %1").arg(saveTracingResultsPath), 4000);
 }
 
 void MainWindow::on_actionSaveAs_triggered()
@@ -293,6 +299,7 @@ void MainWindow::on_actionSaveAs_triggered()
         // Since the NIFTI files were successfully saved, the default path in the dialog next time will be this path
         defaultSaveDir = path;
         saveTracingResultsPath = path;
+        ui->statusBar->showMessage(QObject::tr("Successfully saved file at %1").arg(path), 4000);
     }
     else
         qDebug() << "Unable to save tracing data in path: " << path;
@@ -317,6 +324,7 @@ void MainWindow::on_actionImportTracingData_triggered()
         // Since the NIFTI files were successfully loaded, the default path in the dialog next time will be this path
         defaultSaveDir = path;
         saveTracingResultsPath = path;
+        ui->statusBar->showMessage(QObject::tr("Successfully loaded tracing results in %1").arg(path), 4000);
     }
     else
         qDebug() << "Unable to save tracing data in path: " << path;
@@ -326,6 +334,16 @@ void MainWindow::on_actionExit_triggered()
 {
     // When exit is clicked in menu, close the application
     this->close();
+}
+
+void MainWindow::on_actionAbout_triggered()
+{
+    QMessageBox aboutBox(QMessageBox::Information, "About the Program",
+                         "<html><head/><body><p><span style=\" font-weight:600;\">Creator: </span>Addison Elliott</p><p><span style=\" font-weight:600;\">Adviser: </span>Jon Klingensmith</p><p><span style=\" font-weight:600;\">School: </span>Southern Illinois University Edwardsville</p></body></html>",
+                         QMessageBox::Ok, this);
+    aboutBox.setTextFormat(Qt::RichText);
+
+    aboutBox.exec();
 }
 
 void MainWindow::on_axialSliceSlider_valueChanged(int value)
@@ -683,11 +701,13 @@ void MainWindow::undoStack_canRedoChanged(bool canRedo)
 
 void MainWindow::on_actionUndo_triggered()
 {
+    ui->statusBar->showMessage(QObject::tr("Undid \"%1\"").arg(undoStack->undoText()), 4000);
     undoStack->undo();
 }
 
 void MainWindow::on_actionRedo_triggered()
 {
+    ui->statusBar->showMessage(QObject::tr("Redid \"%1\"").arg(undoStack->redoText()), 4000);
     undoStack->redo();
 }
 

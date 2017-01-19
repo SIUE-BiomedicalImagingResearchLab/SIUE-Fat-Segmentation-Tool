@@ -5,7 +5,7 @@ AxialSliceWidget::AxialSliceWidget(QWidget *parent) : QOpenGLWidget(parent),
     displayType(SliceDisplayType::FatOnly), fatImage(NULL), waterImage(NULL),
     tracingLayerColors({ Qt::blue, Qt::darkCyan, Qt::cyan, Qt::magenta, Qt::yellow, Qt::green }), mouseCommand(NULL),
     slicePrimTexture(NULL), sliceSecdTexture(NULL),
-    location(0, 0, 0, 0), primColorMap(ColorMap::Gray), primOpacity(1.0f), secdColorMap(ColorMap::Gray), secdOpacity(1.0f),
+    location(0, 0, 0, 0), locationLabel(NULL), primColorMap(ColorMap::Gray), primOpacity(1.0f), secdColorMap(ColorMap::Gray), secdOpacity(1.0f),
     brightness(0.0f), contrast(1.0f), tracingLayer(TracingLayer::EAT),
     startDraw(false), startPan(false), moveID(CommandID::AxialMove)
 {
@@ -51,6 +51,10 @@ void AxialSliceWidget::setLocation(QVector4D location)
     // If Z value changed, then update the texture
     if (delta.z())
         updateTexture();
+
+    // Update location label
+    if (locationLabel)
+        locationLabel->setText(QObject::tr("Location: (%1, %2, %3)").arg(this->location.x()).arg(this->location.y()).arg(this->location.z()));
 }
 
 QVector4D AxialSliceWidget::getLocation() const
@@ -65,6 +69,16 @@ QVector4D AxialSliceWidget::transformLocation(QVector4D location) const
     QVector4D temp(location.x() == Location::NoChange, location.y() == Location::NoChange, location.z() == Location::NoChange, location.w() == Location::NoChange);
     QVector4D notTemp = QVector4D(1.0f, 1.0f, 1.0f, 1.0f) - temp;
     return (location * notTemp) + (this->location * temp);
+}
+
+QLabel *AxialSliceWidget::getLocationLabel() const
+{
+    return locationLabel;
+}
+
+void AxialSliceWidget::setLocationLabel(QLabel *label)
+{
+    locationLabel = label;
 }
 
 SliceDisplayType AxialSliceWidget::getDisplayType() const

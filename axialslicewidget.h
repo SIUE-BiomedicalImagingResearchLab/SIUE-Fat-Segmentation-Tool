@@ -16,6 +16,7 @@
 #include <QPainter>
 #include <array>
 #include <QMessageBox>
+#include <QLabel>
 
 #include <nifti/nifti1.h>
 #include <nifti/nifti1_io.h>
@@ -58,6 +59,8 @@ private:
     // The format is (X, Y, Z, T) where T is time
     QVector4D location;
 
+    QLabel *locationLabel;
+
     ColorMap primColorMap;
     float primOpacity;
 
@@ -92,6 +95,9 @@ public:
     void setLocation(QVector4D location);
     QVector4D getLocation() const;
     QVector4D transformLocation(QVector4D location) const;
+
+    QLabel *getLocationLabel() const;
+    void setLocationLabel(QLabel *label);
 
     void setImages(NIFTImage *fat, NIFTImage *water);
     bool isLoaded() const;

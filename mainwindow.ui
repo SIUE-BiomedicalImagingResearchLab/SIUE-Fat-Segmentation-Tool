@@ -33,8 +33,11 @@
     <property name="rightMargin">
      <number>0</number>
     </property>
+    <property name="bottomMargin">
+     <number>0</number>
+    </property>
     <item row="0" column="0">
-     <layout class="QHBoxLayout" name="horizontalLayout" stretch="2,7">
+     <layout class="QHBoxLayout" name="horizontalLayout" stretch="2,0,7">
       <property name="spacing">
        <number>3</number>
       </property>
@@ -86,6 +89,25 @@
                <string>Cursor Location</string>
               </property>
               <layout class="QGridLayout" name="gridLayout_2">
+               <item row="0" column="1">
+                <widget class="QSlider" name="axialSliceSlider">
+                 <property name="toolTip">
+                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Change Axial Slice&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Drag slider left and right to change the axial slice currently displayed on the main widget&lt;/p&gt;&lt;p&gt;The slices are ordered &lt;span style=&quot; font-weight:600;&quot;&gt;Superior to Inferior&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 </property>
+                 <property name="toolTipDuration">
+                  <number>4000</number>
+                 </property>
+                 <property name="statusTip">
+                  <string/>
+                 </property>
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                 <property name="tickPosition">
+                  <enum>QSlider::NoTicks</enum>
+                 </property>
+                </widget>
+               </item>
                <item row="0" column="0">
                 <widget class="QLabel" name="homeAxialLabel">
                  <property name="text">
@@ -96,8 +118,76 @@
                  </property>
                 </widget>
                </item>
-               <item row="0" column="1">
-                <widget class="QSlider" name="axialSliceSlider">
+               <item row="0" column="2">
+                <widget class="QSpinBox" name="axialSliceSpinBox">
+                 <property name="mouseTracking">
+                  <bool>true</bool>
+                 </property>
+                 <property name="focusPolicy">
+                  <enum>Qt::WheelFocus</enum>
+                 </property>
+                 <property name="toolTip">
+                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Change Axial Slice&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Enter slice number or use up/down arrows to change the axial slice currently displayed on the main widget.&lt;/p&gt;&lt;p&gt;The slices are ordered &lt;span style=&quot; font-weight:600;&quot;&gt;Superior to Inferior&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 </property>
+                 <property name="toolTipDuration">
+                  <number>4000</number>
+                 </property>
+                 <property name="statusTip">
+                  <string>Change Axial Slice</string>
+                 </property>
+                 <property name="whatsThis">
+                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Change Axial Slice&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Enter slice number or use up/down arrows to change the axial slice currently displayed on the main widget.&lt;/p&gt;&lt;p&gt;The slices are ordered &lt;span style=&quot; font-weight:600;&quot;&gt;Superior to Inferior&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 </property>
+                 <property name="buttonSymbols">
+                  <enum>QAbstractSpinBox::UpDownArrows</enum>
+                 </property>
+                 <property name="keyboardTracking">
+                  <bool>false</bool>
+                 </property>
+                 <property name="suffix">
+                  <string/>
+                 </property>
+                </widget>
+               </item>
+               <item row="2" column="2">
+                <widget class="QSpinBox" name="saggitalSliceSpinBox">
+                 <property name="mouseTracking">
+                  <bool>true</bool>
+                 </property>
+                 <property name="focusPolicy">
+                  <enum>Qt::WheelFocus</enum>
+                 </property>
+                 <property name="toolTip">
+                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Change Saggital Slice &lt;/span&gt;&lt;span style=&quot; font-weight:600; text-decoration: underline;&quot;&gt;[Not Used]&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Enter slice number or use up/down arrows to change the saggital slice. As of now, the saggital slice location is not used.&lt;/p&gt;&lt;p&gt;The slices are ordered &lt;span style=&quot; font-weight:600;&quot;&gt;Left to Right&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 </property>
+                 <property name="toolTipDuration">
+                  <number>4000</number>
+                 </property>
+                 <property name="statusTip">
+                  <string>Change Saggital Slice</string>
+                 </property>
+                 <property name="buttonSymbols">
+                  <enum>QAbstractSpinBox::UpDownArrows</enum>
+                 </property>
+                 <property name="keyboardTracking">
+                  <bool>false</bool>
+                 </property>
+                 <property name="suffix">
+                  <string/>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="1">
+                <widget class="QSlider" name="coronalSliceSlider">
+                 <property name="toolTip">
+                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Change Coronal Slice&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Drag slider left and right to change the coronal slice currently displayed on the minimap widget&lt;/p&gt;&lt;p&gt;The slices are ordered &lt;span style=&quot; font-weight:600;&quot;&gt;Anterior to Posterior&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 </property>
+                 <property name="toolTipDuration">
+                  <number>4000</number>
+                 </property>
+                 <property name="statusTip">
+                  <string/>
+                 </property>
                  <property name="orientation">
                   <enum>Qt::Horizontal</enum>
                  </property>
@@ -106,13 +196,51 @@
                  </property>
                 </widget>
                </item>
-               <item row="0" column="2">
-                <widget class="QSpinBox" name="axialSliceSpinBox">
+               <item row="2" column="1">
+                <widget class="QSlider" name="saggitalSliceSlider">
+                 <property name="toolTip">
+                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Change Saggital Slice &lt;/span&gt;&lt;span style=&quot; font-weight:600; text-decoration: underline;&quot;&gt;[Not Used]&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Drag slider left and right to change the saggital slice. As of now, the saggital slice location is not used.&lt;/p&gt;&lt;p&gt;The slices are ordered &lt;span style=&quot; font-weight:600;&quot;&gt;Left to Right&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 </property>
+                 <property name="toolTipDuration">
+                  <number>4000</number>
+                 </property>
+                 <property name="statusTip">
+                  <string/>
+                 </property>
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                 <property name="tickPosition">
+                  <enum>QSlider::NoTicks</enum>
+                 </property>
+                </widget>
+               </item>
+               <item row="2" column="0">
+                <widget class="QLabel" name="homeSaggitalLabel">
+                 <property name="text">
+                  <string>&amp;Saggital</string>
+                 </property>
+                 <property name="buddy">
+                  <cstring>saggitalSliceSlider</cstring>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="2">
+                <widget class="QSpinBox" name="coronalSliceSpinBox">
                  <property name="mouseTracking">
                   <bool>true</bool>
                  </property>
                  <property name="focusPolicy">
                   <enum>Qt::WheelFocus</enum>
+                 </property>
+                 <property name="toolTip">
+                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Change Coronal Slice&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Enter slice number or use up/down arrows to change the coronal slice currently displayed on the minimap widget.&lt;/p&gt;&lt;p&gt;The slices are ordered &lt;span style=&quot; font-weight:600;&quot;&gt;Anterior to Posterior&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 </property>
+                 <property name="toolTipDuration">
+                  <number>4000</number>
+                 </property>
+                 <property name="statusTip">
+                  <string>Change Coronal Slice</string>
                  </property>
                  <property name="buttonSymbols">
                   <enum>QAbstractSpinBox::UpDownArrows</enum>
@@ -132,74 +260,6 @@
                  </property>
                  <property name="buddy">
                   <cstring>coronalSliceSlider</cstring>
-                 </property>
-                </widget>
-               </item>
-               <item row="1" column="1">
-                <widget class="QSlider" name="coronalSliceSlider">
-                 <property name="orientation">
-                  <enum>Qt::Horizontal</enum>
-                 </property>
-                 <property name="tickPosition">
-                  <enum>QSlider::NoTicks</enum>
-                 </property>
-                </widget>
-               </item>
-               <item row="1" column="2">
-                <widget class="QSpinBox" name="coronalSliceSpinBox">
-                 <property name="mouseTracking">
-                  <bool>true</bool>
-                 </property>
-                 <property name="focusPolicy">
-                  <enum>Qt::WheelFocus</enum>
-                 </property>
-                 <property name="buttonSymbols">
-                  <enum>QAbstractSpinBox::UpDownArrows</enum>
-                 </property>
-                 <property name="keyboardTracking">
-                  <bool>false</bool>
-                 </property>
-                 <property name="suffix">
-                  <string/>
-                 </property>
-                </widget>
-               </item>
-               <item row="2" column="0">
-                <widget class="QLabel" name="homeSaggitalLabel">
-                 <property name="text">
-                  <string>&amp;Saggital</string>
-                 </property>
-                 <property name="buddy">
-                  <cstring>saggitalSliceSlider</cstring>
-                 </property>
-                </widget>
-               </item>
-               <item row="2" column="1">
-                <widget class="QSlider" name="saggitalSliceSlider">
-                 <property name="orientation">
-                  <enum>Qt::Horizontal</enum>
-                 </property>
-                 <property name="tickPosition">
-                  <enum>QSlider::NoTicks</enum>
-                 </property>
-                </widget>
-               </item>
-               <item row="2" column="2">
-                <widget class="QSpinBox" name="saggitalSliceSpinBox">
-                 <property name="mouseTracking">
-                  <bool>true</bool>
-                 </property>
-                 <property name="focusPolicy">
-                  <enum>Qt::WheelFocus</enum>
-                 </property>
-                 <property name="buttonSymbols">
-                  <enum>QAbstractSpinBox::UpDownArrows</enum>
-                 </property>
-                 <property name="keyboardTracking">
-                  <bool>false</bool>
-                 </property>
-                 <property name="suffix">
-                  <string/>
                  </property>
                 </widget>
                </item>
@@ -234,6 +294,12 @@
                 <verstretch>0</verstretch>
                </sizepolicy>
               </property>
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Primary Image&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;The primary image is the image drawn &lt;span style=&quot; text-decoration: underline;&quot;&gt;first&lt;/span&gt; in the axial widget view. The primary image is set based on the options in the &lt;span style=&quot; font-weight:600; text-decoration: underline;&quot;&gt;Image View&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
+              <property name="toolTipDuration">
+               <number>4000</number>
+              </property>
               <property name="title">
                <string>Primary Image</string>
               </property>
@@ -260,6 +326,12 @@
                </item>
                <item row="1" column="2">
                 <widget class="QSlider" name="primOpacitySlider">
+                 <property name="toolTip">
+                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Change Primary Opacity&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Drag slider left and right to change the opacity of the primary image displayed on the main widget.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 </property>
+                 <property name="toolTipDuration">
+                  <number>4000</number>
+                 </property>
                  <property name="maximum">
                   <number>100</number>
                  </property>
@@ -270,6 +342,12 @@
                </item>
                <item row="1" column="3">
                 <widget class="QSpinBox" name="primOpacitySpinBox">
+                 <property name="toolTip">
+                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Change Primary Opacity&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Enter percentage or use up/down arrows to change the opacity of the primary image displayed on the main widget.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 </property>
+                 <property name="toolTipDuration">
+                  <number>4000</number>
+                 </property>
                  <property name="suffix">
                   <string>%</string>
                  </property>
@@ -285,6 +363,12 @@
                    <horstretch>0</horstretch>
                    <verstretch>0</verstretch>
                   </sizepolicy>
+                 </property>
+                 <property name="toolTip">
+                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Change Primary Color Map&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Select a color map for the primary image. This is a mapping from intensity in the primary image (0.0 -&amp;gt; 1.0) to colors. &lt;/p&gt;&lt;p&gt;A typical example is grayscale which is (0, 0, 0) -&amp;gt; (1, 1, 1) color mapping.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 </property>
+                 <property name="toolTipDuration">
+                  <number>4000</number>
                  </property>
                  <property name="maxVisibleItems">
                   <number>13</number>
@@ -392,6 +476,12 @@
                 <verstretch>0</verstretch>
                </sizepolicy>
               </property>
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Secondary Image&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;The secondary image is the image drawn &lt;span style=&quot; text-decoration: underline;&quot;&gt;second&lt;/span&gt; in the axial widget view. The secondary image is set based on the options in the &lt;span style=&quot; font-weight:600; text-decoration: underline;&quot;&gt;Image View.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;The secondary image is only applicable for &lt;span style=&quot; font-weight:600; text-decoration: underline;&quot;&gt;Fat/Water&lt;/span&gt; and &lt;span style=&quot; font-weight:600; text-decoration: underline;&quot;&gt;Water/Fat&lt;/span&gt; options.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
+              <property name="toolTipDuration">
+               <number>4000</number>
+              </property>
               <property name="title">
                <string>Secondary Image</string>
               </property>
@@ -418,6 +508,12 @@
                </item>
                <item row="1" column="2">
                 <widget class="QSlider" name="secdOpacitySlider">
+                 <property name="toolTip">
+                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Change Secondary Opacity&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Drag slider left and right to change the opacity of the secondary image displayed on the main widget.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 </property>
+                 <property name="toolTipDuration">
+                  <number>4000</number>
+                 </property>
                  <property name="maximum">
                   <number>100</number>
                  </property>
@@ -428,6 +524,12 @@
                </item>
                <item row="1" column="3">
                 <widget class="QSpinBox" name="secdOpacitySpinBox">
+                 <property name="toolTip">
+                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Change Secondary Opacity&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Enter percentage or use up/down arrows to change the opacity of the secondary image displayed on the main widget.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 </property>
+                 <property name="toolTipDuration">
+                  <number>4000</number>
+                 </property>
                  <property name="suffix">
                   <string>%</string>
                  </property>
@@ -443,6 +545,12 @@
                    <horstretch>0</horstretch>
                    <verstretch>0</verstretch>
                   </sizepolicy>
+                 </property>
+                 <property name="toolTip">
+                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Change Secondary Color Map&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Select a color map for the secondary image. This is a mapping from intensity in the primary image (0.0 -&amp;gt; 1.0) to colors. &lt;/p&gt;&lt;p&gt;A typical example is grayscale which is (0, 0, 0) -&amp;gt; (1, 1, 1) color mapping.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 </property>
+                 <property name="toolTipDuration">
+                  <number>4000</number>
                  </property>
                  <property name="maxVisibleItems">
                   <number>13</number>
@@ -544,6 +652,12 @@
             </item>
             <item row="0" column="2">
              <widget class="QSpinBox" name="brightnessSpinBox">
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Change Brightness&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Enter percentage or use up/down arrows to change the brightness currently displayed on the main widget.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
+              <property name="toolTipDuration">
+               <number>4000</number>
+              </property>
               <property name="suffix">
                <string>%</string>
               </property>
@@ -567,6 +681,12 @@
               <property name="focusPolicy">
                <enum>Qt::StrongFocus</enum>
               </property>
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Adjust Contrast&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Drag slider left and right to change the contrast of the axial slice currently displayed on the main widget&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
+              <property name="toolTipDuration">
+               <number>4000</number>
+              </property>
               <property name="maximum">
                <number>100</number>
               </property>
@@ -580,6 +700,12 @@
               <property name="focusPolicy">
                <enum>Qt::StrongFocus</enum>
               </property>
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Adjust Brightness&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Drag slider left and right to change the brightness of the axial slice currently displayed on the main widget&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
+              <property name="toolTipDuration">
+               <number>4000</number>
+              </property>
               <property name="maximum">
                <number>100</number>
               </property>
@@ -590,6 +716,12 @@
             </item>
             <item row="1" column="2">
              <widget class="QSpinBox" name="contrastSpinBox">
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Change Contrast&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Enter percentage or use up/down arrows to change the contrast currently displayed on the main widget.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
+              <property name="toolTipDuration">
+               <number>4000</number>
+              </property>
               <property name="suffix">
                <string>%</string>
               </property>
@@ -614,7 +746,10 @@
                 <item>
                  <widget class="QPushButton" name="resetViewBtn">
                   <property name="toolTip">
-                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Resets the axial slice view to center with no scaling.&lt;/p&gt;&lt;p&gt;Shortcut: &lt;span style=&quot; font-weight:600;&quot;&gt;Space bar&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Reset View&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Resets the axial slice view and coronal slice view to center with no scaling.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Note: &lt;/span&gt;This does &lt;span style=&quot; font-weight:600; text-decoration: underline;&quot;&gt;NOT&lt;/span&gt; change the current location of the user.&lt;/p&gt;&lt;p&gt;Shortcut: &lt;span style=&quot; font-weight:600;&quot;&gt;Space bar&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                  </property>
+                  <property name="toolTipDuration">
+                   <number>4000</number>
                   </property>
                   <property name="text">
                    <string>Reset View</string>
@@ -659,6 +794,15 @@
                  </property>
                  <item>
                   <widget class="QRadioButton" name="fatRadioBtn">
+                   <property name="toolTip">
+                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Fat Only&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Displays only the fat image from the NIFTI files.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Primary Image: &lt;/span&gt;Fat image&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Secondary Image: &lt;/span&gt;N/A&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                   </property>
+                   <property name="toolTipDuration">
+                    <number>4000</number>
+                   </property>
+                   <property name="statusTip">
+                    <string/>
+                   </property>
                    <property name="text">
                     <string>Fat Only</string>
                    </property>
@@ -666,6 +810,12 @@
                  </item>
                  <item>
                   <widget class="QRadioButton" name="waterRadioBtn">
+                   <property name="toolTip">
+                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Water Only&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Displays only the water image from the NIFTI files.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Primary Image: &lt;/span&gt;Water image&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Secondary Image: &lt;/span&gt;N/A&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                   </property>
+                   <property name="toolTipDuration">
+                    <number>4000</number>
+                   </property>
                    <property name="text">
                     <string>Water Only</string>
                    </property>
@@ -673,6 +823,12 @@
                  </item>
                  <item>
                   <widget class="QRadioButton" name="fatFracRadioBtn">
+                   <property name="toolTip">
+                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Fat Fraction&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Displays an image that represents the ratio of fat to water.&lt;/p&gt;&lt;p&gt;Fat Fraction = Fat / (Fat + Water)&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Primary Image: &lt;/span&gt;Fat Fraction image&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Secondary Image: &lt;/span&gt;N/A&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                   </property>
+                   <property name="toolTipDuration">
+                    <number>4000</number>
+                   </property>
                    <property name="text">
                     <string>Fat Fraction</string>
                    </property>
@@ -680,6 +836,12 @@
                  </item>
                  <item>
                   <widget class="QRadioButton" name="waterFracRadioBtn">
+                   <property name="toolTip">
+                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Water Fraction&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Displays an image that represents the ratio of water to fat.&lt;/p&gt;&lt;p&gt;Water Fraction = Water / (Fat + Water)&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Primary Image: &lt;/span&gt;Water Fraction image&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Secondary Image: &lt;/span&gt;N/A&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                   </property>
+                   <property name="toolTipDuration">
+                    <number>4000</number>
+                   </property>
                    <property name="text">
                     <string>Water Fraction</string>
                    </property>
@@ -687,6 +849,12 @@
                  </item>
                  <item>
                   <widget class="QRadioButton" name="fatWaterRadioBtn">
+                   <property name="toolTip">
+                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Fat / Water&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Displays fat image with water image on top at the specified opacities.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Primary Image: &lt;/span&gt;Fat image&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Secondary Image: &lt;/span&gt;Water image&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                   </property>
+                   <property name="toolTipDuration">
+                    <number>4000</number>
+                   </property>
                    <property name="text">
                     <string>Fat / Water</string>
                    </property>
@@ -694,6 +862,12 @@
                  </item>
                  <item>
                   <widget class="QRadioButton" name="waterFatRadioBtn">
+                   <property name="toolTip">
+                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Water / Fat&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Displays water image with fat image on top at the specified opacities.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Primary Image: &lt;/span&gt;Water image&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Secondary Image: &lt;/span&gt;Fat image&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                   </property>
+                   <property name="toolTipDuration">
+                    <number>4000</number>
+                   </property>
                    <property name="text">
                     <string>Water / Fat</string>
                    </property>
@@ -920,7 +1094,7 @@
                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Epicardial Adipose Tissue&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Fat within pericardial sac&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                  </property>
                  <property name="toolTipDuration">
-                  <number>-1</number>
+                  <number>4000</number>
                  </property>
                  <property name="whatsThis">
                   <string>This is something crazier I must say.</string>
@@ -941,6 +1115,9 @@
                  <property name="toolTip">
                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Inter&lt;/span&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;M&lt;/span&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;uscular Adipose Tissue&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Fat in between muscles&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                  </property>
+                 <property name="toolTipDuration">
+                  <number>4000</number>
+                 </property>
                  <property name="text">
                   <string>IMAT</string>
                  </property>
@@ -956,6 +1133,9 @@
                  </property>
                  <property name="toolTip">
                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Peri-Aortic Adipose Tissue&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Fat surrounding aorta&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 </property>
+                 <property name="toolTipDuration">
+                  <number>4000</number>
                  </property>
                  <property name="text">
                   <string>PAAT</string>
@@ -973,6 +1153,9 @@
                  <property name="toolTip">
                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Paracardial Adipose Tissue&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Fat outside pericardial sac&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                  </property>
+                 <property name="toolTipDuration">
+                  <number>4000</number>
+                 </property>
                  <property name="text">
                   <string>PAT</string>
                  </property>
@@ -989,6 +1172,9 @@
                  <property name="toolTip">
                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;SubCutaneous Adipose Tissue&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Fat beneath the skin&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                  </property>
+                 <property name="toolTipDuration">
+                  <number>4000</number>
+                 </property>
                  <property name="text">
                   <string>SCAT</string>
                  </property>
@@ -1004,6 +1190,9 @@
                  </property>
                  <property name="toolTip">
                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Visceral Adipose Tissue&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Fat surrounding organs within abdomen&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 </property>
+                 <property name="toolTipDuration">
+                  <number>4000</number>
                  </property>
                  <property name="text">
                   <string>VAT</string>
@@ -1054,9 +1243,40 @@
           <property name="mouseTracking">
            <bool>true</bool>
           </property>
+          <property name="whatsThis">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Coronal Slice View&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Contains the coronal slice of the MRI data. The currently displayed coronal slice is the Y component of the location. &lt;/p&gt;&lt;p&gt;This is primarily meant as a &amp;quot;minimap&amp;quot; to allow the user to know where they are located within the MRI. Tracing does&lt;span style=&quot; font-weight:600;&quot;&gt; NOT &lt;/span&gt;occur here&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
          </widget>
         </item>
        </layout>
+      </item>
+      <item>
+       <widget class="QLabel" name="lblStatusLocation">
+        <property name="font">
+         <font>
+          <family>Segoe UI</family>
+          <pointsize>9</pointsize>
+         </font>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">QLabel { margin-right: 5px; }</string>
+        </property>
+        <property name="frameShape">
+         <enum>QFrame::NoFrame</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Plain</enum>
+        </property>
+        <property name="text">
+         <string>Location: </string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+        </property>
+        <property name="margin">
+         <number>0</number>
+        </property>
+       </widget>
       </item>
       <item>
        <widget class="AxialSliceWidget" name="glWidgetAxial">
@@ -1068,6 +1288,9 @@
         </property>
         <property name="mouseTracking">
          <bool>true</bool>
+        </property>
+        <property name="whatsThis">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Axial Slice View&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Contains the axial slice of the MRI data. The currently displayed axial slice is the Z component of the location. &lt;/p&gt;&lt;p&gt;Tracing the various layers of fat occurs at this level&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
        </widget>
       </item>
@@ -1103,8 +1326,24 @@
     <addaction name="actionRedo"/>
     <addaction name="actionShow_History"/>
    </widget>
+   <widget class="QMenu" name="menuHelp">
+    <property name="toolTip">
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Help&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Toggle this button. When help is selected, click on any component to see a help menu.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    </property>
+    <property name="tearOffEnabled">
+     <bool>false</bool>
+    </property>
+    <property name="title">
+     <string>Help</string>
+    </property>
+    <property name="toolTipsVisible">
+     <bool>true</bool>
+    </property>
+    <addaction name="actionAbout"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
+   <addaction name="menuHelp"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <attribute name="toolBarArea">
@@ -1113,6 +1352,14 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
+  </widget>
+  <widget class="QStatusBar" name="statusBar">
+   <property name="contextMenuPolicy">
+    <enum>Qt::DefaultContextMenu</enum>
+   </property>
+   <property name="sizeGripEnabled">
+    <bool>false</bool>
+   </property>
   </widget>
   <action name="actionOpen">
    <property name="text">
@@ -1170,6 +1417,22 @@
   <action name="actionImportTracingData">
    <property name="text">
     <string>Import Tracing Data</string>
+   </property>
+  </action>
+  <action name="actionWhatsThis">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>What's This Mode</string>
+   </property>
+   <property name="toolTip">
+    <string>Help</string>
+   </property>
+  </action>
+  <action name="actionAbout">
+   <property name="text">
+    <string>About</string>
    </property>
   </action>
  </widget>

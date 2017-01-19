@@ -11,6 +11,7 @@
 #include <QUndoStack>
 #include <QUndoView>
 #include <QVector4D>
+#include <QWhatsThis>
 
 #include <nifti/nifti1.h>
 #include <nifti/nifti1_io.h>
@@ -67,6 +68,8 @@ private slots:
     void on_actionImportTracingData_triggered();
 
     void on_actionExit_triggered();
+
+    void on_actionAbout_triggered();
 
     void on_axialSliceSlider_valueChanged(int value);
     void on_axialSliceSpinBox_valueChanged(int value);
