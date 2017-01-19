@@ -4,19 +4,22 @@
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
-    undoView(NULL), undoStack(new QUndoStack(this))
+    undoView(NULL), undoStack(new QUndoStack(this)),
+    saveTracingResultsPath()
 {  
     this->ui->setupUi(this);
 
     // Apply keyboard shortcuts to the menu items. The benefit of using a predefined
     // key sequence is that it has the list of valid shortcuts for each platform and
     // is applied appropiately. This cannot be done through the Qt GUI Designer
-    this->ui->actionOpen->setShortcuts(QKeySequence::Open);
-    this->ui->actionSave->setShortcut(QKeySequence::Save);
-    this->ui->actionSaveAs->setShortcut(QKeySequence::SaveAs);
-    this->ui->actionExit->setShortcuts(QKeySequence::Close);
-    this->ui->actionUndo->setShortcuts(QKeySequence::Undo);
-    this->ui->actionRedo->setShortcuts(QKeySequence::Redo);
+
+    this->ui->actionOpen->setShortcut(util::getStandardSequence(QKeySequence::Open, QKeySequence("Ctrl+O")));
+    this->ui->actionSave->setShortcut(util::getStandardSequence(QKeySequence::Save, QKeySequence("Ctrl+S")));
+    this->ui->actionSaveAs->setShortcut(util::getStandardSequence(QKeySequence::SaveAs, QKeySequence("Ctrl+Shift+S")));
+    this->ui->actionImportTracingData->setShortcut(QKeySequence("Ctrl+I"));
+    this->ui->actionExit->setShortcut(util::getStandardSequence(QKeySequence::Close, QKeySequence("Alt+F4")));
+    this->ui->actionUndo->setShortcut(util::getStandardSequence(QKeySequence::Undo, QKeySequence("Ctrl+Z")));
+    this->ui->actionRedo->setShortcut(util::getStandardSequence(QKeySequence::Redo, QKeySequence("Ctrl+Shift+Z")));
 
     // Disable the settingsWidget (because you cannot edit it in designer when it is disabled so I just leave
     // it enabled there). And set current tab to zero in case I am on a different tab in designer.
@@ -63,7 +66,8 @@ void MainWindow::readSettings()
 
     this->resize(1024, 768);
 
-    defaultOpenDir = settings.value("defaultDir", QDir::homePath()).toString();
+    defaultOpenDir = settings.value("defaultOpenDir", QDir::homePath()).toString();
+    defaultSaveDir = settings.value("defaultSaveDir", QDir::homePath()).toString();
 }
 
 void MainWindow::writeSettings()
@@ -74,7 +78,9 @@ void MainWindow::writeSettings()
     // Set key "geometry" to the current window position and size
     settings.setValue("geometry", saveGeometry());
 
-    settings.setValue("defaultDir", defaultOpenDir);
+    settings.setValue("defaultOpenDir", defaultOpenDir);
+    settings.setValue("defaultSaveDir", defaultSaveDir);
+    //settings.remove("defaultDir");
 }
 
 bool MainWindow::loadImage(QString path)
@@ -256,16 +262,64 @@ void MainWindow::on_actionOpen_triggered()
         // Since the NIFTI files were successfully opened, the default path in the FileChooser dialog next time will be this path
         defaultOpenDir = path;
     }
+    else
+        qDebug() << "Unable to load image data located in path: " << path;
 }
 
 void MainWindow::on_actionSave_triggered()
 {
-    //QFileDialog::getSaveFileName(this, "Testing", "directory", "filter");
+    if (saveTracingResultsPath.isNull())
+        on_actionSaveAs_triggered();
+    else if (!ui->glWidgetAxial->saveTracingData(saveTracingResultsPath, false))
+        qDebug() << "Unable to save tracing data in file: " << saveTracingResultsPath;
 }
 
 void MainWindow::on_actionSaveAs_triggered()
 {
+    // Start dialog to select existing directory to save the tracing results
+    QString path = QFileDialog::getExistingDirectory(this, "Save File in Directory", defaultSaveDir);
+    if (path.isNull())
+        return; // If they hit cancel, do nothing
 
+    QFileInfo fileInfo(path);
+    if (!fileInfo.exists() || !fileInfo.isDir())
+    {
+        qDebug() << "Selected directory to save tracing results either does not exist or is not a directory: " << path;
+        return;
+    }
+
+    if (ui->glWidgetAxial->saveTracingData(path))
+    {
+        // Since the NIFTI files were successfully saved, the default path in the dialog next time will be this path
+        defaultSaveDir = path;
+        saveTracingResultsPath = path;
+    }
+    else
+        qDebug() << "Unable to save tracing data in path: " << path;
+}
+
+void MainWindow::on_actionImportTracingData_triggered()
+{
+    // Start dialog to select existing directory to save the tracing results
+    QString path = QFileDialog::getExistingDirectory(this, "Import Data in Directory", defaultSaveDir);
+    if (path.isNull())
+        return; // If they hit cancel, do nothing
+
+    QFileInfo fileInfo(path);
+    if (!fileInfo.exists() || !fileInfo.isDir())
+    {
+        qDebug() << "Selected directory to save tracing results either does not exist or is not a directory: " << path;
+        return;
+    }
+
+    if (ui->glWidgetAxial->loadTracingData(path))
+    {
+        // Since the NIFTI files were successfully loaded, the default path in the dialog next time will be this path
+        defaultSaveDir = path;
+        saveTracingResultsPath = path;
+    }
+    else
+        qDebug() << "Unable to save tracing data in path: " << path;
 }
 
 void MainWindow::on_actionExit_triggered()

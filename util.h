@@ -6,11 +6,15 @@
 #include <QVector3D>
 #include <QVector4D>
 
+#include <QKeySequence>
+
 namespace util
 {
 
 /* Determines if the filename exists and is a file, returns true, otherwise returns false */
 bool fileExists(QString filename);
+
+QKeySequence getStandardSequence(QKeySequence::StandardKey standardKey, QKeySequence defaultSequence);
 
 QVector4D clamp(QVector4D vector, QVector4D min, QVector4D max);
 QVector3D clamp(QVector3D vector, QVector3D min, QVector3D max);

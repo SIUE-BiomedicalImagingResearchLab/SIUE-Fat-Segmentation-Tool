@@ -39,8 +39,11 @@ private:
     QUndoStack *undoStack;
 
     QString defaultOpenDir;
+    QString defaultSaveDir;
 
     SubjectConfig *subConfig;
+
+    QString saveTracingResultsPath;
 
 public:
     explicit MainWindow(QWidget *parent = 0);
@@ -60,6 +63,8 @@ private slots:
 
     void on_actionSave_triggered();
     void on_actionSaveAs_triggered();
+
+    void on_actionImportTracingData_triggered();
 
     void on_actionExit_triggered();
 

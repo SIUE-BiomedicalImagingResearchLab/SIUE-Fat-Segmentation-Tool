@@ -9,6 +9,16 @@ bool fileExists(QString filename)
     return (fileInfo.exists() && fileInfo.isFile());
 }
 
+QKeySequence getStandardSequence(QKeySequence::StandardKey standardKey, QKeySequence defaultSequence)
+{
+    QKeySequence ret(standardKey);
+
+    if (ret.isEmpty())
+        return defaultSequence;
+
+    return ret;
+}
+
 QVector4D clamp(QVector4D vector, QVector4D min, QVector4D max)
 {
     vector.setX(std::min(std::max(vector.x(), min.x()), max.x()));

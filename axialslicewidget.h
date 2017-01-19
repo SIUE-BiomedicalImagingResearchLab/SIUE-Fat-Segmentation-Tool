@@ -15,6 +15,7 @@
 #include <QUndoStack>
 #include <QPainter>
 #include <array>
+#include <QMessageBox>
 
 #include <nifti/nifti1.h>
 #include <nifti/nifti1_io.h>
@@ -133,6 +134,9 @@ public:
 
     float &rscaling();
     QVector3D &rtranslation();
+
+    bool saveTracingData(QString path, bool promptOnOverwrite = true);
+    bool loadTracingData(QString path);
 
     QMatrix4x4 getMVPMatrix();
 

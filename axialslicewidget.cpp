@@ -290,6 +290,143 @@ QVector3D &AxialSliceWidget::rtranslation()
     return translation;
 }
 
+bool AxialSliceWidget::saveTracingData(QString path, bool promptOnOverwrite)
+{
+    const QString layerFilename[(int)TracingLayer::Count] = {"EAT.txt", "IMAT.txt", "PAAT.txt", "PAT.txt", "SCAT.txt", "VAT.txt"};
+    QString layerFullPath[(int)TracingLayer::Count];
+
+    // Create absolute path to each of the layer filenames by joining directory path (path) with each filename (layerFilename)
+    for (int i = 0; i < (int)TracingLayer::Count; ++i)
+        layerFullPath[i] = QDir(path).filePath(layerFilename[i]);
+
+    if (promptOnOverwrite)
+    {
+        for (QString fullPath : layerFullPath)
+        {
+            if (QFileInfo(fullPath).exists())
+            {
+                // Not a fan of the prompt option
+                if (!QMessageBox::warning((QWidget *)parent(), "Confirm Save As", "Tracing data already exists in folder.\nDo you want to replace it?", QMessageBox::Yes, QMessageBox::No))
+                    return false;
+                break;
+            }
+        }
+    }
+
+    for (int i = 0; i < (int)TracingLayer::Count; ++i)
+    {
+        QFile file(layerFullPath[i]);
+        if (!file.open(QIODevice::WriteOnly | QIODevice::Truncate))
+        {
+            qDebug() << "Error opening file to save tracing data. Skipping layer: " << layerFullPath[i];
+            continue;
+        }
+
+        QTextStream stream(&file);
+        stream << fatImage->getZDim() << endl;
+
+        const int zDim = fatImage->getZDim();
+        for (int z = 0; z < zDim; ++z)
+        {
+            auto &layerPoints = getLayerPoints(z, (TracingLayer)i);
+
+            stream << "#" << z << endl;
+            stream << layerPoints.size() << endl;
+
+            for (QPointF point : layerPoints)
+                stream << forcepoint << point.x() << " " << point.y() << " " << (float)z << endl;
+        }
+    }
+
+    return true;
+}
+
+
+bool AxialSliceWidget::loadTracingData(QString path)
+{
+    if (!isLoaded())
+    {
+        QMessageBox::warning((QWidget *)parent(), "Unable to import data", "Tracing data cannot be imported into an application until the correct NIFTI image is loaded first.\nPlease load the correct NIFTI file and then try again.", QMessageBox::Ok);
+        return false;
+    }
+
+    const QString layerFilename[(int)TracingLayer::Count] = {"EAT.txt", "IMAT.txt", "PAAT.txt", "PAT.txt", "SCAT.txt", "VAT.txt"};
+    QString layerFullPath[(int)TracingLayer::Count];
+    std::vector<int> skipLayers;
+
+    // Create absolute path to each of the layer filenames by joining directory path (path) with each filename (layerFilename)
+    for (int i = 0; i < (int)TracingLayer::Count; ++i)
+    {
+        layerFullPath[i] = QDir(path).filePath(layerFilename[i]);
+
+        if (!QFileInfo(layerFullPath[i]).exists())
+        {
+            qDebug() << "Filename does not exist in directory for importing tracing data: " << layerFullPath[i];
+            skipLayers.push_back(i);
+        }
+    }
+
+    for (int i = 0; i < (int)TracingLayer::Count; ++i)
+    {
+        bool nextLayer = false;
+        for (int skipLayer : skipLayers)
+        {
+            if (i == skipLayer)
+            {
+                nextLayer = true;
+                break;
+            }
+        }
+
+        if (nextLayer)
+            continue;
+
+        QFile file(layerFullPath[i]);
+        if (!file.open(QIODevice::ReadOnly))
+        {
+            qDebug() << "Error opening file to load tracing data. Skipping layer: " << layerFullPath[i];
+            continue;
+        }
+
+        QTextStream stream(&file);
+
+        int zDim;
+        stream >> zDim;
+
+        if (zDim != fatImage->getZDim())
+        {
+            qDebug() << "Number of axial slices in the data does not match the NIFTI image loaded.";
+            return false;
+        }
+
+        for (int z = 0; z < zDim; ++z)
+        {
+            auto &layerPoints = getLayerPoints(z, (TracingLayer)i);
+
+            // Skip the #Z where Z is the axial slice
+            stream.skipWhiteSpace();
+            stream.readLine();
+
+            // Get the number of points on the slices
+            int numPoints = 0;
+            stream >> numPoints;
+
+            // Clear the old points and reserve enough space for new points
+            layerPoints.clear();
+            layerPoints.reserve(numPoints);
+
+            float x, y, z_;
+            for (int ii = 0; ii < numPoints; ++ii)
+            {
+                stream >> x >> y >> z_;
+                layerPoints.push_back(QPoint(x, y));
+            }
+        }
+    }
+
+    return true;
+}
+
 QMatrix4x4 AxialSliceWidget::getMVPMatrix()
 {
     // Calculate the ModelViewProjection (MVP) matrix to transform the location of the axial slices
@@ -427,47 +564,6 @@ void AxialSliceWidget::initializeSliceView()
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 }
-
-/*void AxialSliceWidget::initializeFatTraces()
-{
-    // Setup the axial slice vertices
-    sliceVertices.clear();
-    sliceVertices.append(VertexPT(QVector3D(-1.0f, -1.0f, 0.0f), QVector2D(0.0f, 0.0f)));
-    sliceVertices.append(VertexPT(QVector3D(-1.0f, 1.0f, 0.0f), QVector2D(0.0f, 1.0f)));
-    sliceVertices.append(VertexPT(QVector3D(1.0f, -1.0f, 0.0f), QVector2D(1.0f, 0.0f)));
-    sliceVertices.append(VertexPT(QVector3D(1.0f, 1.0f, 0.0f), QVector2D(1.0f, 1.0f)));
-
-    // Setup the axial slice indices
-    sliceIndices.clear();
-    sliceIndices.append({ 0, 1, 2, 3});
-
-    // Generate vertex buffer for the axial slice. The sliceVertices data is uploaded to the VBO
-    glGenBuffers(1, &vertexBuf);
-    glBindBuffer(GL_ARRAY_BUFFER, vertexBuf);
-    glBufferData(GL_ARRAY_BUFFER, sliceVertices.size() * sizeof(VertexPT), sliceVertices.constData(), GL_STATIC_DRAW);
-
-    // Generate index buffer for the axial slice. The sliceIndices data is uploaded to the IBO
-    glGenBuffers(1, &sliceIndexBuf);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, sliceIndexBuf);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sliceIndices.size() * sizeof(GLushort), sliceIndices.constData(), GL_STATIC_DRAW);
-
-    // Generate VAO for the axial slice vertices uploaded. Location 0 is the position and location 1 is the texture position
-    glGenVertexArrays(1, &sliceVertexObject);
-    glBindVertexArray(sliceVertexObject);
-    glEnableVertexAttribArray(0);
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(0, VertexPT::PosTupleSize, GL_FLOAT, true, VertexPT::stride(), static_cast<const char *>(0) + VertexPT::posOffset());
-    glVertexAttribPointer(1, VertexPT::TexPosTupleSize, GL_FLOAT, true, VertexPT::stride(), static_cast<const char *>(0) + VertexPT::texPosOffset());
-
-    // Enable 2D textures and generate a blank texture for the axial slice
-    glEnable(GL_TEXTURE_2D);
-    glGenTextures(1, &this->sliceTexture);
-
-    // Release (unbind) all
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
-}*/
 
 void AxialSliceWidget::initializeCrosshairLine()
 {
@@ -857,11 +953,16 @@ void AxialSliceWidget::addPoint(QPointF mouseCoord)
             mouseCommand = new TracingPointsAddCommand((int)layerPoints.size(), this);
             undoStack->push(mouseCommand);
         }
-        else // There must be existing points in the list
+
+        if ((layerPoints.size() - mouseCommand->getIndex()) > 0) // There must be existing points in the list
         {
             // Perform linear interpolation between current point (NIFTICoord)
             // and last point in layerPoints
             const QPointF lastPoint = layerPoints.back();
+
+            // Dont add duplicate points
+            if (lastPoint == NIFTICoord)
+                return;
 
             // The length approximates how many units are between the two points
             // Therefore, 1/length should be the approximate step value in percent
@@ -871,8 +972,12 @@ void AxialSliceWidget::addPoint(QPointF mouseCoord)
 
             while (percent < 1.0f)
             {
-                QPointF interPoint = util::lerp(lastPoint, NIFTICoord, percent);
-                layerPoints.push_back(interPoint);
+                QPoint interPoint = util::lerp(lastPoint, NIFTICoord, percent).toPoint();
+
+                // Skip if the previous point equals this point
+                // This will occur when rounding errors happen and return the same point
+                if (interPoint != layerPoints.back())
+                    layerPoints.push_back(interPoint);
 
                 percent += steps;
             }
