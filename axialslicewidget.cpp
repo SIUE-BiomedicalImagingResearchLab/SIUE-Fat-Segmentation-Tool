@@ -28,7 +28,7 @@ void AxialSliceWidget::setImages(NIFTImage *fat, NIFTImage *water)
         layers.resize((int)TracingLayer::Count);
 }
 
-bool AxialSliceWidget::isLoaded()
+bool AxialSliceWidget::isLoaded() const
 {
     return (fatImage && waterImage);
 }
@@ -53,12 +53,12 @@ void AxialSliceWidget::setLocation(QVector4D location)
         updateTexture();
 }
 
-QVector4D AxialSliceWidget::getLocation()
+QVector4D AxialSliceWidget::getLocation() const
 {
     return location;
 }
 
-QVector4D AxialSliceWidget::transformLocation(QVector4D location)
+QVector4D AxialSliceWidget::transformLocation(QVector4D location) const
 {
     // This function returns a QVector4D that replaces Location::NoChange's from location variable with actual location value
 
@@ -67,7 +67,7 @@ QVector4D AxialSliceWidget::transformLocation(QVector4D location)
     return (location * notTemp) + (this->location * temp);
 }
 
-SliceDisplayType AxialSliceWidget::getDisplayType()
+SliceDisplayType AxialSliceWidget::getDisplayType() const
 {
     return displayType;
 }
@@ -87,7 +87,7 @@ void AxialSliceWidget::setDisplayType(SliceDisplayType type)
     updateTexture();
 }
 
-ColorMap AxialSliceWidget::getPrimColorMap()
+ColorMap AxialSliceWidget::getPrimColorMap() const
 {
     return primColorMap;
 }
@@ -107,7 +107,7 @@ void AxialSliceWidget::setPrimColorMap(ColorMap map)
     update();
 }
 
-float AxialSliceWidget::getPrimOpacity()
+float AxialSliceWidget::getPrimOpacity() const
 {
     return primOpacity;
 }
@@ -126,7 +126,7 @@ void AxialSliceWidget::setPrimOpacity(float opacity)
     update();
 }
 
-ColorMap AxialSliceWidget::getSecdColorMap()
+ColorMap AxialSliceWidget::getSecdColorMap() const
 {
     return secdColorMap;
 }
@@ -146,7 +146,7 @@ void AxialSliceWidget::setSecdColorMap(ColorMap map)
     update();
 }
 
-float AxialSliceWidget::getSecdOpacity()
+float AxialSliceWidget::getSecdOpacity() const
 {
     return secdOpacity;
 }
@@ -165,7 +165,7 @@ void AxialSliceWidget::setSecdOpacity(float opacity)
     update();
 }
 
-float AxialSliceWidget::getBrightness()
+float AxialSliceWidget::getBrightness() const
 {
     return brightness;
 }
@@ -185,7 +185,7 @@ void AxialSliceWidget::setBrightness(float brightness)
     update();
 }
 
-float AxialSliceWidget::getContrast()
+float AxialSliceWidget::getContrast() const
 {
     return contrast;
 }
@@ -205,7 +205,7 @@ void AxialSliceWidget::setContrast(float contrast)
     update();
 }
 
-TracingLayer AxialSliceWidget::getTracingLayer()
+TracingLayer AxialSliceWidget::getTracingLayer() const
 {
     return tracingLayer;
 }
@@ -222,7 +222,7 @@ void AxialSliceWidget::setTracingLayer(TracingLayer layer)
     tracingLayer = layer;
 }
 
-bool AxialSliceWidget::getTracingLayerVisible(TracingLayer layer)
+bool AxialSliceWidget::getTracingLayerVisible(TracingLayer layer) const
 {
     // If the layer is out of the acceptable range, then do nothing
     if (layer < TracingLayer::EAT || layer >= TracingLayer::Count)
@@ -427,7 +427,7 @@ bool AxialSliceWidget::loadTracingData(QString path)
     return true;
 }
 
-QMatrix4x4 AxialSliceWidget::getMVPMatrix()
+QMatrix4x4 AxialSliceWidget::getMVPMatrix() const
 {
     // Calculate the ModelViewProjection (MVP) matrix to transform the location of the axial slices
     QMatrix4x4 modelMatrix;
@@ -440,12 +440,12 @@ QMatrix4x4 AxialSliceWidget::getMVPMatrix()
     return (projectionMatrix * viewMatrix * modelMatrix);
 }
 
-QMatrix4x4 AxialSliceWidget::getWindowToNIFTIMatrix(bool includeMVP)
+QMatrix4x4 AxialSliceWidget::getWindowToNIFTIMatrix(bool includeMVP) const
 {
     return (getNIFTIToOpenGLMatrix(includeMVP, !includeMVP).inverted() * getWindowToOpenGLMatrix(false, true));
 }
 
-QMatrix4x4 AxialSliceWidget::getWindowToOpenGLMatrix(bool includeMVP, bool flipY)
+QMatrix4x4 AxialSliceWidget::getWindowToOpenGLMatrix(bool includeMVP, bool flipY) const
 {
     QMatrix4x4 windowToOpenGLMatrix;
 
@@ -458,7 +458,7 @@ QMatrix4x4 AxialSliceWidget::getWindowToOpenGLMatrix(bool includeMVP, bool flipY
         return windowToOpenGLMatrix;
 }
 
-QMatrix4x4 AxialSliceWidget::getNIFTIToOpenGLMatrix(bool includeMVP, bool flipY)
+QMatrix4x4 AxialSliceWidget::getNIFTIToOpenGLMatrix(bool includeMVP, bool flipY) const
 {
     QMatrix4x4 NIFTIToOpenGLMatrix;
 
@@ -771,7 +771,7 @@ void AxialSliceWidget::updateTexture()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     // Get the OpenGL datatype of the matrix
-    NumericType *dataType = NumericType::OpenCV(primMatrix.type());
+    auto dataType = NumericType::OpenCV(primMatrix.type());
     // Upload the texture data from the matrix to the texture. The internal format is 32 bit floats with one channel for red
     glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, fatImage->getXDim(), fatImage->getYDim(), 0, dataType->openGLFormat, dataType->openGLType, primMatrix.data);
 
@@ -783,7 +783,7 @@ void AxialSliceWidget::updateTexture()
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-        NumericType *dataType = NumericType::OpenCV(primMatrix.type());
+        dataType = NumericType::OpenCV(primMatrix.type());
 
         glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, fatImage->getXDim(), fatImage->getYDim(), 0, dataType->openGLFormat, dataType->openGLType, secdMatrix.data);
     }

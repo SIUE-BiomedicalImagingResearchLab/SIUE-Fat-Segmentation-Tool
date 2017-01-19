@@ -39,28 +39,28 @@ struct NumericType
 
     const DataType type;
 
-    double getMin();
-    double getMax();
+    double getMin() const;
+    double getMax() const;
 
 #ifndef NUMERIC_TYPE_NO_OPENGL
     const GLenum openGLFormat;
     const GLenum openGLType;
 
-    static NumericType *OpenGL(GLenum format, GLenum type);
+    static const NumericType *OpenGL(GLenum format, GLenum type);
 #endif // NUMERIC_TYPE_NO_OPENGL
 
 #ifndef NUMERIC_TYPE_NO_OPENCV
     const int openCVType;
     const int openCVTypeNoChannel;
 
-    static NumericType *OpenCV(int type);
-    static NumericType *OpenCV(int type, int numChannels);
+    static const NumericType *OpenCV(int type);
+    static const NumericType *OpenCV(int type, int numChannels);
 #endif // NUMERIC_TYPE_NO_OPENCV
 
 #ifndef NUMERIC_TYPE_NO_NIFTI
     const int NIFTIType;
 
-    static NumericType *NIFTI(int type);
+    static const NumericType *NIFTI(int type);
 #endif // NUMERIC_TYPE_NO_NIFTI
 };
 

@@ -67,31 +67,25 @@ public:
 
     // A value of Location::NoChange(-1) means no change for the location
     void setLocation(QVector4D location);
-    QVector4D getLocation();
-    QVector4D transformLocation(QVector4D location);
+    QVector4D getLocation() const;
+    QVector4D transformLocation(QVector4D location) const;
 
     void setImages(NIFTImage *fat, NIFTImage *water);
-    bool isLoaded();
+    bool isLoaded() const;
 
-    SliceDisplayType getDisplayType();
+    SliceDisplayType getDisplayType() const;
     void setDisplayType(SliceDisplayType type);
-
-    float getContrast();
-    void setContrast(float contrast);
-
-    float getBrightness();
-    void setBrightness(float brightness);
 
     void resetView();
 
     float &rscaling();
     QVector3D &rtranslation();
 
-    QMatrix4x4 getMVPMatrix();
+    QMatrix4x4 getMVPMatrix() const;
 
-    QMatrix4x4 getWindowToNIFTIMatrix(bool includeMVP = true);
-    QMatrix4x4 getWindowToOpenGLMatrix(bool includeMVP = true, bool flipY = true);
-    QMatrix4x4 getNIFTIToOpenGLMatrix(bool includeMVP = true, bool flipY = true);
+    QMatrix4x4 getWindowToNIFTIMatrix(bool includeMVP = true) const;
+    QMatrix4x4 getWindowToOpenGLMatrix(bool includeMVP = true, bool flipY = true) const;
+    QMatrix4x4 getNIFTIToOpenGLMatrix(bool includeMVP = true, bool flipY = true) const;
 
     void setUndoStack(QUndoStack *stack);
 

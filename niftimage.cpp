@@ -77,7 +77,7 @@ bool NIFTImage::setImage(nifti_image *upper, nifti_image *lower, SubjectConfig *
 
     // Create matrix of zDim x yDim x xDim.
     // The default datatype of the matrix is to match the NIFTI file datatype
-    NumericType *numericType = NumericType::NIFTI(upper->datatype);
+    auto numericType = NumericType::NIFTI(upper->datatype);
     int datatype = CV_MAKETYPE(numericType->openCVTypeNoChannel, 1);
     data = cv::Mat({zDim, yDim, xDim}, datatype, cv::Scalar(0));
 
@@ -137,7 +137,7 @@ bool NIFTImage::setSubjectConfig(SubjectConfig *config)
  *      true - Upper/lower images are compatible
  *      false - Upper/lower images are not compatible or an error occurred
  */
-bool NIFTImage::checkImage()
+bool NIFTImage::checkImage() const
 {
     // If upper or lower are not set, then there is nothing to check.
     if (!upper || !lower)
@@ -173,7 +173,7 @@ bool NIFTImage::checkImage()
 
     // If there is not a valid OpenGL/OpenCV datatype for the upper image, then return false.
     // Note: The upper and lower have the same datatypes since the above if statement is true
-    NumericType *type = NumericType::NIFTI(upper->datatype);
+    auto type = NumericType::NIFTI(upper->datatype);
     if (type == NULL || type->openGLFormat == (int)DataType::None || type->openGLType == (int)DataType::None || type->openCVType == (int)DataType::None)
     {
         qDebug() << "Unsupported NIFTI datatype in OpenGL: " << upper->datatype;
@@ -192,7 +192,7 @@ bool NIFTImage::checkImage()
  *      true - This class is compatible with the given image class
  *      false - Not compatible or an error occurred
  */
-bool NIFTImage::compatible(NIFTImage *image)
+bool NIFTImage::compatible(NIFTImage *image) const
 {
     // Get the NIFTI image of the other class
     nifti_image *upperOther = image->getUpperImage();
@@ -237,27 +237,27 @@ bool NIFTImage::compatible(NIFTImage *image)
     return true;
 }
 
-nifti_image *NIFTImage::getUpperImage()
+nifti_image *NIFTImage::getUpperImage() const
 {
     return upper;
 }
 
-nifti_image *NIFTImage::getLowerImage()
+nifti_image *NIFTImage::getLowerImage() const
 {
     return lower;
 }
 
-int NIFTImage::getXDim()
+int NIFTImage::getXDim() const
 {
     return xDim;
 }
 
-int NIFTImage::getYDim()
+int NIFTImage::getYDim() const
 {
     return yDim;
 }
 
-int NIFTImage::getZDim()
+int NIFTImage::getZDim() const
 {
     return zDim;
 }
@@ -361,7 +361,7 @@ cv::Mat NIFTImage::getSaggitalSlice(int x, bool clone)
  *      NumericType * - NULL if data matrix is empty or invalid data type in data matrix is used
  *                      otherwise, a valid NumericType is returned
  */
-NumericType *NIFTImage::getType()
+const NumericType *NIFTImage::getType() const
 {
     if (data.empty())
         return NULL;

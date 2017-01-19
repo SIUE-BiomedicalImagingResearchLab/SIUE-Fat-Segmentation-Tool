@@ -90,37 +90,37 @@ public:
 
     // A value of Location::NoChange(-1) means no change for the location
     void setLocation(QVector4D location);
-    QVector4D getLocation();
-    QVector4D transformLocation(QVector4D location);
+    QVector4D getLocation() const;
+    QVector4D transformLocation(QVector4D location) const;
 
     void setImages(NIFTImage *fat, NIFTImage *water);
-    bool isLoaded();
+    bool isLoaded() const;
 
-    SliceDisplayType getDisplayType();
+    SliceDisplayType getDisplayType() const;
     void setDisplayType(SliceDisplayType type);
 
-    ColorMap getPrimColorMap();
+    ColorMap getPrimColorMap() const;
     void setPrimColorMap(ColorMap map);
 
-    float getPrimOpacity();
+    float getPrimOpacity() const;
     void setPrimOpacity(float opacity);
 
-    ColorMap getSecdColorMap();
+    ColorMap getSecdColorMap() const;
     void setSecdColorMap(ColorMap map);
 
-    float getSecdOpacity();
+    float getSecdOpacity() const;
     void setSecdOpacity(float opacity);
 
-    float getBrightness();
+    float getBrightness() const;
     void setBrightness(float brightness);
 
-    float getContrast();
+    float getContrast() const;
     void setContrast(float contrast);
 
-    TracingLayer getTracingLayer();
+    TracingLayer getTracingLayer() const;
     void setTracingLayer(TracingLayer layer);
 
-    bool getTracingLayerVisible(TracingLayer layer);
+    bool getTracingLayerVisible(TracingLayer layer) const;
     void setTracingLayerVisible(TracingLayer layer, bool value);
 
     /* Note: This will retrieve a vector of points for various configurations. The default values:
@@ -138,11 +138,11 @@ public:
     bool saveTracingData(QString path, bool promptOnOverwrite = true);
     bool loadTracingData(QString path);
 
-    QMatrix4x4 getMVPMatrix();
+    QMatrix4x4 getMVPMatrix() const;
 
-    QMatrix4x4 getWindowToNIFTIMatrix(bool includeMVP = true);
-    QMatrix4x4 getWindowToOpenGLMatrix(bool includeMVP = true, bool flipY = true);
-    QMatrix4x4 getNIFTIToOpenGLMatrix(bool includeMVP = true, bool flipY = true);
+    QMatrix4x4 getWindowToNIFTIMatrix(bool includeMVP = true) const;
+    QMatrix4x4 getWindowToOpenGLMatrix(bool includeMVP = true, bool flipY = true) const;
+    QMatrix4x4 getNIFTIToOpenGLMatrix(bool includeMVP = true, bool flipY = true) const;
 
     void setUndoStack(QUndoStack *stack);
 

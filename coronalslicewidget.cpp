@@ -19,7 +19,7 @@ void CoronalSliceWidget::setImages(NIFTImage *fat, NIFTImage *water)
     location = QVector4D(0, 0, 0, 0);
 }
 
-bool CoronalSliceWidget::isLoaded()
+bool CoronalSliceWidget::isLoaded() const
 {
     return (fatImage && waterImage);
 }
@@ -44,12 +44,12 @@ void CoronalSliceWidget::setLocation(QVector4D location)
         updateCrosshairLine();
 }
 
-QVector4D CoronalSliceWidget::getLocation()
+QVector4D CoronalSliceWidget::getLocation() const
 {
     return location;
 }
 
-QVector4D CoronalSliceWidget::transformLocation(QVector4D location)
+QVector4D CoronalSliceWidget::transformLocation(QVector4D location) const
 {
     // This function returns a QVector4D that replaces Location::NoChange's from location variable with actual location value
 
@@ -58,7 +58,7 @@ QVector4D CoronalSliceWidget::transformLocation(QVector4D location)
     return (location * notTemp) + (this->location * temp);
 }
 
-SliceDisplayType CoronalSliceWidget::getDisplayType()
+SliceDisplayType CoronalSliceWidget::getDisplayType() const
 {
     return displayType;
 }
@@ -88,7 +88,7 @@ QVector3D &CoronalSliceWidget::rtranslation()
     return translation;
 }
 
-QMatrix4x4 CoronalSliceWidget::getMVPMatrix()
+QMatrix4x4 CoronalSliceWidget::getMVPMatrix() const
 {
     // Calculate the ModelViewProjection (MVP) matrix to transform the location of the axial slices
     QMatrix4x4 modelMatrix;
@@ -102,12 +102,12 @@ QMatrix4x4 CoronalSliceWidget::getMVPMatrix()
     return (projectionMatrix * viewMatrix * modelMatrix);
 }
 
-QMatrix4x4 CoronalSliceWidget::getWindowToNIFTIMatrix(bool includeMVP)
+QMatrix4x4 CoronalSliceWidget::getWindowToNIFTIMatrix(bool includeMVP) const
 {
     return (getNIFTIToOpenGLMatrix(includeMVP, !includeMVP).inverted() * getWindowToOpenGLMatrix(false, true));
 }
 
-QMatrix4x4 CoronalSliceWidget::getWindowToOpenGLMatrix(bool includeMVP, bool flipY)
+QMatrix4x4 CoronalSliceWidget::getWindowToOpenGLMatrix(bool includeMVP, bool flipY) const
 {
     QMatrix4x4 windowToOpenGLMatrix;
 
@@ -120,7 +120,7 @@ QMatrix4x4 CoronalSliceWidget::getWindowToOpenGLMatrix(bool includeMVP, bool fli
         return windowToOpenGLMatrix;
 }
 
-QMatrix4x4 CoronalSliceWidget::getNIFTIToOpenGLMatrix(bool includeMVP, bool flipY)
+QMatrix4x4 CoronalSliceWidget::getNIFTIToOpenGLMatrix(bool includeMVP, bool flipY) const
 {
     QMatrix4x4 NIFTIToOpenGLMatrix;
 
@@ -255,7 +255,7 @@ void CoronalSliceWidget::updateTexture()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     // Get the OpenGL datatype of the matrix
-    NumericType *dataType = NumericType::OpenCV(matrix.type());
+    auto dataType = NumericType::OpenCV(matrix.type());
     // Upload the texture data from the matrix to the texture. The internal format is 32 bit floats with one channel for red
     glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, fatImage->getXDim(), fatImage->getZDim(), 0, dataType->openGLFormat, dataType->openGLType, matrix.data);
 

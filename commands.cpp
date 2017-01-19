@@ -838,7 +838,7 @@ void TracingPointsAddCommand::redo()
     widget->update();
 }
 
-int TracingPointsAddCommand::getIndex()
+int TracingPointsAddCommand::getIndex() const
 {
     return index;
 }

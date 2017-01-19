@@ -293,7 +293,7 @@ public:
     void undo() override;
     void redo() override;
 
-    int getIndex();
+    int getIndex() const;
 };
 
 #endif // COMMANDS_H

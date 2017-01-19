@@ -1,7 +1,7 @@
 #include "numerictype.h"
 
 static const int numericTypeLUTSize = 18;
-static NumericType numericTypeLUT[numericTypeLUTSize] =
+static const NumericType numericTypeLUT[numericTypeLUTSize] =
 {
     { DataType::UnsignedChar,   GL_RED,     GL_UNSIGNED_BYTE,   CV_8UC1,    CV_8U,      DT_UINT8 },
     { DataType::Char,           GL_RED,     GL_BYTE,            CV_8SC1,    CV_8S,      DT_INT8 },
@@ -36,7 +36,7 @@ static NumericType numericTypeLUT[numericTypeLUTSize] =
 #ifdef _MSC_VER
 #pragma warning(disable:4838)
 #endif // _MSC_VER
-static double minMaxLUT[][2] =
+static const double minMaxLUT[][2] =
 {
     {std::numeric_limits<bool>::min(), std::numeric_limits<bool>::max()},
     {std::numeric_limits<unsigned char>::min(), std::numeric_limits<unsigned char>::max()},
@@ -71,18 +71,18 @@ NumericType::NumericType(DataType type_, GLenum openGLFormat_, GLenum openGLType
 
 }
 
-double NumericType::getMin()
+double NumericType::getMin() const
 {
     return minMaxLUT[(int)type][0];
 }
 
-double NumericType::getMax()
+double NumericType::getMax() const
 {
     return minMaxLUT[(int)type][1];
 }
 
 #ifndef NUMERIC_TYPE_NO_OPENGL
-NumericType *NumericType::OpenGL(GLenum format, GLenum type)
+const NumericType *NumericType::OpenGL(GLenum format, GLenum type)
 {
     for (int i = 0; i < numericTypeLUTSize; ++i)
     {
@@ -95,7 +95,7 @@ NumericType *NumericType::OpenGL(GLenum format, GLenum type)
 #endif // NUMERIC_TYPE_NO_OPENGL
 
 #ifndef NUMERIC_TYPE_NO_OPENCV
-NumericType *NumericType::OpenCV(int type)
+const NumericType *NumericType::OpenCV(int type)
 {
     for (int i = 0; i < numericTypeLUTSize; ++i)
     {
@@ -106,7 +106,7 @@ NumericType *NumericType::OpenCV(int type)
     return NULL;
 }
 
-NumericType *NumericType::OpenCV(int type, int numChannels)
+const NumericType *NumericType::OpenCV(int type, int numChannels)
 {
     int searchType = CV_MAKETYPE(type, numChannels);
     for (int i = 0; i < numericTypeLUTSize; ++i)
@@ -120,7 +120,7 @@ NumericType *NumericType::OpenCV(int type, int numChannels)
 #endif // NUMERIC_TYPE_NO_OPENCV
 
 #ifndef NUMERIC_TYPE_NO_NIFTI
-NumericType *NumericType::NIFTI(int type)
+const NumericType *NumericType::NIFTI(int type)
 {
     for (int i = 0; i < numericTypeLUTSize; ++i)
     {
