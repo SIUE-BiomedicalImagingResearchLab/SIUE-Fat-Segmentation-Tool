@@ -58,7 +58,7 @@ int main(int argc, char *argv[])
         app = new Application(argc, argv);
         QCoreApplication::setOrganizationName("Southern Illinois University Edwardsville");
         QCoreApplication::setApplicationName("Visceral Fat Validation");
-        QCoreApplication::setApplicationVersion(QT_VERSION_STR);
+        QCoreApplication::setApplicationVersion(APP_VERSION);
         w = new MainWindow();
 
         w->show();

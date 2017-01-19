@@ -376,10 +376,9 @@ void MainWindow::on_actionExit_triggered()
 
 void MainWindow::on_actionAbout_triggered()
 {
-    qWarning() << "There was an error while performing this operation";
-    return;
     QMessageBox aboutBox(QMessageBox::Information, "About the Program",
-                         "<html><head/><body><p><span style=\" font-weight:600;\">Creator: </span>Addison Elliott</p><p><span style=\" font-weight:600;\">Adviser: </span>Jon Klingensmith</p><p><span style=\" font-weight:600;\">School: </span>Southern Illinois University Edwardsville</p></body></html>",
+                         QObject::tr("<html><head/><body><p><span style=\" font-weight:600;\">Visceral Fat Validation v%1</span></p><p><span style=\" font-weight:600;\">Creator:</span> Addison Elliott</p><p><span style=\" font-weight:600;\">Release Date: </span>1/19/2017</p><p><span style=\" font-weight:600;\">Advisor:</span> Jon Klingensmith</p><p><span style=\" font-weight:600;\">School:</span> Southern Illinois University Edwardsville</p></body></html>")
+                         .arg(QCoreApplication::applicationVersion()),
                          QMessageBox::Ok, this);
     aboutBox.setTextFormat(Qt::RichText);
 

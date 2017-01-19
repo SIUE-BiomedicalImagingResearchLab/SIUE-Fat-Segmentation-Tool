@@ -11,10 +11,15 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 CONFIG += c++11
 CONFIG -= app_bundle
 
+win32:VERSION = 1.0.0.0 # major.minor.patch.build
+else:VERSION = 1.0.0    # major.minor.patch
+
+DEFINES += APP_VERSION=\\\"$$VERSION\\\"
+
 TARGET = VisceralFatValidation
 TEMPLATE = app
 
-CONFIG(release, debug|release): DEFINES += QT_NO_WARNING_OUTPUT QT_NO_DEBUG_OUTPUT
+CONFIG(release, debug|release): DEFINES += QT_NO_DEBUG_OUTPUT QT_MESSAGELOGCONTEXT
 
 SOURCES += main.cpp\
         mainwindow.cpp \

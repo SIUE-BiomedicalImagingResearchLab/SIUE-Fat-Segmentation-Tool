@@ -370,6 +370,9 @@ void CoronalSliceWidget::paintGL()
 
 void CoronalSliceWidget::mouseMoveEvent(QMouseEvent *eventMove)
 {
+    if (!isLoaded())
+        return;
+
     if (startPan)
     {
         // Change in mouse x/y based on last mouse position
@@ -399,6 +402,9 @@ void CoronalSliceWidget::mouseMoveEvent(QMouseEvent *eventMove)
 
 void CoronalSliceWidget::mousePressEvent(QMouseEvent *eventPress)
 {
+    if (!isLoaded())
+        return;
+
     // There are button() and buttons() functions in QMouseEvent that have a very
     // important distinction between one another. button() is only going to return
     // the button that caused this event while buttons() is a state of all buttons
@@ -418,6 +424,9 @@ void CoronalSliceWidget::mousePressEvent(QMouseEvent *eventPress)
 
 void CoronalSliceWidget::mouseReleaseEvent(QMouseEvent *eventRelease)
 {
+    if (!isLoaded())
+        return;
+
     if ((eventRelease->button() == Qt::LeftButton || eventRelease->button() == Qt::MiddleButton) && startPan)
     {
         startPan = false;

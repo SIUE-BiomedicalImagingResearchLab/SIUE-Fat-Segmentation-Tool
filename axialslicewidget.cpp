@@ -1017,6 +1017,9 @@ void AxialSliceWidget::addPoint(QPointF mouseCoord)
 
 void AxialSliceWidget::mouseMoveEvent(QMouseEvent *eventMove)
 {
+    if (!isLoaded())
+        return;
+
     if (startDraw)
     {
         QPointF mouseCoord = eventMove->pos();
@@ -1051,6 +1054,9 @@ void AxialSliceWidget::mouseMoveEvent(QMouseEvent *eventMove)
 
 void AxialSliceWidget::mousePressEvent(QMouseEvent *eventPress)
 {
+    if (!isLoaded())
+        return;
+
     // There are button() and buttons() functions in QMouseEvent that have a very
     // important distinction between one another. button() is only going to return
     // the button that caused this event while buttons() is a state of all buttons
@@ -1090,6 +1096,9 @@ void AxialSliceWidget::mousePressEvent(QMouseEvent *eventPress)
 
 void AxialSliceWidget::mouseReleaseEvent(QMouseEvent *eventRelease)
 {
+    if (!isLoaded())
+        return;
+
     if (eventRelease->button() == Qt::LeftButton && startDraw)
     {
         addPoint(eventRelease->pos());
