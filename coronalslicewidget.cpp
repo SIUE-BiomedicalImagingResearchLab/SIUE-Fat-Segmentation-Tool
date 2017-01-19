@@ -68,7 +68,7 @@ void CoronalSliceWidget::setDisplayType(SliceDisplayType type)
     // If the display type is out of the acceptable range, then do nothing
     if (type < SliceDisplayType::FatOnly || type > SliceDisplayType::WaterFraction)
     {
-        qDebug() << "Invalid display type was specified for CoronalSliceWidget: " << (int)type;
+        qWarning() << "Invalid display type was specified for CoronalSliceWidget: " << (int)type;
         return;
     }
 
@@ -238,7 +238,7 @@ void CoronalSliceWidget::updateTexture()
     matrix = fatImage->getCoronalSlice(location.y(), true);
     if (matrix.empty())
     {
-        qDebug() << "Unable to retrieve coronal slice " << location.y() << " from the fat image. Matrix returned empty.";
+        qWarning() << "Unable to retrieve coronal slice " << location.y() << " from the fat image. Matrix returned empty.";
         return;
     }
 
@@ -262,7 +262,7 @@ void CoronalSliceWidget::updateTexture()
     // If there was an error, then say something
     GLenum err;
     if ((err = glGetError()) != GL_NO_ERROR)
-        qDebug() << "Unable to upload texture image for coronal slice " << location.y() << ". Error code: " << err;
+        qWarning() << "Unable to upload texture image for coronal slice " << location.y() << ". Error code: " << err;
 
     update();
 }

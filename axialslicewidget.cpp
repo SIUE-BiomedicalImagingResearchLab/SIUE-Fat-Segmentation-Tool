@@ -91,7 +91,7 @@ void AxialSliceWidget::setDisplayType(SliceDisplayType type)
     // If the display type is out of the acceptable range, then do nothing
     if (type < SliceDisplayType::FatOnly || type > SliceDisplayType::WaterFat)
     {
-        qDebug() << "Invalid display type was specified for AxialSliceWidget: " << (int)type;
+        qWarning() << "Invalid display type was specified for AxialSliceWidget: " << (int)type;
         return;
     }
 
@@ -111,7 +111,7 @@ void AxialSliceWidget::setPrimColorMap(ColorMap map)
     // If the map given is out of the acceptable range, then do nothing
     if (map < ColorMap::Autumn || map >= ColorMap::Count)
     {
-        qDebug() << "Invalid primary color map was specified for AxialSliceWidget: " << (int)map;
+        qWarning() << "Invalid primary color map was specified for AxialSliceWidget: " << (int)map;
         return;
     }
 
@@ -130,7 +130,7 @@ void AxialSliceWidget::setPrimOpacity(float opacity)
 {
     if (opacity < 0.0f || opacity > 1.0f)
     {
-        qDebug() << "Invalid primary opacity level was specified for AxialSliceWidget: " << opacity;
+        qWarning() << "Invalid primary opacity level was specified for AxialSliceWidget: " << opacity;
         return;
     }
 
@@ -150,7 +150,7 @@ void AxialSliceWidget::setSecdColorMap(ColorMap map)
     // If the map given is out of the acceptable range, then do nothing
     if (map < ColorMap::Autumn || map >= ColorMap::Count)
     {
-        qDebug() << "Invalid secondary color map was specified for AxialSliceWidget: " << (int)map;
+        qWarning() << "Invalid secondary color map was specified for AxialSliceWidget: " << (int)map;
         return;
     }
 
@@ -169,7 +169,7 @@ void AxialSliceWidget::setSecdOpacity(float opacity)
 {
     if (opacity < 0.0f || opacity > 1.0f)
     {
-        qDebug() << "Invalid secondary opacity level was specified for AxialSliceWidget: " << opacity;
+        qWarning() << "Invalid secondary opacity level was specified for AxialSliceWidget: " << opacity;
         return;
     }
 
@@ -189,7 +189,7 @@ void AxialSliceWidget::setBrightness(float brightness)
     // If the brightness is out of the acceptable range, then do nothing
     if (brightness < 0.0f || brightness > 1.0f)
     {
-        qDebug() << "Invalid brightness was specified for AxialSliceWidget: " << brightness;
+        qWarning() << "Invalid brightness was specified for AxialSliceWidget: " << brightness;
         return;
     }
 
@@ -209,7 +209,7 @@ void AxialSliceWidget::setContrast(float contrast)
     // If the contrast is out of the acceptable range, then do nothing
     if (contrast < 0.0f || contrast > 1.0f)
     {
-        qDebug() << "Invalid contrast was specified for AxialSliceWidget: " << contrast;
+        qWarning() << "Invalid contrast was specified for AxialSliceWidget: " << contrast;
         return;
     }
 
@@ -229,7 +229,7 @@ void AxialSliceWidget::setTracingLayer(TracingLayer layer)
     // If the layer is out of the acceptable range, then do nothing
     if (layer < TracingLayer::EAT || layer >= TracingLayer::Count)
     {
-        qDebug() << "Invalid current tracing layer was specified for AxialSliceWidget: " << (int)layer;
+        qWarning() << "Invalid current tracing layer was specified for AxialSliceWidget: " << (int)layer;
         return;
     }
 
@@ -241,7 +241,7 @@ bool AxialSliceWidget::getTracingLayerVisible(TracingLayer layer) const
     // If the layer is out of the acceptable range, then do nothing
     if (layer < TracingLayer::EAT || layer >= TracingLayer::Count)
     {
-        qDebug() << "Invalid current tracing layer was specified for AxialSliceWidget: " << (int)layer;
+        qWarning() << "Invalid current tracing layer was specified for AxialSliceWidget: " << (int)layer;
         return false;
     }
 
@@ -253,7 +253,7 @@ void AxialSliceWidget::setTracingLayerVisible(TracingLayer layer, bool value)
     // If the layer is out of the acceptable range, then do nothing
     if (layer < TracingLayer::EAT || layer >= TracingLayer::Count)
     {
-        qDebug() << "Invalid current tracing layer was specified for AxialSliceWidget: " << (int)layer;
+        qWarning() << "Invalid current tracing layer was specified for AxialSliceWidget: " << (int)layer;
         return;
     }
 
@@ -266,7 +266,7 @@ std::vector<std::vector<QPointF>> &AxialSliceWidget::getSlicePoints(int slice)
         slice = location.z();
     else if (slice < 0 || slice >= fatImage->getZDim())
     {
-        qDebug() << "Invalid slice given for getSlicePoints in AxialSliceWidget: " << slice;
+        qWarning() << "Invalid slice given for getSlicePoints in AxialSliceWidget: " << slice;
         slice = 0; // Since a reference is returned, just set a dummy slice
     }
 
@@ -279,7 +279,7 @@ std::vector<QPointF> &AxialSliceWidget::getLayerPoints(int slice, TracingLayer l
         slice = location.z();
     else if (slice < 0 || slice >= fatImage->getZDim())
     {
-        qDebug() << "Invalid slice given for getLayerPoints in AxialSliceWidget: " << slice;
+        qWarning() << "Invalid slice given for getLayerPoints in AxialSliceWidget: " << slice;
         slice = 0; // Since a reference is returned, just set a dummy slice
     }
 
@@ -287,7 +287,7 @@ std::vector<QPointF> &AxialSliceWidget::getLayerPoints(int slice, TracingLayer l
         layer = tracingLayer;
     else if (layer < TracingLayer::EAT || layer > TracingLayer::Count)
     {
-        qDebug() << "Invalid tracing layer given for getLayerPoints in AxialSliceWidget: " << (int)layer;
+        qWarning() << "Invalid tracing layer given for getLayerPoints in AxialSliceWidget: " << (int)layer;
         layer = TracingLayer::EAT; // Since a reference is returned, just set a dummy layer
     }
 
@@ -332,7 +332,7 @@ bool AxialSliceWidget::saveTracingData(QString path, bool promptOnOverwrite)
         QFile file(layerFullPath[i]);
         if (!file.open(QIODevice::WriteOnly | QIODevice::Truncate))
         {
-            qDebug() << "Error opening file to save tracing data. Skipping layer: " << layerFullPath[i];
+            qWarning() << "Error opening file to save tracing data. Skipping layer: " << layerFullPath[i];
             continue;
         }
 
@@ -360,7 +360,7 @@ bool AxialSliceWidget::loadTracingData(QString path)
 {
     if (!isLoaded())
     {
-        QMessageBox::warning((QWidget *)parent(), "Unable to import data", "Tracing data cannot be imported into an application until the correct NIFTI image is loaded first.\nPlease load the correct NIFTI file and then try again.", QMessageBox::Ok);
+        qWarning() << "Tracing data cannot be imported into an application until the correct NIFTI image is loaded first.\nPlease load the correct NIFTI file and then try again.";
         return false;
     }
 
@@ -398,7 +398,7 @@ bool AxialSliceWidget::loadTracingData(QString path)
         QFile file(layerFullPath[i]);
         if (!file.open(QIODevice::ReadOnly))
         {
-            qDebug() << "Error opening file to load tracing data. Skipping layer: " << layerFullPath[i];
+            qWarning() << "Error opening file to load tracing data. Skipping layer: " << layerFullPath[i];
             continue;
         }
 
@@ -409,8 +409,8 @@ bool AxialSliceWidget::loadTracingData(QString path)
 
         if (zDim != fatImage->getZDim())
         {
-            qDebug() << "Number of axial slices in the data does not match the NIFTI image loaded.";
-            return false;
+            qWarning() << "Number of axial slices in the data does not match the NIFTI image loaded.";
+            return false; // Note: Return false because the other layers should be mismatched as well
         }
 
         for (int z = 0; z < zDim; ++z)
@@ -651,7 +651,7 @@ void AxialSliceWidget::updateTexture()
             primMatrix = fatImage->getAxialSlice(location.z(), true);
             if (primMatrix.empty())
             {
-                qDebug() << "Unable to retrieve axial slice " << location.z() << " from the fat image. Matrix returned empty.";
+                qWarning() << "Unable to retrieve axial slice " << location.z() << " from the fat image. Matrix returned empty.";
                 return;
             }
 
@@ -667,7 +667,7 @@ void AxialSliceWidget::updateTexture()
             primMatrix = waterImage->getAxialSlice(location.z(), true);
             if (primMatrix.empty())
             {
-                qDebug() << "Unable to retrieve axial slice " << location.z() << " from the water image. Matrix returned empty.";
+                qWarning() << "Unable to retrieve axial slice " << location.z() << " from the water image. Matrix returned empty.";
                 return;
             }
 
@@ -684,7 +684,7 @@ void AxialSliceWidget::updateTexture()
             cv::Mat waterTemp = waterImage->getAxialSlice(location.z(), true);
             if (fatTemp.empty() || waterTemp.empty())
             {
-                qDebug() << "Unable to retrieve axial slice " << location.z() << " from the fat or water image. Matrix returned empty.";
+                qWarning() << "Unable to retrieve axial slice " << location.z() << " from the fat or water image. Matrix returned empty.";
                 return;
             }
 
@@ -704,7 +704,7 @@ void AxialSliceWidget::updateTexture()
             cv::Mat waterTemp = waterImage->getAxialSlice(location.z(), true);
             if (fatTemp.empty() || waterTemp.empty())
             {
-                qDebug() << "Unable to retrieve axial slice " << location.z() << " from the fat or water image. Matrix returned empty.";
+                qWarning() << "Unable to retrieve axial slice " << location.z() << " from the fat or water image. Matrix returned empty.";
                 return;
             }
 
@@ -723,7 +723,7 @@ void AxialSliceWidget::updateTexture()
             primMatrix = fatImage->getAxialSlice(location.z(), true);
             if (primMatrix.empty())
             {
-                qDebug() << "Unable to retrieve axial slice " << location.z() << " from the fat image. Matrix returned empty.";
+                qWarning() << "Unable to retrieve axial slice " << location.z() << " from the fat image. Matrix returned empty.";
                 return;
             }
 
@@ -736,7 +736,7 @@ void AxialSliceWidget::updateTexture()
             secdMatrix = waterImage->getAxialSlice(location.z(), true);
             if (secdMatrix.empty())
             {
-                qDebug() << "Unable to retrieve axial slice " << location.z() << " from the water image. Matrix returned empty.";
+                qWarning() << "Unable to retrieve axial slice " << location.z() << " from the water image. Matrix returned empty.";
                 return;
             }
 
@@ -752,7 +752,7 @@ void AxialSliceWidget::updateTexture()
             primMatrix = waterImage->getAxialSlice(location.z(), true);
             if (primMatrix.empty())
             {
-                qDebug() << "Unable to retrieve axial slice " << location.z() << " from the water image. Matrix returned empty.";
+                qWarning() << "Unable to retrieve axial slice " << location.z() << " from the water image. Matrix returned empty.";
                 return;
             }
 
@@ -765,7 +765,7 @@ void AxialSliceWidget::updateTexture()
             secdMatrix = fatImage->getAxialSlice(location.z(), true);
             if (secdMatrix.empty())
             {
-                qDebug() << "Unable to retrieve axial slice " << location.z() << " from the fat image. Matrix returned empty.";
+                qWarning() << "Unable to retrieve axial slice " << location.z() << " from the fat image. Matrix returned empty.";
                 return;
             }
 
@@ -805,7 +805,7 @@ void AxialSliceWidget::updateTexture()
     // If there was an error, then say something
     GLenum err;
     if ((err = glGetError()) != GL_NO_ERROR)
-        qDebug() << "Unable to upload texture image for axial slice " << location.z() << ". Error code: " << err;
+        qWarning() << "Unable to upload texture image for axial slice " << location.z() << ". Error code: " << err;
 
     update();
 }

@@ -61,10 +61,10 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(PATShortcut, SIGNAL(activated()), this, SLOT(on_PATRadioBtn_toggled()));
     connect(SCATShortcut, SIGNAL(activated()), this, SLOT(on_SCATRadioBtn_toggled()));
     connect(VATShortcut, SIGNAL(activated()), this, SLOT(on_VATRadioBtn_toggled()));
-    connect(upShortcut, SIGNAL(activated()), this, SLOT(on_upShortcut_triggered()));
-    connect(downShortcut, SIGNAL(activated()), this, SLOT(on_downShortcut_triggered()));
-    connect(leftShortcut, SIGNAL(activated()), this, SLOT(on_leftShortcut_triggered()));
-    connect(rightShortcut, SIGNAL(activated()), this, SLOT(on_rightShortcut_triggered()));
+    connect(upShortcut, SIGNAL(activated()), this, SLOT(upShortcut_triggered()));
+    connect(downShortcut, SIGNAL(activated()), this, SLOT(downShortcut_triggered()));
+    connect(leftShortcut, SIGNAL(activated()), this, SLOT(leftShortcut_triggered()));
+    connect(rightShortcut, SIGNAL(activated()), this, SLOT(rightShortcut_triggered()));
 
     // Read window settings(size of window from last time application was used) upon initialization
     readSettings();
@@ -189,8 +189,7 @@ bool MainWindow::loadImage(QString path)
     {
         // Show a message box for this exception and free the four nifti images if they are allocated.
         // Since this is an open dialog box, we do not want to stop the application so the exception is caught here
-        QMessageBox::critical(this, e.title(), e.message());
-        qCritical() << e.message();
+        qWarning() << e.message();
         if (fatUpperImage) nifti_image_free(fatUpperImage);
         if (fatLowerImage) nifti_image_free(fatLowerImage);
         if (waterUpperImage) nifti_image_free(waterUpperImage);
@@ -311,17 +310,13 @@ void MainWindow::on_actionOpen_triggered()
         defaultOpenDir = path;
         ui->statusBar->showMessage(QObject::tr("Successfully loaded file in %1").arg(path), 4000);
     }
-    else
-        qDebug() << "Unable to load image data located in path: " << path;
 }
 
 void MainWindow::on_actionSave_triggered()
 {
     if (saveTracingResultsPath.isNull())
         on_actionSaveAs_triggered();
-    else if (!ui->glWidgetAxial->saveTracingData(saveTracingResultsPath, false))
-        qDebug() << "Unable to save tracing data in file: " << saveTracingResultsPath;
-    else
+    else if (ui->glWidgetAxial->saveTracingData(saveTracingResultsPath, false))
         ui->statusBar->showMessage(QObject::tr("Successfully saved file at %1").arg(saveTracingResultsPath), 4000);
 }
 
@@ -335,7 +330,7 @@ void MainWindow::on_actionSaveAs_triggered()
     QFileInfo fileInfo(path);
     if (!fileInfo.exists() || !fileInfo.isDir())
     {
-        qDebug() << "Selected directory to save tracing results either does not exist or is not a directory: " << path;
+        qWarning() << "Selected directory to save tracing results either does not exist or is not a directory: " << path;
         return;
     }
 
@@ -347,7 +342,7 @@ void MainWindow::on_actionSaveAs_triggered()
         ui->statusBar->showMessage(QObject::tr("Successfully saved file at %1").arg(path), 4000);
     }
     else
-        qDebug() << "Unable to save tracing data in path: " << path;
+        qWarning() << "Unable to save tracing data in path: " << path;
 }
 
 void MainWindow::on_actionImportTracingData_triggered()
@@ -360,7 +355,7 @@ void MainWindow::on_actionImportTracingData_triggered()
     QFileInfo fileInfo(path);
     if (!fileInfo.exists() || !fileInfo.isDir())
     {
-        qDebug() << "Selected directory to save tracing results either does not exist or is not a directory: " << path;
+        qWarning() << "Selected directory to save tracing results either does not exist or is not a directory: " << path;
         return;
     }
 
@@ -371,8 +366,6 @@ void MainWindow::on_actionImportTracingData_triggered()
         saveTracingResultsPath = path;
         ui->statusBar->showMessage(QObject::tr("Successfully loaded tracing results in %1").arg(path), 4000);
     }
-    else
-        qDebug() << "Unable to save tracing data in path: " << path;
 }
 
 void MainWindow::on_actionExit_triggered()
@@ -383,6 +376,8 @@ void MainWindow::on_actionExit_triggered()
 
 void MainWindow::on_actionAbout_triggered()
 {
+    qWarning() << "There was an error while performing this operation";
+    return;
     QMessageBox aboutBox(QMessageBox::Information, "About the Program",
                          "<html><head/><body><p><span style=\" font-weight:600;\">Creator: </span>Addison Elliott</p><p><span style=\" font-weight:600;\">Adviser: </span>Jon Klingensmith</p><p><span style=\" font-weight:600;\">School: </span>Southern Illinois University Edwardsville</p></body></html>",
                          QMessageBox::Ok, this);
@@ -391,7 +386,7 @@ void MainWindow::on_actionAbout_triggered()
     aboutBox.exec();
 }
 
-void MainWindow::on_upShortcut_triggered()
+void MainWindow::upShortcut_triggered()
 {
     const int value = ui->glWidgetAxial->getLocation().y() + 1;
     if (value >= fatImage->getYDim())
@@ -403,7 +398,7 @@ void MainWindow::on_upShortcut_triggered()
                                               ui->coronalSliceSpinBox, ui->saggitalSliceSlider, ui->saggitalSliceSpinBox));
 }
 
-void MainWindow::on_downShortcut_triggered()
+void MainWindow::downShortcut_triggered()
 {
     const int value = ui->glWidgetAxial->getLocation().y() - 1;
     if (value < 0)
@@ -415,7 +410,7 @@ void MainWindow::on_downShortcut_triggered()
                                               ui->coronalSliceSpinBox, ui->saggitalSliceSlider, ui->saggitalSliceSpinBox));
 }
 
-void MainWindow::on_leftShortcut_triggered()
+void MainWindow::leftShortcut_triggered()
 {
     const int value = ui->glWidgetAxial->getLocation().z() - 1;
     if (value < 0)
@@ -427,7 +422,7 @@ void MainWindow::on_leftShortcut_triggered()
                                               ui->coronalSliceSpinBox, ui->saggitalSliceSlider, ui->saggitalSliceSpinBox));
 }
 
-void MainWindow::on_rightShortcut_triggered()
+void MainWindow::rightShortcut_triggered()
 {
     const int value = ui->glWidgetAxial->getLocation().z() + 1;
     if (value >= fatImage->getZDim())

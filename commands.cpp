@@ -808,7 +808,7 @@ void TracingPointsAddCommand::undo()
     // because there are no points to copy
     if (layerPoints.size() <= index)
     {
-        qDebug() << "Number of points contained in layerPoints is less than index. Layer points size: " << layerPoints.size() << " Index: " << index;
+        qWarning() << "Number of points contained in layerPoints is less than index. Layer points size: " << layerPoints.size() << " Index: " << index;
         return;
     }
 

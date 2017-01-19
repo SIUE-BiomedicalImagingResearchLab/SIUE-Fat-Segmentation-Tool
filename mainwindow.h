@@ -85,10 +85,10 @@ private slots:
 
     void on_actionAbout_triggered();
 
-    void on_upShortcut_triggered();
-    void on_downShortcut_triggered();
-    void on_leftShortcut_triggered();
-    void on_rightShortcut_triggered();
+    void upShortcut_triggered();
+    void downShortcut_triggered();
+    void leftShortcut_triggered();
+    void rightShortcut_triggered();
 
     void on_axialSliceSlider_valueChanged(int value);
     void on_axialSliceSpinBox_valueChanged(int value);
