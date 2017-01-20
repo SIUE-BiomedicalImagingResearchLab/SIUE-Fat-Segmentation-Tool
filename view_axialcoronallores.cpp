@@ -79,6 +79,8 @@ bool viewAxialCoronalLoRes::loadImage(QString path)
 
     try
     {
+        qDebug() << "Loading image...";
+
         // Load NIFTI file
         QString fatUpperPath = QDir(path).filePath("fatUpper.nii");
         QString fatLowerPath = QDir(path).filePath("fatLower.nii");
@@ -113,6 +115,8 @@ bool viewAxialCoronalLoRes::loadImage(QString path)
         if (!fatUpperImage || !fatLowerImage || !waterUpperImage || !waterLowerImage)
             EXCEPTION("Unable to load NIFTI file", "An error occurred while loading one of the four NIFTI images.");
 
+        qDebug() << "Read all 4 NIFTI images";
+
         if (!fatImage->setImage(fatUpperImage, fatLowerImage))
             EXCEPTION("Unable to merge upper and lower image", "Unable to merge upper and lower fat images in NIFTImage class.");
 
@@ -121,6 +125,8 @@ bool viewAxialCoronalLoRes::loadImage(QString path)
 
         if (!fatImage->compatible(waterImage))
             EXCEPTION("Fat and water image are incompatible", "The fat and water image are incompatible in some way. Please check the NIFTI file format of the files and try again.");
+
+        qDebug() << "Setup fat/water images";
 
         setWindowTitle(QCoreApplication::applicationName() + " - " + path);
 
@@ -133,8 +139,12 @@ bool viewAxialCoronalLoRes::loadImage(QString path)
         ui->glWidgetAxial->setImages(fatImage, waterImage);
         ui->glWidgetAxial->setLocation(defaultLocation);
 
+        qDebug() << "Axial Widget images are set";
+
         ui->glWidgetCoronal->setImages(fatImage, waterImage);
         ui->glWidgetCoronal->setLocation(defaultLocation);
+
+        qDebug() << "Coronal Widget images are set";
 
         // Setup the default controls in the GUI
         setupDefaults();

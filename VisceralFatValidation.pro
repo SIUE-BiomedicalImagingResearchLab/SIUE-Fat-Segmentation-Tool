@@ -55,9 +55,7 @@ FORMS    += mainwindow.ui \
     view_axialcoronalhires.ui \
     view_axialcoronallores.ui
 
-DISTFILES += \
-    shaders/axialslice.vert \
-    shaders/axialslice.frag
+DISTFILES +=
 
 # Include the NIFTI files and link the dynamic libraries.
 # The DLL files should deploy with the application automatically

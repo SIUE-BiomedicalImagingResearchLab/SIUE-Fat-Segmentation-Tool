@@ -50,8 +50,8 @@ int main(int argc, char *argv[])
         // This should be uncommented when deploying the application so that the user will be able to see errors.
         // However, if compiling within Qt Creator, it is usually better to comment this out so the output will go to the
         // Qt Creator box instead.
-        //if (!freopen("./error.log", "w", stdout))
-        //    qWarning() << "Unable to redirect stdout to ./error.log. Errors will not be logged in a text file";
+        if (!freopen("./error.log", "w", stdout))
+            qWarning() << "Unable to redirect stdout to ./error.log. Errors will not be logged in a text file";
 
         qInstallMessageHandler(messageLogger);
         qSetMessagePattern("[%{time MM/dd/yyyy h:mm:ss}] [%{if-debug}Debug%{endif}%{if-info}Info%{endif}%{if-warning}Warn%{endif}%{if-critical}Crit%{endif}%{if-fatal}Fatal%{endif}] %{function}:%{line} - %{message}");

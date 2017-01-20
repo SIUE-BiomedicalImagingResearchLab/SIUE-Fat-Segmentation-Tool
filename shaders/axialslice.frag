@@ -10,7 +10,7 @@ uniform float contrast;
 
 void main(void)
 {
-    vec4 texColor = texture(tex, texCoord.st);
+    vec4 texColor = texture2D(tex, texCoord.st);
 
-    gl_FragColor = vec4(texture(mappingTexture, clamp(((texColor.r * contrast) + brightness), 0.0, 1.0)).rgb, opacity);
+    gl_FragColor = vec4(texture1D(mappingTexture, clamp(((texColor.r * contrast) + brightness), 0.0, 1.0)).rgb, opacity);
 }
