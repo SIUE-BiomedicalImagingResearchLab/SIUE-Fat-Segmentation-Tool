@@ -48,8 +48,14 @@
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
+    <property name="toolTipDuration">
+     <number>4000</number>
+    </property>
     <property name="title">
      <string>&amp;File</string>
+    </property>
+    <property name="toolTipsVisible">
+     <bool>true</bool>
     </property>
     <addaction name="actionOpen"/>
     <addaction name="actionSave"/>
@@ -59,8 +65,14 @@
     <addaction name="actionExit"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
+    <property name="toolTipDuration">
+     <number>4000</number>
+    </property>
     <property name="title">
      <string>&amp;Edit</string>
+    </property>
+    <property name="toolTipsVisible">
+     <bool>true</bool>
     </property>
     <addaction name="actionUndo"/>
     <addaction name="actionRedo"/>
@@ -82,8 +94,14 @@
     <addaction name="actionAbout"/>
    </widget>
    <widget class="QMenu" name="menuView">
+    <property name="toolTipDuration">
+     <number>4000</number>
+    </property>
     <property name="title">
      <string>View</string>
+    </property>
+    <property name="toolTipsVisible">
+     <bool>true</bool>
     </property>
     <addaction name="actionAxialCoronalLoRes"/>
     <addaction name="actionAxialCoronalHiRes"/>
@@ -112,6 +130,9 @@
   <action name="actionOpen">
    <property name="text">
     <string>&amp;Open</string>
+   </property>
+   <property name="toolTip">
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Open&lt;/span&gt;&lt;/p&gt;&lt;p&gt;User selects directory in which to search for NIFTI MRI files. &lt;/p&gt;&lt;p&gt;The four NIFTI files loaded are fatUpper.nii, fatLower.nii, waterUpper.nii, and waterLower.nii. &lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Note:&lt;/span&gt; Alternatively, the data may be compressed with *.nii.gz file format&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+O</string>
@@ -156,15 +177,24 @@
    <property name="text">
     <string>Save</string>
    </property>
+   <property name="toolTip">
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Save&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Performs same function as Save As but uses last saved directory as the saving point. &lt;/p&gt;&lt;p&gt;Each fat layer is saved in its own text file within that directory.&lt;/p&gt;&lt;p&gt;This does &lt;span style=&quot; font-weight:600; text-decoration: underline;&quot;&gt;NOT&lt;/span&gt; alter the NIFTI images in any way nor does it save them.&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+   </property>
   </action>
   <action name="actionSaveAs">
    <property name="text">
     <string>Save As</string>
    </property>
+   <property name="toolTip">
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Save As&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Saves the &lt;span style=&quot; text-decoration: underline;&quot;&gt;tracing results&lt;/span&gt; the user has drawn onto the NIFTI image. User will select a directory to save tracing results. Each fat layer is saved in its own text file within that directory.&lt;/p&gt;&lt;p&gt;This does &lt;span style=&quot; font-weight:600; text-decoration: underline;&quot;&gt;NOT&lt;/span&gt; alter the NIFTI images in any way nor does it save them.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+   </property>
   </action>
   <action name="actionImportTracingData">
    <property name="text">
     <string>Import Tracing Data</string>
+   </property>
+   <property name="toolTip">
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Import Tracing Data&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Loads previously drawn tracing data into the viewer to be displayed, altered, and saved. &lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Note:&lt;/span&gt; The appropiate NIFTI image must already be loaded before the tracing data is loaded.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
    </property>
   </action>
   <action name="actionWhatsThis">
