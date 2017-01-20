@@ -95,8 +95,6 @@ void MainWindow::readSettings()
         restoreGeometry(geometry);
     }
 
-    this->resize(1024, 768);
-
     defaultOpenDir = settings.value("defaultOpenDir", QDir::homePath()).toString();
     defaultSaveDir = settings.value("defaultSaveDir", QDir::homePath()).toString();
 }
