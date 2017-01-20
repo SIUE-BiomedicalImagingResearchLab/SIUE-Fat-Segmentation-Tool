@@ -1,0 +1,1343 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>viewAxialCoronalLoRes</class>
+ <widget class="QWidget" name="viewAxialCoronalLoRes">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1200</width>
+    <height>768</height>
+   </rect>
+  </property>
+  <layout class="QGridLayout" name="gridLayout">
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
+    <number>0</number>
+   </property>
+   <item row="0" column="0">
+    <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,0,4,6">
+     <property name="spacing">
+      <number>3</number>
+     </property>
+     <property name="sizeConstraint">
+      <enum>QLayout::SetNoConstraint</enum>
+     </property>
+     <property name="leftMargin">
+      <number>11</number>
+     </property>
+     <property name="rightMargin">
+      <number>11</number>
+     </property>
+     <item>
+      <layout class="QVBoxLayout" name="verticalLayout" stretch="0">
+       <property name="spacing">
+        <number>3</number>
+       </property>
+       <property name="sizeConstraint">
+        <enum>QLayout::SetMaximumSize</enum>
+       </property>
+       <item>
+        <widget class="QTabWidget" name="settingsWidget">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="currentIndex">
+          <number>1</number>
+         </property>
+         <widget class="QWidget" name="homeTab">
+          <attribute name="title">
+           <string>&amp;Home</string>
+          </attribute>
+          <layout class="QGridLayout" name="gridLayout_10">
+           <item row="0" column="0">
+            <widget class="QGroupBox" name="cursorLocationBox">
+             <property name="title">
+              <string>Cursor Location</string>
+             </property>
+             <layout class="QGridLayout" name="gridLayout_2">
+              <item row="0" column="1">
+               <widget class="QSlider" name="axialSliceSlider">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Change Axial Slice&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Drag slider left and right to change the axial slice currently displayed on the main widget&lt;/p&gt;&lt;p&gt;The slices are ordered &lt;span style=&quot; font-weight:600;&quot;&gt;Superior to Inferior&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Shortcut: &lt;/span&gt;Left/Right Keys&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="toolTipDuration">
+                 <number>4000</number>
+                </property>
+                <property name="statusTip">
+                 <string/>
+                </property>
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="tickPosition">
+                 <enum>QSlider::NoTicks</enum>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="0">
+               <widget class="QLabel" name="homeAxialLabel">
+                <property name="text">
+                 <string>&amp;Axial</string>
+                </property>
+                <property name="buddy">
+                 <cstring>axialSliceSlider</cstring>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="2">
+               <widget class="QSpinBox" name="axialSliceSpinBox">
+                <property name="mouseTracking">
+                 <bool>true</bool>
+                </property>
+                <property name="focusPolicy">
+                 <enum>Qt::WheelFocus</enum>
+                </property>
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Change Axial Slice&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Enter slice number or use up/down arrows to change the axial slice currently displayed on the main widget.&lt;/p&gt;&lt;p&gt;The slices are ordered &lt;span style=&quot; font-weight:600;&quot;&gt;Superior to Inferior&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Shortcut: &lt;/span&gt;Left/Right Keys&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="toolTipDuration">
+                 <number>4000</number>
+                </property>
+                <property name="statusTip">
+                 <string>Change Axial Slice</string>
+                </property>
+                <property name="whatsThis">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Change Axial Slice&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Enter slice number or use up/down arrows to change the axial slice currently displayed on the main widget.&lt;/p&gt;&lt;p&gt;The slices are ordered &lt;span style=&quot; font-weight:600;&quot;&gt;Superior to Inferior&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="buttonSymbols">
+                 <enum>QAbstractSpinBox::UpDownArrows</enum>
+                </property>
+                <property name="keyboardTracking">
+                 <bool>false</bool>
+                </property>
+                <property name="suffix">
+                 <string/>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="2">
+               <widget class="QSpinBox" name="saggitalSliceSpinBox">
+                <property name="mouseTracking">
+                 <bool>true</bool>
+                </property>
+                <property name="focusPolicy">
+                 <enum>Qt::WheelFocus</enum>
+                </property>
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Change Saggital Slice &lt;/span&gt;&lt;span style=&quot; font-weight:600; text-decoration: underline;&quot;&gt;[Not Used]&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Enter slice number or use up/down arrows to change the saggital slice. As of now, the saggital slice location is not used.&lt;/p&gt;&lt;p&gt;The slices are ordered &lt;span style=&quot; font-weight:600;&quot;&gt;Left to Right&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="toolTipDuration">
+                 <number>4000</number>
+                </property>
+                <property name="statusTip">
+                 <string>Change Saggital Slice</string>
+                </property>
+                <property name="buttonSymbols">
+                 <enum>QAbstractSpinBox::UpDownArrows</enum>
+                </property>
+                <property name="keyboardTracking">
+                 <bool>false</bool>
+                </property>
+                <property name="suffix">
+                 <string/>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="1">
+               <widget class="QSlider" name="coronalSliceSlider">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Change Coronal Slice&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Drag slider left and right to change the coronal slice currently displayed on the minimap widget&lt;/p&gt;&lt;p&gt;The slices are ordered &lt;span style=&quot; font-weight:600;&quot;&gt;Anterior to Posterior&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Shortcut: &lt;/span&gt;Up/Down Keys&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="toolTipDuration">
+                 <number>4000</number>
+                </property>
+                <property name="statusTip">
+                 <string/>
+                </property>
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="tickPosition">
+                 <enum>QSlider::NoTicks</enum>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="1">
+               <widget class="QSlider" name="saggitalSliceSlider">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Change Saggital Slice &lt;/span&gt;&lt;span style=&quot; font-weight:600; text-decoration: underline;&quot;&gt;[Not Used]&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Drag slider left and right to change the saggital slice. As of now, the saggital slice location is not used.&lt;/p&gt;&lt;p&gt;The slices are ordered &lt;span style=&quot; font-weight:600;&quot;&gt;Left to Right&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="toolTipDuration">
+                 <number>4000</number>
+                </property>
+                <property name="statusTip">
+                 <string/>
+                </property>
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="tickPosition">
+                 <enum>QSlider::NoTicks</enum>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="0">
+               <widget class="QLabel" name="homeSaggitalLabel">
+                <property name="text">
+                 <string>&amp;Saggital</string>
+                </property>
+                <property name="buddy">
+                 <cstring>saggitalSliceSlider</cstring>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="2">
+               <widget class="QSpinBox" name="coronalSliceSpinBox">
+                <property name="mouseTracking">
+                 <bool>true</bool>
+                </property>
+                <property name="focusPolicy">
+                 <enum>Qt::WheelFocus</enum>
+                </property>
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Change Coronal Slice&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Enter slice number or use up/down arrows to change the coronal slice currently displayed on the minimap widget.&lt;/p&gt;&lt;p&gt;The slices are ordered &lt;span style=&quot; font-weight:600;&quot;&gt;Anterior to Posterior&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Shortcut: &lt;/span&gt;Up/Down Keys&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="toolTipDuration">
+                 <number>4000</number>
+                </property>
+                <property name="statusTip">
+                 <string>Change Coronal Slice</string>
+                </property>
+                <property name="buttonSymbols">
+                 <enum>QAbstractSpinBox::UpDownArrows</enum>
+                </property>
+                <property name="keyboardTracking">
+                 <bool>false</bool>
+                </property>
+                <property name="suffix">
+                 <string/>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="0">
+               <widget class="QLabel" name="homeCoronalLabel">
+                <property name="text">
+                 <string>&amp;Coronal</string>
+                </property>
+                <property name="buddy">
+                 <cstring>coronalSliceSlider</cstring>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <spacer name="verticalSpacer">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+          </layout>
+         </widget>
+         <widget class="QWidget" name="axialDisplayTab">
+          <attribute name="title">
+           <string>Axial &amp;Display</string>
+          </attribute>
+          <layout class="QGridLayout" name="gridLayout_3">
+           <item row="2" column="0" colspan="3">
+            <widget class="QGroupBox" name="primaryImageBox">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="toolTip">
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Primary Image&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;The primary image is the image drawn &lt;span style=&quot; text-decoration: underline;&quot;&gt;first&lt;/span&gt; in the axial widget view. The primary image is set based on the options in the &lt;span style=&quot; font-weight:600; text-decoration: underline;&quot;&gt;Image View&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             </property>
+             <property name="toolTipDuration">
+              <number>4000</number>
+             </property>
+             <property name="title">
+              <string>Primary Image</string>
+             </property>
+             <layout class="QGridLayout" name="gridLayout_7">
+              <item row="0" column="0">
+               <widget class="QLabel" name="label_24">
+                <property name="text">
+                 <string>Color Map</string>
+                </property>
+                <property name="buddy">
+                 <cstring>primColorMapComboBox</cstring>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="0" colspan="2">
+               <widget class="QLabel" name="label_25">
+                <property name="text">
+                 <string>Opacity</string>
+                </property>
+                <property name="buddy">
+                 <cstring>primOpacitySlider</cstring>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="2">
+               <widget class="QSlider" name="primOpacitySlider">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Change Primary Opacity&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Drag slider left and right to change the opacity of the primary image displayed on the main widget.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="toolTipDuration">
+                 <number>4000</number>
+                </property>
+                <property name="maximum">
+                 <number>100</number>
+                </property>
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="3">
+               <widget class="QSpinBox" name="primOpacitySpinBox">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Change Primary Opacity&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Enter percentage or use up/down arrows to change the opacity of the primary image displayed on the main widget.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="toolTipDuration">
+                 <number>4000</number>
+                </property>
+                <property name="suffix">
+                 <string>%</string>
+                </property>
+                <property name="maximum">
+                 <number>100</number>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="1" colspan="3">
+               <widget class="QComboBox" name="primColorMapComboBox">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Change Primary Color Map&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Select a color map for the primary image. This is a mapping from intensity in the primary image (0.0 -&amp;gt; 1.0) to colors. &lt;/p&gt;&lt;p&gt;A typical example is grayscale which is (0, 0, 0) -&amp;gt; (1, 1, 1) color mapping.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="toolTipDuration">
+                 <number>4000</number>
+                </property>
+                <property name="maxVisibleItems">
+                 <number>13</number>
+                </property>
+                <item>
+                 <property name="text">
+                  <string>Autumn</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Bone</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Cool</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Copper</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Gray</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Hot</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>HSV</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Jet</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Parula</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Pink</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Spring</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Summer</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Winter</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Red</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Green</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Blue</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>RedWhite</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>GreenWhite</string>
+                 </property>
+                </item>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item row="3" column="0" colspan="3">
+            <widget class="QGroupBox" name="secondaryImageBox">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="toolTip">
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Secondary Image&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;The secondary image is the image drawn &lt;span style=&quot; text-decoration: underline;&quot;&gt;second&lt;/span&gt; in the axial widget view. The secondary image is set based on the options in the &lt;span style=&quot; font-weight:600; text-decoration: underline;&quot;&gt;Image View.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;The secondary image is only applicable for &lt;span style=&quot; font-weight:600; text-decoration: underline;&quot;&gt;Fat/Water&lt;/span&gt; and &lt;span style=&quot; font-weight:600; text-decoration: underline;&quot;&gt;Water/Fat&lt;/span&gt; options.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             </property>
+             <property name="toolTipDuration">
+              <number>4000</number>
+             </property>
+             <property name="title">
+              <string>Secondary Image</string>
+             </property>
+             <layout class="QGridLayout" name="gridLayout_8">
+              <item row="0" column="0">
+               <widget class="QLabel" name="label_12">
+                <property name="text">
+                 <string>Color Map</string>
+                </property>
+                <property name="buddy">
+                 <cstring>secdColorMapComboBox</cstring>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="0" colspan="2">
+               <widget class="QLabel" name="label_13">
+                <property name="text">
+                 <string>Opacity</string>
+                </property>
+                <property name="buddy">
+                 <cstring>secdOpacitySlider</cstring>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="2">
+               <widget class="QSlider" name="secdOpacitySlider">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Change Secondary Opacity&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Drag slider left and right to change the opacity of the secondary image displayed on the main widget.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="toolTipDuration">
+                 <number>4000</number>
+                </property>
+                <property name="maximum">
+                 <number>100</number>
+                </property>
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="3">
+               <widget class="QSpinBox" name="secdOpacitySpinBox">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Change Secondary Opacity&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Enter percentage or use up/down arrows to change the opacity of the secondary image displayed on the main widget.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="toolTipDuration">
+                 <number>4000</number>
+                </property>
+                <property name="suffix">
+                 <string>%</string>
+                </property>
+                <property name="maximum">
+                 <number>100</number>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="1" colspan="3">
+               <widget class="QComboBox" name="secdColorMapComboBox">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Change Secondary Color Map&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Select a color map for the secondary image. This is a mapping from intensity in the primary image (0.0 -&amp;gt; 1.0) to colors. &lt;/p&gt;&lt;p&gt;A typical example is grayscale which is (0, 0, 0) -&amp;gt; (1, 1, 1) color mapping.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="toolTipDuration">
+                 <number>4000</number>
+                </property>
+                <property name="maxVisibleItems">
+                 <number>13</number>
+                </property>
+                <item>
+                 <property name="text">
+                  <string>Autumn</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Bone</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Cool</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Copper</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Gray</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Hot</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>HSV</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Jet</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Parula</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Pink</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Spring</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Summer</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Winter</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Red</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Green</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Blue</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>RedWhite</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>GreenWhite</string>
+                 </property>
+                </item>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item row="0" column="2">
+            <widget class="QSpinBox" name="brightnessSpinBox">
+             <property name="toolTip">
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Change Brightness&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Enter percentage or use up/down arrows to change the brightness currently displayed on the main widget.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             </property>
+             <property name="toolTipDuration">
+              <number>4000</number>
+             </property>
+             <property name="suffix">
+              <string>%</string>
+             </property>
+             <property name="maximum">
+              <number>100</number>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="contrastLabel">
+             <property name="text">
+              <string>&amp;Contrast</string>
+             </property>
+             <property name="buddy">
+              <cstring>contrastSlider</cstring>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QSlider" name="contrastSlider">
+             <property name="focusPolicy">
+              <enum>Qt::StrongFocus</enum>
+             </property>
+             <property name="toolTip">
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Adjust Contrast&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Drag slider left and right to change the contrast of the axial slice currently displayed on the main widget&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             </property>
+             <property name="toolTipDuration">
+              <number>4000</number>
+             </property>
+             <property name="maximum">
+              <number>100</number>
+             </property>
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QSlider" name="brightnessSlider">
+             <property name="focusPolicy">
+              <enum>Qt::StrongFocus</enum>
+             </property>
+             <property name="toolTip">
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Adjust Brightness&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Drag slider left and right to change the brightness of the axial slice currently displayed on the main widget&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             </property>
+             <property name="toolTipDuration">
+              <number>4000</number>
+             </property>
+             <property name="maximum">
+              <number>100</number>
+             </property>
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="2">
+            <widget class="QSpinBox" name="contrastSpinBox">
+             <property name="toolTip">
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Change Contrast&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Enter percentage or use up/down arrows to change the contrast currently displayed on the main widget.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             </property>
+             <property name="toolTipDuration">
+              <number>4000</number>
+             </property>
+             <property name="suffix">
+              <string>%</string>
+             </property>
+             <property name="maximum">
+              <number>100</number>
+             </property>
+             <property name="value">
+              <number>100</number>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="0" colspan="3">
+            <layout class="QGridLayout" name="gridLayout_5">
+             <item row="0" column="1">
+              <layout class="QVBoxLayout" name="verticalLayout_2">
+               <property name="rightMargin">
+                <number>0</number>
+               </property>
+               <property name="bottomMargin">
+                <number>0</number>
+               </property>
+               <item>
+                <widget class="QPushButton" name="resetViewBtn">
+                 <property name="toolTip">
+                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Reset View&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Resets the axial slice view and coronal slice view to center with no scaling.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Note: &lt;/span&gt;This does &lt;span style=&quot; font-weight:600; text-decoration: underline;&quot;&gt;NOT&lt;/span&gt; change the current location of the user.&lt;/p&gt;&lt;p&gt;Shortcut: &lt;span style=&quot; font-weight:600;&quot;&gt;Space bar&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 </property>
+                 <property name="toolTipDuration">
+                  <number>4000</number>
+                 </property>
+                 <property name="text">
+                  <string>Reset View</string>
+                 </property>
+                 <property name="shortcut">
+                  <string>Space</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <spacer name="verticalSpacer_2">
+                 <property name="orientation">
+                  <enum>Qt::Vertical</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>20</width>
+                   <height>40</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+              </layout>
+             </item>
+             <item row="0" column="0">
+              <widget class="QGroupBox" name="sliceViewBox_3">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="toolTip">
+                <string/>
+               </property>
+               <property name="title">
+                <string>Image View</string>
+               </property>
+               <layout class="QVBoxLayout" name="verticalLayout_5">
+                <property name="spacing">
+                 <number>1</number>
+                </property>
+                <item>
+                 <widget class="QRadioButton" name="fatRadioBtn">
+                  <property name="toolTip">
+                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Fat Only&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Displays only the fat image from the NIFTI files.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Primary Image: &lt;/span&gt;Fat image&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Secondary Image: &lt;/span&gt;N/A&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                  </property>
+                  <property name="toolTipDuration">
+                   <number>4000</number>
+                  </property>
+                  <property name="statusTip">
+                   <string/>
+                  </property>
+                  <property name="text">
+                   <string>Fat Only</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QRadioButton" name="waterRadioBtn">
+                  <property name="toolTip">
+                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Water Only&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Displays only the water image from the NIFTI files.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Primary Image: &lt;/span&gt;Water image&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Secondary Image: &lt;/span&gt;N/A&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                  </property>
+                  <property name="toolTipDuration">
+                   <number>4000</number>
+                  </property>
+                  <property name="text">
+                   <string>Water Only</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QRadioButton" name="fatFracRadioBtn">
+                  <property name="toolTip">
+                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Fat Fraction&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Displays an image that represents the ratio of fat to water.&lt;/p&gt;&lt;p&gt;Fat Fraction = Fat / (Fat + Water)&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Primary Image: &lt;/span&gt;Fat Fraction image&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Secondary Image: &lt;/span&gt;N/A&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                  </property>
+                  <property name="toolTipDuration">
+                   <number>4000</number>
+                  </property>
+                  <property name="text">
+                   <string>Fat Fraction</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QRadioButton" name="waterFracRadioBtn">
+                  <property name="toolTip">
+                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Water Fraction&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Displays an image that represents the ratio of water to fat.&lt;/p&gt;&lt;p&gt;Water Fraction = Water / (Fat + Water)&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Primary Image: &lt;/span&gt;Water Fraction image&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Secondary Image: &lt;/span&gt;N/A&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                  </property>
+                  <property name="toolTipDuration">
+                   <number>4000</number>
+                  </property>
+                  <property name="text">
+                   <string>Water Fraction</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QRadioButton" name="fatWaterRadioBtn">
+                  <property name="toolTip">
+                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Fat / Water&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Displays fat image with water image on top at the specified opacities.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Primary Image: &lt;/span&gt;Fat image&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Secondary Image: &lt;/span&gt;Water image&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                  </property>
+                  <property name="toolTipDuration">
+                   <number>4000</number>
+                  </property>
+                  <property name="text">
+                   <string>Fat / Water</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QRadioButton" name="waterFatRadioBtn">
+                  <property name="toolTip">
+                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Water / Fat&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Displays water image with fat image on top at the specified opacities.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Primary Image: &lt;/span&gt;Water image&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Secondary Image: &lt;/span&gt;Fat image&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                  </property>
+                  <property name="toolTipDuration">
+                   <number>4000</number>
+                  </property>
+                  <property name="text">
+                   <string>Water / Fat</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </item>
+             <item row="0" column="2">
+              <spacer name="horizontalSpacer">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+            </layout>
+           </item>
+           <item row="0" column="0">
+            <widget class="QLabel" name="brightnessLabel">
+             <property name="text">
+              <string>&amp;Brightness</string>
+             </property>
+             <property name="buddy">
+              <cstring>brightnessSlider</cstring>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+         <widget class="QWidget" name="tracingTab">
+          <attribute name="title">
+           <string>&amp;Tracing</string>
+          </attribute>
+          <layout class="QGridLayout" name="gridLayout_9">
+           <item row="0" column="0">
+            <widget class="QGroupBox" name="visibleLayersBox_3">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="title">
+              <string>Visible Layers</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+             </property>
+             <layout class="QGridLayout" name="gridLayout_4">
+              <property name="sizeConstraint">
+               <enum>QLayout::SetDefaultConstraint</enum>
+              </property>
+              <property name="topMargin">
+               <number>9</number>
+              </property>
+              <property name="rightMargin">
+               <number>9</number>
+              </property>
+              <property name="horizontalSpacing">
+               <number>0</number>
+              </property>
+              <property name="verticalSpacing">
+               <number>2</number>
+              </property>
+              <item row="6" column="0" alignment="Qt::AlignLeft">
+               <widget class="QCheckBox" name="VATCheckBox">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Visceral Adipose Tissue&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Fat surrounding organs within abdomen&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="text">
+                 <string>VAT</string>
+                </property>
+                <property name="checked">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="0" alignment="Qt::AlignLeft">
+               <widget class="QCheckBox" name="EATCheckBox">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>15</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Epicardial Adipose Tissue&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Fat within pericardial sac&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="text">
+                 <string>EAT</string>
+                </property>
+                <property name="checked">
+                 <bool>true</bool>
+                </property>
+                <property name="tristate">
+                 <bool>false</bool>
+                </property>
+               </widget>
+              </item>
+              <item row="4" column="0" alignment="Qt::AlignLeft">
+               <widget class="QCheckBox" name="PATCheckBox">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Paracardial Adipose Tissue&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Fat outside pericardial sac&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="text">
+                 <string>PAT</string>
+                </property>
+                <property name="checked">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item row="5" column="0" alignment="Qt::AlignLeft">
+               <widget class="QCheckBox" name="SCATCheckBox">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;SubCutaneous Adipose Tissue&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Fat beneath the skin&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="text">
+                 <string>SCAT</string>
+                </property>
+                <property name="checked">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="0" alignment="Qt::AlignLeft">
+               <widget class="QCheckBox" name="IMATCheckBox">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Inter&lt;/span&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;M&lt;/span&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;uscular Adipose Tissue&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Fat in between muscles&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="text">
+                 <string>IMAT</string>
+                </property>
+                <property name="checked">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="0" alignment="Qt::AlignLeft">
+               <widget class="QCheckBox" name="PAATCheckBox">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Peri-Aortic Adipose Tissue&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Fat surrounding aorta&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="text">
+                 <string>PAAT</string>
+                </property>
+                <property name="checked">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QGroupBox" name="currentLayerBox_3">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="toolTip">
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Active layer being traced out on axial slice screen&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             </property>
+             <property name="title">
+              <string>Current Layer</string>
+             </property>
+             <layout class="QVBoxLayout" name="verticalLayout_4">
+              <property name="spacing">
+               <number>2</number>
+              </property>
+              <item>
+               <widget class="QRadioButton" name="EATRadioBtn">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="contextMenuPolicy">
+                 <enum>Qt::ActionsContextMenu</enum>
+                </property>
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Epicardial Adipose Tissue&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Fat within pericardial sac&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Shortcut: &lt;/span&gt;&amp;quot;1&amp;quot; Key&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="toolTipDuration">
+                 <number>4000</number>
+                </property>
+                <property name="whatsThis">
+                 <string>This is something crazier I must say.</string>
+                </property>
+                <property name="text">
+                 <string>EAT</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QRadioButton" name="IMATRadioBtn">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;InterMuscular Adipose Tissue&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Fat in between muscles&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Shortcut: &lt;/span&gt;&amp;quot;2&amp;quot; Key&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="toolTipDuration">
+                 <number>4000</number>
+                </property>
+                <property name="text">
+                 <string>IMAT</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QRadioButton" name="PAATRadioBtn">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Peri-Aortic Adipose Tissue&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Fat surrounding aorta&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Shortcut: &lt;/span&gt;&amp;quot;3&amp;quot; Key&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="toolTipDuration">
+                 <number>4000</number>
+                </property>
+                <property name="text">
+                 <string>PAAT</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QRadioButton" name="PATRadioBtn">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Paracardial Adipose Tissue&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Fat outside pericardial sac&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Shortcut: &lt;/span&gt;&amp;quot;4&amp;quot; Key&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="toolTipDuration">
+                 <number>4000</number>
+                </property>
+                <property name="text">
+                 <string>PAT</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QRadioButton" name="SCATRadioBtn">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;SubCutaneous Adipose Tissue&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Fat beneath the skin&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Shortcut: &lt;/span&gt;&amp;quot;5&amp;quot; Key&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="toolTipDuration">
+                 <number>4000</number>
+                </property>
+                <property name="text">
+                 <string>SCAT</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QRadioButton" name="VATRadioBtn">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Visceral Adipose Tissue&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Fat surrounding organs within abdomen&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Shortcut: &lt;/span&gt;&amp;quot;6&amp;quot; Key&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="toolTipDuration">
+                 <number>4000</number>
+                </property>
+                <property name="text">
+                 <string>VAT</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <spacer name="verticalSpacer_3">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item row="0" column="2">
+            <spacer name="horizontalSpacer_3">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+          </layout>
+         </widget>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <widget class="QLabel" name="lblStatusLocation">
+       <property name="font">
+        <font>
+         <family>Segoe UI</family>
+         <pointsize>9</pointsize>
+        </font>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QLabel { margin-right: 5px; }</string>
+       </property>
+       <property name="frameShape">
+        <enum>QFrame::NoFrame</enum>
+       </property>
+       <property name="frameShadow">
+        <enum>QFrame::Plain</enum>
+       </property>
+       <property name="text">
+        <string>Location: </string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+       </property>
+       <property name="margin">
+        <number>0</number>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="CoronalSliceWidget" name="glWidgetCoronal">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="mouseTracking">
+        <bool>true</bool>
+       </property>
+       <property name="whatsThis">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Coronal Slice View&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Contains the coronal slice of the MRI data. The currently displayed coronal slice is the Y component of the location. &lt;/p&gt;&lt;p&gt;This is primarily meant as a &amp;quot;minimap&amp;quot; to allow the user to know where they are located within the MRI. Tracing does&lt;span style=&quot; font-weight:600;&quot;&gt; NOT &lt;/span&gt;occur here&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="AxialSliceWidget" name="glWidgetAxial">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
+         <horstretch>2</horstretch>
+         <verstretch>1</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="mouseTracking">
+        <bool>true</bool>
+       </property>
+       <property name="whatsThis">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Axial Slice View&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Contains the axial slice of the MRI data. The currently displayed axial slice is the Z component of the location. &lt;/p&gt;&lt;p&gt;Tracing the various layers of fat occurs at this level&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>AxialSliceWidget</class>
+   <extends>QOpenGLWidget</extends>
+   <header>axialslicewidget.h</header>
+  </customwidget>
+  <customwidget>
+   <class>CoronalSliceWidget</class>
+   <extends>QOpenGLWidget</extends>
+   <header>coronalslicewidget.h</header>
+  </customwidget>
+ </customwidgets>
+ <tabstops>
+  <tabstop>settingsWidget</tabstop>
+  <tabstop>axialSliceSlider</tabstop>
+  <tabstop>axialSliceSpinBox</tabstop>
+  <tabstop>coronalSliceSlider</tabstop>
+  <tabstop>coronalSliceSpinBox</tabstop>
+  <tabstop>saggitalSliceSlider</tabstop>
+  <tabstop>saggitalSliceSpinBox</tabstop>
+  <tabstop>brightnessSlider</tabstop>
+  <tabstop>brightnessSpinBox</tabstop>
+  <tabstop>contrastSlider</tabstop>
+  <tabstop>contrastSpinBox</tabstop>
+  <tabstop>primColorMapComboBox</tabstop>
+  <tabstop>primOpacitySlider</tabstop>
+  <tabstop>primOpacitySpinBox</tabstop>
+  <tabstop>secdColorMapComboBox</tabstop>
+  <tabstop>secdOpacitySlider</tabstop>
+  <tabstop>secdOpacitySpinBox</tabstop>
+  <tabstop>fatRadioBtn</tabstop>
+  <tabstop>waterRadioBtn</tabstop>
+  <tabstop>fatFracRadioBtn</tabstop>
+  <tabstop>waterFracRadioBtn</tabstop>
+  <tabstop>fatWaterRadioBtn</tabstop>
+  <tabstop>waterFatRadioBtn</tabstop>
+  <tabstop>resetViewBtn</tabstop>
+  <tabstop>EATCheckBox</tabstop>
+  <tabstop>IMATCheckBox</tabstop>
+  <tabstop>PAATCheckBox</tabstop>
+  <tabstop>PATCheckBox</tabstop>
+  <tabstop>SCATCheckBox</tabstop>
+  <tabstop>VATCheckBox</tabstop>
+  <tabstop>EATRadioBtn</tabstop>
+  <tabstop>IMATRadioBtn</tabstop>
+  <tabstop>PAATRadioBtn</tabstop>
+  <tabstop>PATRadioBtn</tabstop>
+  <tabstop>SCATRadioBtn</tabstop>
+  <tabstop>VATRadioBtn</tabstop>
+ </tabstops>
+ <resources/>
+ <connections/>
+</ui>

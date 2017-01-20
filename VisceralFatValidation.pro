@@ -31,7 +31,9 @@ SOURCES += main.cpp\
     opencv.cpp \
     subjectconfig.cpp \
     coronalslicewidget.cpp \
-    numerictype.cpp
+    numerictype.cpp \
+    view_axialcoronalhires.cpp \
+    view_axialcoronallores.cpp
 
 HEADERS  += mainwindow.h \
     application.h \
@@ -45,9 +47,13 @@ HEADERS  += mainwindow.h \
     subjectconfig.h \
     coronalslicewidget.h \
     displayinfo.h \
-    numerictype.h
+    numerictype.h \
+    view_axialcoronalhires.h \
+    view_axialcoronallores.h
 
-FORMS    += mainwindow.ui
+FORMS    += mainwindow.ui \
+    view_axialcoronalhires.ui \
+    view_axialcoronallores.ui
 
 DISTFILES += \
     shaders/axialslice.vert \

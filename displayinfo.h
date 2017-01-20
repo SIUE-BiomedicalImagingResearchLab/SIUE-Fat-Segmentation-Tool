@@ -72,4 +72,10 @@ enum class TracingLayer : int
     Count
 };
 
+enum class WindowViewType : int
+{
+    AxialCoronalLoRes = 0,
+    AxialCoronalHiRes
+};
+
 #endif // DISPLAYINFO_H
