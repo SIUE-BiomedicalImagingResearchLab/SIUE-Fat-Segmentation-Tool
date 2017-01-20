@@ -5,8 +5,9 @@
 #include <QVector2D>
 #include <QVector3D>
 #include <QVector4D>
-
+#include <QOpenGLFunctions_3_3_Core>
 #include <QKeySequence>
+#include <QDebug>
 
 namespace util
 {
@@ -27,6 +28,8 @@ QVector3D lerp(QVector3D start, QVector3D end, float percent);
 QVector2D lerp(QVector2D start, QVector2D end, float percent);
 QPointF lerp(QPointF start, QPointF end, float percent);
 QPoint lerp(QPoint start, QPoint end, float percent);
+
+void glCheckError();
 
 }
 

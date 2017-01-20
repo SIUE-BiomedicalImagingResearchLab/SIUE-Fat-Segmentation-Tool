@@ -285,8 +285,6 @@ void LocationChangeCommand::undo()
 void LocationChangeCommand::redo()
 {
     // Go to new location
-
-    qInfo() << "Location changed to: " << newLocation << " Old: " << oldLocation;
     axialWidget->setLocation(newLocation);
     coronalWidget->setLocation(newLocation);
 

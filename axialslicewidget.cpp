@@ -508,7 +508,6 @@ void AxialSliceWidget::resetView()
 
 void AxialSliceWidget::initializeGL()
 {
-    qInfo() << "Initializing OpenGL";
     initializeOpenGLFunctions();
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
@@ -524,10 +523,10 @@ void AxialSliceWidget::initializeGL()
     program->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/shaders/axialslice.frag");
     program->link();
     program->bind();
+    util::glCheckError();
 
     program->setUniformValue("tex", 0);
-
-    qInfo() << "Initializing OpenGL...1: " << glGetError();
+    program->setUniformValue("mappingTexture", 0);
 
     initializeSliceView();
     initializeCrosshairLine();
@@ -537,15 +536,15 @@ void AxialSliceWidget::initializeGL()
 void AxialSliceWidget::initializeSliceView()
 {
     // get context opengl-version
-    qInfo() << "----------------- AxialSliceWidget ---------------------------";
-    qInfo() << "Widget OpenGL: " << format().majorVersion() << "." << format().minorVersion();
-    qInfo() << "Context valid: " << context()->isValid();
-    qInfo() << "Really used OpenGL: " << context()->format().majorVersion() << "." << context()->format().minorVersion();
-    qInfo() << "OpenGL information: VENDOR:       " << (const char*)glGetString(GL_VENDOR);
-    qInfo() << "                    RENDERDER:    " << (const char*)glGetString(GL_RENDERER);
-    qInfo() << "                    VERSION:      " << (const char*)glGetString(GL_VERSION);
-    qInfo() << "                    GLSL VERSION: " << (const char*)glGetString(GL_SHADING_LANGUAGE_VERSION);
-    qInfo() << "";
+    qDebug() << "----------------- AxialSliceWidget ---------------------------";
+    qDebug() << "Widget OpenGL: " << format().majorVersion() << "." << format().minorVersion();
+    qDebug() << "Context valid: " << context()->isValid();
+    qDebug() << "Really used OpenGL: " << context()->format().majorVersion() << "." << context()->format().minorVersion();
+    qDebug() << "OpenGL information: VENDOR:       " << (const char*)glGetString(GL_VENDOR);
+    qDebug() << "                    RENDERDER:    " << (const char*)glGetString(GL_RENDERER);
+    qDebug() << "                    VERSION:      " << (const char*)glGetString(GL_VERSION);
+    qDebug() << "                    GLSL VERSION: " << (const char*)glGetString(GL_SHADING_LANGUAGE_VERSION);
+    qDebug() << "";
 
     // Setup the axial slice vertices
     sliceVertices.clear();
@@ -562,13 +561,13 @@ void AxialSliceWidget::initializeSliceView()
     glGenBuffers(1, &sliceVertexBuf);
     glBindBuffer(GL_ARRAY_BUFFER, sliceVertexBuf);
     glBufferData(GL_ARRAY_BUFFER, sliceVertices.size() * sizeof(VertexPT), sliceVertices.constData(), GL_STATIC_DRAW);
+    util::glCheckError();
 
     // Generate index buffer for the axial slice. The sliceIndices data is uploaded to the IBO
     glGenBuffers(1, &sliceIndexBuf);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, sliceIndexBuf);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sliceIndices.size() * sizeof(GLushort), sliceIndices.constData(), GL_STATIC_DRAW);
-
-    qInfo() << "Initializing OpenGL...2: " << glGetError();
+    util::glCheckError();
 
     // Generate VAO for the axial slice vertices uploaded. Location 0 is the position and location 1 is the texture position
     glGenVertexArrays(1, &sliceVertexObject);
@@ -577,19 +576,17 @@ void AxialSliceWidget::initializeSliceView()
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(0, VertexPT::PosTupleSize, GL_FLOAT, true, VertexPT::stride(), static_cast<const char *>(0) + VertexPT::posOffset());
     glVertexAttribPointer(1, VertexPT::TexPosTupleSize, GL_FLOAT, true, VertexPT::stride(), static_cast<const char *>(0) + VertexPT::texPosOffset());
+    util::glCheckError();
 
     // Generate a blank texture for the axial slice
     glGenTextures(1, &this->slicePrimTexture);
     glGenTextures(1, &this->sliceSecdTexture);
-
-    qInfo() << "Initializing OpenGL...3: " << glGetError();
+    util::glCheckError();
 
     // Release (unbind) all
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
-
-    qInfo() << "Initializing OpenGL...4: " << glGetError();
 }
 
 void AxialSliceWidget::initializeCrosshairLine()
@@ -610,8 +607,7 @@ void AxialSliceWidget::initializeColorMaps()
 
     // Create textures for each of the color maps
     glGenTextures((GLsizei)ColorMap::Count, &this->colorMapTexture[0]);
-
-    qInfo() << "Initializing OpenGL...5: " << glGetError();
+    util::glCheckError();
 
     for (int i = 0; i < (int)ColorMap::Count; ++i)
     {
@@ -632,8 +628,6 @@ void AxialSliceWidget::initializeColorMaps()
             continue;
         }
 
-        qInfo() << "Initializing OpenGL...6: " << glGetError();
-
         // This is a formula to determine if a number is a power of two easily. If equal to zero, it is a power of two
         if ((image.width() & (image.width() - 1)) != 0)
         {
@@ -645,19 +639,16 @@ void AxialSliceWidget::initializeColorMaps()
         glBindTexture(GL_TEXTURE_1D, colorMapTexture[i]);
         // These parameters say that the color value for a pixel will be chosen based on the nearest pixel value. This creates a more blocky effect
         // since it will not be linearly interpolated like GL_LINEAR
-        //glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        //glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-        glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
         // This parameter will clamp points to [0.0, 1.0]. This means that anything above 1.0 will become 1.0
         // and anything below 0.0 will become 0.0
         glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+        util::glCheckError();
 
         glTexImage1D(GL_TEXTURE_1D, 0, internalFormat, image.width(), 0, format, type, image.bits());
-
-        qInfo() << "Initializing OpenGL...7: " << glGetError();
+        util::glCheckError();
     }
 }
 
@@ -805,13 +796,13 @@ void AxialSliceWidget::updateTexture()
     // like GL_NEAREST would.
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    util::glCheckError();
 
     // Get the OpenGL datatype of the matrix
     auto dataType = NumericType::OpenCV(primMatrix.type());
     // Upload the texture data from the matrix to the texture. The internal format is 32 bit floats with one channel for red
     glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, fatImage->getXDim(), fatImage->getYDim(), 0, dataType->openGLFormat, dataType->openGLType, primMatrix.data);
-
-    qInfo() << "Initializing OpenGL...8: " << glGetError();
+    util::glCheckError();
 
     // Repeat the process if the second matrix is available
     if (!secdMatrix.empty())
@@ -820,16 +811,13 @@ void AxialSliceWidget::updateTexture()
 
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        util::glCheckError();
 
         dataType = NumericType::OpenCV(primMatrix.type());
 
         glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, fatImage->getXDim(), fatImage->getYDim(), 0, dataType->openGLFormat, dataType->openGLType, secdMatrix.data);
+        util::glCheckError();
     }
-
-    // If there was an error, then say something
-    GLenum err;
-    if ((err = glGetError()) != GL_NO_ERROR)
-        qWarning() << "Unable to upload texture image for axial slice " << location.z() << ". Error code: " << err;
 
     update();
 }
@@ -907,56 +895,49 @@ void AxialSliceWidget::paintGL()
     glDisable(GL_DEPTH_TEST);
 
     glClear(GL_COLOR_BUFFER_BIT);
+    util::glCheckError();
 
     // Calculate the ModelViewProjection (MVP) matrix to transform the location of the axial slices
     QMatrix4x4 mvpMatrix = getMVPMatrix();
 
     program->bind();
-    qInfo() << "Painting OpenGL...1: " << glGetError();
     program->setUniformValue("brightness", brightness);
-    qInfo() << "Painting OpenGL...2: " << glGetError();
     program->setUniformValue("contrast", contrast);
-    qInfo() << "Painting OpenGL...3: " << glGetError();
     program->setUniformValue("MVP", mvpMatrix);
-    qInfo() << "Painting OpenGL...4: " << glGetError();
-    program->setUniformValue("tex", 0);
-    program->setUniformValue("mappingTexture", 0);
+    util::glCheckError();
 
     program->setUniformValue("opacity", primOpacity);
-    qInfo() << "Painting OpenGL...5: " << glGetError();
+    util::glCheckError();
 
     // Bind the VAO, bind texture to GL_TEXTURE0, bind VBO, bind IBO
     glBindVertexArray(sliceVertexObject);
-    qInfo() << "Painting OpenGL...6: " << glGetError();
     glBindBuffer(GL_ARRAY_BUFFER, sliceVertexBuf);
-    qInfo() << "Painting OpenGL...7: " << glGetError();
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, sliceIndexBuf);
-    qInfo() << "Painting OpenGL...8: " << glGetError();
+    util::glCheckError();
 
     glActiveTexture(GL_TEXTURE0);
-    qInfo() << "Painting OpenGL...9: " << glGetError();
     glBindTexture(GL_TEXTURE_2D, slicePrimTexture);
-    glActiveTexture(GL_TEXTURE0);
-    qInfo() << "Painting OpenGL...10: " << glGetError();
     glBindTexture(GL_TEXTURE_1D, colorMapTexture[(int)primColorMap]);
-    qInfo() << "Painting OpenGL...11: " << glGetError();
+    util::glCheckError();
 
     // Draw a triangle strip of 4 elements which is two triangles. The indices are unsigned shorts
     glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_SHORT, 0);
-
-    qInfo() << "Painting OpenGL...12: " << glGetError();
+    util::glCheckError();
 
     if (displayType == SliceDisplayType::FatWater || displayType == SliceDisplayType::WaterFat)
     {
         program->setUniformValue("opacity", secdOpacity);
+        util::glCheckError();
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, sliceSecdTexture);
         glBindTexture(GL_TEXTURE_1D, colorMapTexture[(int)secdColorMap]);
+        util::glCheckError();
 
         // Draw a triangle strip of 4 elements which is two triangles. The indices are unsigned shorts
         // Drawing again for the secondary image
         glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_SHORT, 0);
+        util::glCheckError();
     }
 
     // Release (unbind) the binded objects in reverse order
