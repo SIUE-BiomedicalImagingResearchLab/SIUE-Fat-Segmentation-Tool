@@ -485,6 +485,8 @@ void viewAxialCoronalLoRes::on_brightnessSlider_valueChanged(int value)
     if (value / 100.0f == ui->glWidgetAxial->getBrightness())
         return;
 
+    qDebug() << "Brightness triggered: " << value;
+
     // Add a BrightnessChangeCommand to change the brightness
     undoStack->push(new BrightnessChangeCommand(value / 100.0f, ui->glWidgetAxial, ui->brightnessSlider, ui->brightnessSpinBox));
 }
@@ -494,6 +496,8 @@ void viewAxialCoronalLoRes::on_brightnessSpinBox_valueChanged(int value)
     // If the new value is equal to the current value, then do nothing
     if (value / 100.0f == ui->glWidgetAxial->getBrightness())
         return;
+
+    qDebug() << "Brightness spin triggered: " << value;
 
     // Add a BrightnessChangeCommand to change the brightness
     undoStack->push(new BrightnessChangeCommand(value / 100.0f, ui->glWidgetAxial, ui->brightnessSlider, ui->brightnessSpinBox));
