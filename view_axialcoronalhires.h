@@ -13,6 +13,8 @@
 #include <QWhatsThis>
 #include <QShortcut>
 
+#include <opencv2/opencv.hpp>
+
 #include <nifti/nifti1.h>
 #include <nifti/nifti1_io.h>
 
@@ -27,6 +29,7 @@ class viewAxialCoronalHiRes;
 }
 
 class MainWindow;
+class viewAxialCoronalLoRes;
 
 class viewAxialCoronalHiRes : public QWidget
 {
@@ -37,13 +40,10 @@ private:
 
     NIFTImage *fatImage;
     NIFTImage *waterImage;
+    SubjectConfig *subConfig;
 
     QUndoView *undoView;
     QUndoStack *undoStack;
-
-    SubjectConfig *subConfig;
-
-    QString saveTracingResultsPath;
 
     QShortcut *EATShortcut;
     QShortcut *IMATShortcut;
@@ -58,7 +58,7 @@ private:
     QShortcut *rightShortcut;
 
 public:
-    explicit viewAxialCoronalHiRes(QWidget *parent = 0);
+    explicit viewAxialCoronalHiRes(QWidget *parent, NIFTImage *fatImage, NIFTImage *waterImage, SubjectConfig *subConfig);
     ~viewAxialCoronalHiRes();
 
     MainWindow *parentMain();
@@ -69,6 +69,8 @@ public:
 
     void changeSliceView(SliceDisplayType newType);
     void changeTracingLayer(TracingLayer newLayer);
+
+    friend class viewAxialCoronalLoRes;
 
 private slots:
     // Slots that do not contain the on_ prefix are not automatically connected with MOC and so must not include the on_

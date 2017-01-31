@@ -11,8 +11,8 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 CONFIG += c++11
 CONFIG -= app_bundle
 
-win32:VERSION = 1.0.0.0 # major.minor.patch.build
-else:VERSION = 1.0.0    # major.minor.patch
+win32:VERSION = 1.0.1.0 # major.minor.patch.build
+else:VERSION = 1.0.1    # major.minor.patch
 
 DEFINES += APP_VERSION=\\\"$$VERSION\\\"
 

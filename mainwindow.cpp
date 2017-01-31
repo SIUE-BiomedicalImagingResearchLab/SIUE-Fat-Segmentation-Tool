@@ -3,8 +3,12 @@
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::MainWindow)
+    ui(new Ui::MainWindow),
+    fatImage(new NIFTImage()), waterImage(new NIFTImage()), subConfig(new SubjectConfig())
 {  
+    this->fatImage->setSubjectConfig(subConfig);
+    this->waterImage->setSubjectConfig(subConfig);
+
     // Read window settings(size of window from last time application was used) upon initialization
     readSettings();
 
@@ -17,7 +21,7 @@ MainWindow::MainWindow(QWidget *parent) :
             bool prev = this->ui->actionAxialCoronalLoRes->blockSignals(true);
             this->ui->actionAxialCoronalLoRes->setChecked(true);
             this->ui->actionAxialCoronalLoRes->blockSignals(prev);
-            this->setCentralWidget(new viewAxialCoronalLoRes(this));
+            this->setCentralWidget(new viewAxialCoronalLoRes(this, fatImage, waterImage, subConfig));
         }
         break;
 
@@ -26,7 +30,7 @@ MainWindow::MainWindow(QWidget *parent) :
             bool prev = this->ui->actionAxialCoronalHiRes->blockSignals(true);
             this->ui->actionAxialCoronalHiRes->setChecked(true);
             this->ui->actionAxialCoronalHiRes->blockSignals(prev);
-            this->setCentralWidget(new viewAxialCoronalHiRes(this));
+            this->setCentralWidget(new viewAxialCoronalHiRes(this, fatImage, waterImage, subConfig));
          }
          break;
     }

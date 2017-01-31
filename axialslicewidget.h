@@ -17,6 +17,8 @@
 #include <array>
 #include <QMessageBox>
 #include <QLabel>
+#include <QTime>
+#include <QElapsedTimer>
 
 #include <nifti/nifti1.h>
 #include <nifti/nifti1_io.h>
@@ -27,6 +29,14 @@
 #include "vertex.h"
 #include "commands.h"
 #include "displayinfo.h"
+
+struct FatLayerSlice
+{
+    QTime drawingTime;
+    std::vector<QPointF> points;
+
+    FatLayerSlice() : drawingTime(), points() {}
+};
 
 class AxialSliceWidget : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Core
 {
@@ -39,7 +49,7 @@ private:
     NIFTImage *waterImage;
 
     std::array<QColor, (size_t)TracingLayer::Count> tracingLayerColors;
-    std::vector<std::vector<std::vector<QPointF>>> points;
+    std::vector<std::array<FatLayerSlice, (size_t)TracingLayer::Count>> layerSlices;
     TracingPointsAddCommand *mouseCommand;
 
     QOpenGLShaderProgram *program;
@@ -71,6 +81,7 @@ private:
     float contrast;
 
     bool startDraw;
+    QElapsedTimer drawTimer;
 
     bool startPan;
     QPoint lastMousePos;
@@ -129,12 +140,12 @@ public:
     bool getTracingLayerVisible(TracingLayer layer) const;
     void setTracingLayerVisible(TracingLayer layer, bool value);
 
-    /* Note: This will retrieve a vector of points for various configurations. The default values:
+    /* Note: This will retrieve a vector of FatLayerSlice for various configurations. The default values:
      * slice defaulting to Location::NoChange will select the axial slice of the current location (location.z())
      * layer defaulting to TracingLayer::Count will set the layer to the currently selected layer
      */
-    std::vector<std::vector<QPointF>> &getSlicePoints(int slice = (int)Location::NoChange);
-    std::vector<QPointF> &getLayerPoints(int slice = (int)Location::NoChange, TracingLayer layer = TracingLayer::Count);
+    std::array<FatLayerSlice, (size_t)TracingLayer::Count> &getFatLayers(int slice = (int)Location::NoChange);
+    FatLayerSlice &getFatLayerSlice(int slice = (int)Location::NoChange, TracingLayer layer = TracingLayer::Count);
 
     void resetView();
 

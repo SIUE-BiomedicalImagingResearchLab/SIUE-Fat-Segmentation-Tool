@@ -24,10 +24,8 @@ void AxialSliceWidget::setImages(NIFTImage *fat, NIFTImage *water)
 
     location = QVector4D(0, 0, 0, 0);
 
-    // Resize points vector to accomodate layers and axial slices
-    this->points.resize(fatImage->getZDim());
-    for (auto &layers : points)
-        layers.resize((int)TracingLayer::Count);
+    // Resize layerSlices vector to accomodate layers and axial slices
+    this->layerSlices.resize(fatImage->getZDim());
 
     qInfo() << "Axial images set...everything ok";
 }
@@ -264,26 +262,26 @@ void AxialSliceWidget::setTracingLayerVisible(TracingLayer layer, bool value)
     tracingLayerVisible[(int)layer] = value;
 }
 
-std::vector<std::vector<QPointF>> &AxialSliceWidget::getSlicePoints(int slice)
+std::array<FatLayerSlice, (size_t)TracingLayer::Count> &AxialSliceWidget::getFatLayers(int slice)
 {
     if (slice == Location::NoChange)
         slice = location.z();
     else if (slice < 0 || slice >= fatImage->getZDim())
     {
-        qWarning() << "Invalid slice given for getSlicePoints in AxialSliceWidget: " << slice;
+        qWarning() << "Invalid slice given for getFatLayers in AxialSliceWidget: " << slice;
         slice = 0; // Since a reference is returned, just set a dummy slice
     }
 
-    return points[slice];
+    return layerSlices[slice];
 }
 
-std::vector<QPointF> &AxialSliceWidget::getLayerPoints(int slice, TracingLayer layer)
+FatLayerSlice &AxialSliceWidget::getFatLayerSlice(int slice, TracingLayer layer)
 {
     if (slice == Location::NoChange)
         slice = location.z();
     else if (slice < 0 || slice >= fatImage->getZDim())
     {
-        qWarning() << "Invalid slice given for getLayerPoints in AxialSliceWidget: " << slice;
+        qWarning() << "Invalid slice given for getFatLayerSlice in AxialSliceWidget: " << slice;
         slice = 0; // Since a reference is returned, just set a dummy slice
     }
 
@@ -291,11 +289,11 @@ std::vector<QPointF> &AxialSliceWidget::getLayerPoints(int slice, TracingLayer l
         layer = tracingLayer;
     else if (layer < TracingLayer::EAT || layer > TracingLayer::Count)
     {
-        qWarning() << "Invalid tracing layer given for getLayerPoints in AxialSliceWidget: " << (int)layer;
+        qWarning() << "Invalid tracing layer given for getFatLayerSlice in AxialSliceWidget: " << (int)layer;
         layer = TracingLayer::EAT; // Since a reference is returned, just set a dummy layer
     }
 
-    return points[slice][(int)layer];
+    return layerSlices[slice][(int)layer];
 }
 
 float &AxialSliceWidget::rscaling()
@@ -346,12 +344,12 @@ bool AxialSliceWidget::saveTracingData(QString path, bool promptOnOverwrite)
         const int zDim = fatImage->getZDim();
         for (int z = 0; z < zDim; ++z)
         {
-            auto &layerPoints = getLayerPoints(z, (TracingLayer)i);
+            auto &layerSlice = getFatLayerSlice(z, (TracingLayer)i);
 
             stream << "#" << z << endl;
-            stream << layerPoints.size() << endl;
+            stream << layerSlice.points.size() << endl;
 
-            for (QPointF point : layerPoints)
+            for (QPointF point : layerSlice.points)
                 stream << forcepoint << point.x() << " " << point.y() << " " << (float)z << endl;
         }
     }
@@ -419,7 +417,7 @@ bool AxialSliceWidget::loadTracingData(QString path)
 
         for (int z = 0; z < zDim; ++z)
         {
-            auto &layerPoints = getLayerPoints(z, (TracingLayer)i);
+            auto &layerSlice = getFatLayerSlice(z, (TracingLayer)i);
 
             // Skip the #Z where Z is the axial slice
             stream.skipWhiteSpace();
@@ -430,14 +428,14 @@ bool AxialSliceWidget::loadTracingData(QString path)
             stream >> numPoints;
 
             // Clear the old points and reserve enough space for new points
-            layerPoints.clear();
-            layerPoints.reserve(numPoints);
+            layerSlice.points.clear();
+            layerSlice.points.reserve(numPoints);
 
             float x, y, z_;
             for (int ii = 0; ii < numPoints; ++ii)
             {
                 stream >> x >> y >> z_;
-                layerPoints.push_back(QPoint(x, y));
+                layerSlice.points.push_back(QPoint(x, y));
             }
         }
     }
@@ -958,14 +956,14 @@ void AxialSliceWidget::paintGL()
 
     painter.setTransform(getWindowToNIFTIMatrix().inverted().toTransform());
 
-    auto axialPoints = points[location.z()];
+    auto &layersSlice = layerSlices[location.z()];
     for (int i = 0; i < (int)TracingLayer::Count; ++i)
     {
-        auto layer = axialPoints[i];
-        if (tracingLayerVisible[i] && layer.size() > 0)
+        auto &layer = layersSlice[i];
+        if (tracingLayerVisible[i] && layer.points.size() > 0)
         {
             painter.setPen(QPen(tracingLayerColors[i], 1, Qt::SolidLine, Qt::SquareCap));
-            painter.drawPoints(layer.data(), (int)layer.size());
+            painter.drawPoints(layer.points.data(), (int)layer.points.size());
         }
     }
 }
@@ -976,7 +974,8 @@ void AxialSliceWidget::addPoint(QPointF mouseCoord)
 
     if (QRect(0, 0, fatImage->getXDim(), fatImage->getYDim()).contains(NIFTICoord))
     {
-        auto &layerPoints = points[location.z()][(int)tracingLayer];
+        auto &layerSlice = layerSlices[location.z()][(int)tracingLayer];
+        auto &layerPoints = layerSlice.points;
 
         // Mouse Command Created is a boolean variable to store whether a TracingPointsAddCommand
         // was added since the mouse has been clicked down. This is necessary because the user can
@@ -1092,7 +1091,7 @@ void AxialSliceWidget::mousePressEvent(QMouseEvent *eventPress)
             startPan = false;
 
         startDraw = true;
-
+        drawTimer.start();
         addPoint(eventPress->pos());
     }
     else if (eventPress->button() == Qt::MiddleButton)
@@ -1123,7 +1122,8 @@ void AxialSliceWidget::mouseReleaseEvent(QMouseEvent *eventRelease)
     if (eventRelease->button() == Qt::LeftButton && startDraw)
     {
         addPoint(eventRelease->pos());
-
+        auto elapsed = drawTimer.elapsed();
+        layerSlices[location.z()][(int)tracingLayer].drawingTime.addMSecs(elapsed);
         startDraw = false;
         mouseCommand = NULL;
     }

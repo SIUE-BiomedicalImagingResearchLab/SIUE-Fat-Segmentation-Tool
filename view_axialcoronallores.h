@@ -60,7 +60,7 @@ private:
     QShortcut *rightShortcut;
 
 public:
-    explicit viewAxialCoronalLoRes(QWidget *parent = 0);
+    explicit viewAxialCoronalLoRes(QWidget *parent, NIFTImage *fatImage, NIFTImage *waterImage, SubjectConfig *subConfig);
     ~viewAxialCoronalLoRes();
 
     MainWindow *parentMain();
@@ -71,6 +71,8 @@ public:
 
     void changeSliceView(SliceDisplayType newType);
     void changeTracingLayer(TracingLayer newLayer);
+
+    friend class viewAxialCoronalHiRes;
 
 private slots:
     // Slots that do not contain the on_ prefix are not automatically connected with MOC and so must not include the on_
@@ -124,8 +126,7 @@ private slots:
 
     void on_resetViewBtn_clicked();
 
-    // Default to true so that the activated() signal in QShortcut
-    // can call this
+    // Default to true so that the activated() signal in QShortcut can call this
     void on_EATRadioBtn_toggled(bool checked = true);
     void on_IMATRadioBtn_toggled(bool checked = true);
     void on_PAATRadioBtn_toggled(bool checked = true);

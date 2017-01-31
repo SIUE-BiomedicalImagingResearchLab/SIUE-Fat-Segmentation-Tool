@@ -40,6 +40,12 @@ protected:
     QString defaultOpenDir;
     QString defaultSaveDir;
 
+    NIFTImage *fatImage;
+    NIFTImage *waterImage;
+    SubjectConfig *subConfig;
+
+    QString saveTracingResultsPath;
+
     WindowViewType windowViewType;
 
 public:

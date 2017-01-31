@@ -1,13 +1,17 @@
 #include "view_axialcoronalhires.h"
 #include "ui_view_axialcoronalhires.h"
+
+#include "view_axialcoronallores.h"
+#include "ui_view_axialcoronallores.h"
+
 #include "ui_mainwindow.h"
 #include "mainwindow.h"
 
-viewAxialCoronalHiRes::viewAxialCoronalHiRes(QWidget *parent) :
+viewAxialCoronalHiRes::viewAxialCoronalHiRes(QWidget *parent, NIFTImage *fatImage, NIFTImage *waterImage, SubjectConfig *subConfig) :
     QWidget(parent),
     ui(new Ui::viewAxialCoronalHiRes),
+    fatImage(fatImage), waterImage(waterImage), subConfig(subConfig),
     undoView(NULL), undoStack(new QUndoStack(this)),
-    saveTracingResultsPath(),
     EATShortcut(new QShortcut(QKeySequence("1"), this)), IMATShortcut(new QShortcut(QKeySequence("2"), this)), PAATShortcut(new QShortcut(QKeySequence("3"), this)),
     PATShortcut(new QShortcut(QKeySequence("4"), this)), SCATShortcut(new QShortcut(QKeySequence("5"), this)), VATShortcut(new QShortcut(QKeySequence("6"), this)),
     upShortcut(new QShortcut(QKeySequence("up"), this)), downShortcut(new QShortcut(QKeySequence("down"), this)),
@@ -19,10 +23,6 @@ viewAxialCoronalHiRes::viewAxialCoronalHiRes(QWidget *parent) :
     // it enabled there). And set current tab to zero in case I am on a different tab in designer.
     this->ui->settingsWidget->setEnabled(false);
     this->ui->settingsWidget->setCurrentIndex(0);
-
-    this->subConfig = new SubjectConfig();
-    this->fatImage = new NIFTImage(subConfig);
-    this->waterImage = new NIFTImage(subConfig);
 
     connect(undoStack, SIGNAL(canUndoChanged(bool)), this, SLOT(undoStack_canUndoChanged(bool)));
     connect(undoStack, SIGNAL(canRedoChanged(bool)), this, SLOT(undoStack_canRedoChanged(bool)));
@@ -249,8 +249,16 @@ void viewAxialCoronalHiRes::setupDefaults()
     ui->secondaryImageBox->setEnabled((ui->glWidgetAxial->getDisplayType() == SliceDisplayType::FatWater || ui->glWidgetAxial->getDisplayType() == SliceDisplayType::WaterFat));
 
     // ------------------------------------------- Setup Tracing Tab -------------------------------------------
-    // Set the EAT radio button for the default layer to be drawing with
-    ui->EATRadioBtn->setChecked(true);
+    // Set the current radio button based on default layer to be drawing with
+    switch (ui->glWidgetAxial->getTracingLayer())
+    {
+        case TracingLayer::EAT: ui->EATRadioBtn->setChecked(true); break;
+        case TracingLayer::IMAT: ui->IMATRadioBtn->setChecked(true); break;
+        case TracingLayer::PAAT: ui->PAATRadioBtn->setChecked(true); break;
+        case TracingLayer::PAT: ui->PATRadioBtn->setChecked(true); break;
+        case TracingLayer::SCAT: ui->SCATRadioBtn->setChecked(true); break;
+        case TracingLayer::VAT: ui->VATRadioBtn->setChecked(true); break;
+    }
 }
 
 void viewAxialCoronalHiRes::actionOpen_triggered()
@@ -270,10 +278,10 @@ void viewAxialCoronalHiRes::actionOpen_triggered()
 
 void viewAxialCoronalHiRes::actionSave_triggered()
 {
-    if (saveTracingResultsPath.isNull())
+    if (parentMain()->saveTracingResultsPath.isNull())
         actionSaveAs_triggered();
-    else if (ui->glWidgetAxial->saveTracingData(saveTracingResultsPath, false))
-        parentMain()->ui->statusBar->showMessage(QObject::tr("Successfully saved file at %1").arg(saveTracingResultsPath), 4000);
+    else if (ui->glWidgetAxial->saveTracingData(parentMain()->saveTracingResultsPath, false))
+        parentMain()->ui->statusBar->showMessage(QObject::tr("Successfully saved file at %1").arg(parentMain()->saveTracingResultsPath), 4000);
 }
 
 void viewAxialCoronalHiRes::actionSaveAs_triggered()
@@ -294,7 +302,7 @@ void viewAxialCoronalHiRes::actionSaveAs_triggered()
     {
         // Since the NIFTI files were successfully saved, the default path in the dialog next time will be this path
         parentMain()->defaultSaveDir = path;
-        saveTracingResultsPath = path;
+        parentMain()->saveTracingResultsPath = path;
         parentMain()->ui->statusBar->showMessage(QObject::tr("Successfully saved file at %1").arg(path), 4000);
     }
     else
@@ -319,7 +327,7 @@ void viewAxialCoronalHiRes::actionImportTracingData_triggered()
     {
         // Since the NIFTI files were successfully loaded, the default path in the dialog next time will be this path
         parentMain()->defaultSaveDir = path;
-        saveTracingResultsPath = path;
+        parentMain()->saveTracingResultsPath = path;
         parentMain()->ui->statusBar->showMessage(QObject::tr("Successfully loaded tracing results in %1").arg(path), 4000);
     }
 }
@@ -780,6 +788,11 @@ viewAxialCoronalHiRes::~viewAxialCoronalHiRes()
     delete PATShortcut;
     delete SCATShortcut;
     delete VATShortcut;
+
+    delete upShortcut;
+    delete downShortcut;
+    delete leftShortcut;
+    delete rightShortcut;
 
     delete ui;
 }

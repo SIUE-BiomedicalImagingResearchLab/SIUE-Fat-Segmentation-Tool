@@ -802,7 +802,7 @@ TracingPointsAddCommand::TracingPointsAddCommand(int index, AxialSliceWidget *wi
 void TracingPointsAddCommand::undo()
 {
     // Get a vector of the points contained in the current layer and axial slice
-    auto &layerPoints = widget->getLayerPoints();
+    auto &layerPoints = widget->getFatLayerSlice().points;
 
     // If the number of points is below the index number, then something is wrong
     // because there are no points to copy
@@ -824,7 +824,7 @@ void TracingPointsAddCommand::undo()
 void TracingPointsAddCommand::redo()
 {
     // Get a vector of the points contained in the current layer and axial slice
-    auto &layerPoints = widget->getLayerPoints();
+    auto &layerPoints = widget->getFatLayerSlice().points;
 
     // If there are no points to restore, do nothing. Presumably, this is the first
     // call of redo() when inserting on stack.

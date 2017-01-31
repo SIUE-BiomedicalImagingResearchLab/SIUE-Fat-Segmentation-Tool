@@ -3,11 +3,11 @@
 #include "ui_mainwindow.h"
 #include "mainwindow.h"
 
-viewAxialCoronalLoRes::viewAxialCoronalLoRes(QWidget *parent) :
+viewAxialCoronalLoRes::viewAxialCoronalLoRes(QWidget *parent, NIFTImage *fatImage, NIFTImage *waterImage, SubjectConfig *subConfig) :
     QWidget(parent),
     ui(new Ui::viewAxialCoronalLoRes),
+    fatImage(fatImage), waterImage(waterImage), subConfig(subConfig),
     undoView(NULL), undoStack(new QUndoStack(this)),
-    saveTracingResultsPath(),
     EATShortcut(new QShortcut(QKeySequence("1"), this)), IMATShortcut(new QShortcut(QKeySequence("2"), this)), PAATShortcut(new QShortcut(QKeySequence("3"), this)),
     PATShortcut(new QShortcut(QKeySequence("4"), this)), SCATShortcut(new QShortcut(QKeySequence("5"), this)), VATShortcut(new QShortcut(QKeySequence("6"), this)),
     upShortcut(new QShortcut(QKeySequence("up"), this)), downShortcut(new QShortcut(QKeySequence("down"), this)),
@@ -19,10 +19,6 @@ viewAxialCoronalLoRes::viewAxialCoronalLoRes(QWidget *parent) :
     // it enabled there). And set current tab to zero in case I am on a different tab in designer.
     this->ui->settingsWidget->setEnabled(false);
     this->ui->settingsWidget->setCurrentIndex(0);
-
-    this->subConfig = new SubjectConfig();
-    this->fatImage = new NIFTImage(subConfig);
-    this->waterImage = new NIFTImage(subConfig);
 
     connect(undoStack, SIGNAL(canUndoChanged(bool)), this, SLOT(undoStack_canUndoChanged(bool)));
     connect(undoStack, SIGNAL(canRedoChanged(bool)), this, SLOT(undoStack_canRedoChanged(bool)));
@@ -794,6 +790,11 @@ viewAxialCoronalLoRes::~viewAxialCoronalLoRes()
     delete PATShortcut;
     delete SCATShortcut;
     delete VATShortcut;
+
+    delete upShortcut;
+    delete downShortcut;
+    delete leftShortcut;
+    delete rightShortcut;
 
     delete ui;
 }
