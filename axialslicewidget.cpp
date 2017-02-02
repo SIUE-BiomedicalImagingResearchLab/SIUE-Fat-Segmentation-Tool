@@ -32,6 +32,16 @@ bool AxialSliceWidget::isLoaded() const
     return (fatImage->isLoaded() && waterImage->isLoaded());
 }
 
+void AxialSliceWidget::imageLoaded()
+{
+    sliceTexturePrimInit = false;
+    sliceTextureSecdInit = false;
+    traceTextureInit = false;
+
+    dirty |= (int)Dirty::Slice | (int)Dirty::TracesAll | (int)Dirty::Crosshair;
+    update();
+}
+
 void AxialSliceWidget::setLocation(QVector4D location)
 {
     // If there is no fat or water image currently loaded then return with doing nothing.
@@ -325,8 +335,14 @@ bool AxialSliceWidget::saveTracingData(QString path, bool promptOnOverwrite)
             cv::Mat points;
             opencv::findNonZero(slice, points);
 
-            // TODO: Sort points by index to make it more readable
-            //cv::sortIdx(points, points, );
+            // Only sort if there are points to sort
+            if (points.total() > 0)
+            {
+                // Sort based on Z, then Y, then X value.
+                std::sort(points.begin<cv::Vec3i>(), points.end<cv::Vec3i>(), [](const cv::Vec3i &a, const cv::Vec3i &b) {
+                    return !((a[0] >= b[0]) && (a[0] != b[0] || a[1] >= b[1]) && (a[0] != b[0] || a[1] != b[1] || a[2] >= b[2]));
+                });
+            }
 
             stream << "#" << z << endl;
             stream << points.total() << endl;
@@ -575,6 +591,9 @@ void AxialSliceWidget::initializeSliceView()
     qDebug() << "                    GLSL VERSION: " << (const char*)glGetString(GL_SHADING_LANGUAGE_VERSION);
     qDebug() << "";
 
+    sliceTexturePrimInit = false;
+    sliceTextureSecdInit = false;
+
     // Setup the axial slice vertices
     sliceVertices.clear();
     sliceVertices.append(VertexPT(QVector3D(-1.0f, -1.0f, 0.0f), QVector2D(0.0f, 0.0f)));
@@ -620,6 +639,8 @@ void AxialSliceWidget::initializeSliceView()
 
 void AxialSliceWidget::initializeTracing()
 {
+    traceTextureInit = false;
+
     // Setup the trace vertices
     traceVertices.clear();
     traceVertices.append(VertexPT(QVector3D(-1.0f, -1.0f, 0.0f), QVector2D(0.0f, 0.0f)));
@@ -874,7 +895,16 @@ void AxialSliceWidget::updateTexture()
     // Get the OpenGL datatype of the matrix
     auto dataType = NumericType::OpenCV(primMatrix.type());
     // Upload the texture data from the matrix to the texture. The internal format is 32 bit floats with one channel for red
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, fatImage->getXDim(), fatImage->getYDim(), 0, dataType->openGLFormat, dataType->openGLType, primMatrix.data);
+    // If it hasnt been initialized yet or needs to be reinitialized to a different size, use glTexImage2D, otherwise use
+    // the quicker method glTexSubImage2D which just overwrites old data
+    if (!sliceTexturePrimInit)
+    {
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, fatImage->getXDim(), fatImage->getYDim(), 0, dataType->openGLFormat, dataType->openGLType, primMatrix.data);
+        sliceTexturePrimInit = true;
+    }
+    else
+        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, fatImage->getXDim(), fatImage->getYDim(), dataType->openGLFormat, dataType->openGLType, primMatrix.data);
+
     glCheckError();
 
     // Repeat the process if the second matrix is available
@@ -888,7 +918,16 @@ void AxialSliceWidget::updateTexture()
 
         dataType = NumericType::OpenCV(primMatrix.type());
 
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, fatImage->getXDim(), fatImage->getYDim(), 0, dataType->openGLFormat, dataType->openGLType, secdMatrix.data);
+        // If it hasnt been initialized yet or needs to be reinitialized to a different size, use glTexImage2D, otherwise use
+        // the quicker method glTexSubImage2D which just overwrites old data
+        if (!sliceTextureSecdInit)
+        {
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, fatImage->getXDim(), fatImage->getYDim(), 0, dataType->openGLFormat, dataType->openGLType, secdMatrix.data);
+            sliceTextureSecdInit = true;
+        }
+        else
+            glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, fatImage->getXDim(), fatImage->getYDim(), dataType->openGLFormat, dataType->openGLType, secdMatrix.data);
+
         glCheckError();
     }
 
@@ -951,9 +990,17 @@ void AxialSliceWidget::updateTrace(TracingLayer layer)
     // Get the OpenGL datatype of the matrix
     auto dataType = NumericType::OpenCV(matrix.type());
 
-    // TODO: glTexImage2D destroys all buffer and allocates new. If the data is same as old size, glSubTexImage2D will be much faster
     // Upload the texture data from the matrix to the texture. The internal format is an 8 bit char with one channel for red
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, fatImage->getXDim(), fatImage->getYDim(), 0, dataType->openGLFormat, dataType->openGLType, matrix.data);
+    // If it hasnt been initialized yet or needs to be reinitialized to a different size, use glTexImage2D, otherwise use
+    // the quicker method glTexSubImage2D which just overwrites old data
+    if (!traceTextureInit)
+    {
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, fatImage->getXDim(), fatImage->getYDim(), 0, dataType->openGLFormat, dataType->openGLType, matrix.data);
+        traceTextureInit = true;
+    }
+    else
+        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, fatImage->getXDim(), fatImage->getYDim(), dataType->openGLFormat, dataType->openGLType, matrix.data);
+
     glCheckError();
 }
 

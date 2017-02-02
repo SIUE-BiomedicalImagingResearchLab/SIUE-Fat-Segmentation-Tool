@@ -220,13 +220,8 @@ void findNonZero(cv::InputArray _src, cv::OutputArray _idx)
         func( ptrs[0], ofs, planeSize, startidx );
 
     int *idx_ptr = reinterpret_cast<int *>(idx.ptr());
-    //cv::Vec<int, src.dims> *idx_ptr = idx.ptr<cv::Vec<int, src.dims>>();
-    // It isnt a compile time constant...thats an issue
     for (int i = 0; i < n; ++i, idx_ptr += src.dims)
-    {
-        qDebug() << i << ": " << ofs[i];
         ofs2idx(src, ofs[i], idx_ptr);
-    }
 
     delete ofs;
 }

@@ -134,6 +134,9 @@ bool viewAxialCoronalLoRes::loadImage(QString path)
             layer.time.resize(fatImage->getZDim());
         }
 
+        ui->glWidgetAxial->imageLoaded();
+        ui->glWidgetCoronal->imageLoaded();
+
         // Setup the default controls in the GUI
         setupDefaults();
 

@@ -130,7 +130,11 @@ bool viewAxialCoronalHiRes::loadImage(QString path)
         {
             layer.data = cv::Mat({fatImage->getZDim(), fatImage->getYDim(), fatImage->getXDim()}, CV_8UC1, cv::Scalar(0));
             layer.time.resize(fatImage->getZDim());
+            layer.time.clear();
         }
+
+        ui->glWidgetAxial->imageLoaded();
+        ui->glWidgetCoronal->imageLoaded();
 
         // Setup the default controls in the GUI
         setupDefaults();

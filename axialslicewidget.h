@@ -70,6 +70,8 @@ private:
     GLuint sliceSecdTexture;
     QVector<VertexPT> sliceVertices;
     QVector<unsigned short> sliceIndices;
+    bool sliceTexturePrimInit;
+    bool sliceTextureSecdInit;
 
     QOpenGLShaderProgram *traceProgram;
     GLuint traceVertexBuf, traceIndexBuf;
@@ -77,6 +79,7 @@ private:
     GLuint traceTextures[(int)TracingLayer::Count];
     QVector<VertexPT> traceVertices;
     QVector<unsigned short> traceIndices;
+    bool traceTextureInit;
 
     QPoint lineStart, lineEnd;
     int lineWidth;
@@ -130,6 +133,9 @@ public:
 
     void setup(NIFTImage *fat, NIFTImage *water, TracingData *tracing);
     bool isLoaded() const;
+
+    // Performs actions when a new image is loaded
+    void imageLoaded();
 
     SliceDisplayType getDisplayType() const;
     void setDisplayType(SliceDisplayType type);

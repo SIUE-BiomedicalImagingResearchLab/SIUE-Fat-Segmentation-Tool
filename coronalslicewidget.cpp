@@ -24,6 +24,14 @@ bool CoronalSliceWidget::isLoaded() const
     return (fatImage->isLoaded() && waterImage->isLoaded());
 }
 
+void CoronalSliceWidget::imageLoaded()
+{
+    sliceTextureInit = false;
+
+    dirty |= (int)Dirty::Slice | (int)Dirty::Crosshair;
+    update();
+}
+
 void CoronalSliceWidget::setLocation(QVector4D location)
 {
     // If there is no fat or water image currently loaded then return with doing nothing.
@@ -194,6 +202,8 @@ void CoronalSliceWidget::initializeSliceView()
     qDebug() << "                    GLSL VERSION: " << (const char*)glGetString(GL_SHADING_LANGUAGE_VERSION);
     qDebug() << "";
 
+    sliceTextureInit = false;
+
     // Setup the axial slice vertices
     sliceVertices.clear();
     sliceVertices.append(VertexPT(QVector3D(-1.0f, -1.0f, 0.0f), QVector2D(0.0f, 0.0f)));
@@ -269,6 +279,17 @@ void CoronalSliceWidget::updateTexture()
     auto dataType = NumericType::OpenCV(matrix.type());
     // Upload the texture data from the matrix to the texture. The internal format is 32 bit floats with one channel for red
     glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, fatImage->getXDim(), fatImage->getZDim(), 0, dataType->openGLFormat, dataType->openGLType, matrix.data);
+
+    // If it hasnt been initialized yet or needs to be reinitialized to a different size, use glTexImage2D, otherwise use
+    // the quicker method glTexSubImage2D which just overwrites old data
+    if (!sliceTextureInit)
+    {
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, fatImage->getXDim(), fatImage->getZDim(), 0, dataType->openGLFormat, dataType->openGLType, matrix.data);
+        sliceTextureInit = true;
+    }
+    else
+        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, fatImage->getXDim(), fatImage->getZDim(), dataType->openGLFormat, dataType->openGLType, matrix.data);
+
     glCheckError();
 
     dirty &= ~(int)Dirty::Slice;
