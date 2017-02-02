@@ -37,11 +37,13 @@ void CoronalSliceWidget::setLocation(QVector4D location)
 
     // If Y value changed, then update the texture
     if (delta.y())
-        updateTexture();
+        dirty |= (int)Dirty::Slice;
 
     // If Z value changed, then update the crosshair line
     if (delta.z())
-        updateCrosshairLine();
+        dirty |= (int)Dirty::Crosshair;
+
+    update();
 }
 
 QVector4D CoronalSliceWidget::getLocation() const
@@ -75,7 +77,8 @@ void CoronalSliceWidget::setDisplayType(SliceDisplayType type)
     displayType = type;
 
     // This will recreate the texture because the display type has changed
-    updateTexture();
+    dirty |= (int)Dirty::Slice;
+    update();
 }
 
 float &CoronalSliceWidget::rscaling()
@@ -138,6 +141,11 @@ void CoronalSliceWidget::setUndoStack(QUndoStack *stack)
     undoStack = stack;
 }
 
+void CoronalSliceWidget::setDirty(Dirty bit)
+{
+    dirty |= (int)bit;
+}
+
 void CoronalSliceWidget::resetView()
 {
     // Reset translation and scaling factors
@@ -145,7 +153,7 @@ void CoronalSliceWidget::resetView()
     scaling = 1.0f;
 
     // Update the screen
-    updateCrosshairLine();
+    dirty |= (int)Dirty::Crosshair;
     update();
 }
 
@@ -233,6 +241,8 @@ void CoronalSliceWidget::initializeCrosshairLine()
 
 void CoronalSliceWidget::updateTexture()
 {
+    qDebug() << " Coronal Hande Texture...1";
+
     cv::Mat matrix;
     // Get the slice for the fat image. If the result is empty then there was an error retrieving the slice
     matrix = fatImage->getCoronalSlice(location.y(), true);
@@ -253,18 +263,15 @@ void CoronalSliceWidget::updateTexture()
     // like GL_NEAREST would.
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glCheckError();
 
     // Get the OpenGL datatype of the matrix
     auto dataType = NumericType::OpenCV(matrix.type());
     // Upload the texture data from the matrix to the texture. The internal format is 32 bit floats with one channel for red
     glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, fatImage->getXDim(), fatImage->getZDim(), 0, dataType->openGLFormat, dataType->openGLType, matrix.data);
+    glCheckError();
 
-    // If there was an error, then say something
-    GLenum err;
-    if ((err = glGetError()) != GL_NO_ERROR)
-        qWarning() << "Unable to upload texture image for coronal slice " << location.y() << ". Error code: " << err;
-
-    update();
+    dirty &= ~(int)Dirty::Slice;
 }
 
 void CoronalSliceWidget::updateCrosshairLine()
@@ -307,7 +314,7 @@ void CoronalSliceWidget::updateCrosshairLine()
     lineStart = start.toPoint();
     lineEnd = end.toPoint();
 
-    update();
+    dirty &= ~(int)Dirty::Crosshair;
 }
 
 void CoronalSliceWidget::resizeGL(int w, int h)
@@ -320,7 +327,8 @@ void CoronalSliceWidget::resizeGL(int w, int h)
     if (!isLoaded())
         return;
 
-    updateCrosshairLine();
+    dirty |= (int)Dirty::Crosshair;
+    update();
 }
 
 void CoronalSliceWidget::paintGL()
@@ -329,6 +337,14 @@ void CoronalSliceWidget::paintGL()
     if (!isLoaded())
         return;
 
+    // Update relevant OpenGL objects if dirty
+    if (dirty & (int)Dirty::Slice)
+        updateTexture();
+
+    if (dirty & (int)Dirty::Crosshair)
+        updateCrosshairLine();
+
+    // After updating, begin rendering
     QPainter painter(this);
 
     painter.beginNativePainting();
@@ -347,9 +363,11 @@ void CoronalSliceWidget::paintGL()
     glBindTexture(GL_TEXTURE_2D, sliceTexture);
     glBindBuffer(GL_ARRAY_BUFFER, sliceVertexBuf);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, sliceIndexBuf);
+    glCheckError();
 
     // Draw a triangle strip of 4 elements which is two triangles. The indices are unsigned shorts
     glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_SHORT, 0);
+    glCheckError();
 
     // Release (unbind) the binded objects in reverse order
     // This is a simple protocol to prevent anything happening to the objects outside of this function without
@@ -360,6 +378,7 @@ void CoronalSliceWidget::paintGL()
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     program->release();
+    glCheckError();
 
     painter.endNativePainting();
 

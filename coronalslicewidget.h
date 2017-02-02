@@ -35,6 +35,9 @@ private:
     NIFTImage *fatImage;
     NIFTImage *waterImage;
 
+    // Each bit represents whether the specified item in Dirty enum needs to be updated on drawing
+    int dirty;
+
     QOpenGLShaderProgram *program;
     GLuint sliceVertexBuf, sliceIndexBuf;
     GLuint sliceVertexObject;
@@ -88,6 +91,8 @@ public:
     QMatrix4x4 getNIFTIToOpenGLMatrix(bool includeMVP = true, bool flipY = true) const;
 
     void setUndoStack(QUndoStack *stack);
+
+    void setDirty(Dirty bit);
 
     void updateTexture();
     void updateCrosshairLine();

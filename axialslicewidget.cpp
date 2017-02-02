@@ -20,15 +20,11 @@ void AxialSliceWidget::setup(NIFTImage *fat, NIFTImage *water, TracingData *trac
         return;
     }
 
-    qInfo() << "Setting axial images....";
-
     fatImage = fat;
     waterImage = water;
     tracingData = tracing;
 
     location = QVector4D(0, 0, 0, 0);
-
-    qInfo() << "Axial images set...everything ok";
 }
 
 bool AxialSliceWidget::isLoaded() const

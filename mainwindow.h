@@ -57,7 +57,7 @@ public:
     void readSettings();
     void writeSettings();
 
-    void switchView(WindowViewType type, bool showPrompt = true);
+    void switchView(WindowViewType type);
 
     friend class viewAxialCoronalLoRes;
     friend class viewAxialCoronalHiRes;

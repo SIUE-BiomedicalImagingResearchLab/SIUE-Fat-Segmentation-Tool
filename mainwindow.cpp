@@ -14,26 +14,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     this->ui->setupUi(this);
 
-    switch (windowViewType)
-    {
-        case WindowViewType::AxialCoronalLoRes:
-        {
-            bool prev = this->ui->actionAxialCoronalLoRes->blockSignals(true);
-            this->ui->actionAxialCoronalLoRes->setChecked(true);
-            this->ui->actionAxialCoronalLoRes->blockSignals(prev);
-            this->setCentralWidget(new viewAxialCoronalLoRes(this, fatImage, waterImage, subConfig, tracingData));
-        }
-        break;
-
-        case WindowViewType::AxialCoronalHiRes:
-        {
-            bool prev = this->ui->actionAxialCoronalHiRes->blockSignals(true);
-            this->ui->actionAxialCoronalHiRes->setChecked(true);
-            this->ui->actionAxialCoronalHiRes->blockSignals(prev);
-            this->setCentralWidget(new viewAxialCoronalHiRes(this, fatImage, waterImage, subConfig, tracingData));
-         }
-         break;
-    }
+    // Setup the initial view
+    this->switchView(windowViewType);
 
     // Apply keyboard shortcuts to the menu items. The benefit of using a predefined
     // key sequence is that it has the list of valid shortcuts for each platform and
@@ -115,24 +97,34 @@ void MainWindow::on_actionAbout_triggered()
     aboutBox.exec();
 }
 
-void MainWindow::switchView(WindowViewType type, bool showPrompt)
+void MainWindow::switchView(WindowViewType type)
 {
     ui->actionAxialCoronalLoRes->setChecked(false);
-    ui->actionAxialCoronalLoRes->setChecked(false);
+    ui->actionAxialCoronalHiRes->setChecked(false);
 
     switch (type)
     {
         case WindowViewType::AxialCoronalLoRes:
+        {
+            bool prev = this->ui->actionAxialCoronalLoRes->blockSignals(true);
+            this->ui->actionAxialCoronalLoRes->setChecked(true);
+            this->ui->actionAxialCoronalLoRes->blockSignals(prev);
+            this->setCentralWidget(new viewAxialCoronalLoRes(this, fatImage, waterImage, subConfig, tracingData));
             ui->actionAxialCoronalLoRes->setChecked(true);
-            break;
+        }
+        break;
 
         case WindowViewType::AxialCoronalHiRes:
+        {
+            bool prev = this->ui->actionAxialCoronalHiRes->blockSignals(true);
+            this->ui->actionAxialCoronalHiRes->setChecked(true);
+            this->ui->actionAxialCoronalHiRes->blockSignals(prev);
+            this->setCentralWidget(new viewAxialCoronalHiRes(this, fatImage, waterImage, subConfig, tracingData));
             ui->actionAxialCoronalHiRes->setChecked(true);
-            break;
+        }
+        break;
     }
 
-    if (showPrompt)
-        QMessageBox::information(this, "Switch Views", "Your current view type was acknowledged. Please restart the application to see the changes.", QMessageBox::Ok);
     windowViewType = type;
 }
 
@@ -140,12 +132,16 @@ void MainWindow::on_actionAxialCoronalLoRes_triggered(bool checked)
 {
     if (checked)
         switchView(WindowViewType::AxialCoronalLoRes);
+    else // Prevent user from unchecking the box without toggling to something else
+        ui->actionAxialCoronalLoRes->setChecked(true);
 }
 
 void MainWindow::on_actionAxialCoronalHiRes_triggered(bool checked)
 {
     if (checked)
         switchView(WindowViewType::AxialCoronalHiRes);
+    else // Prevent user from unchecking the box without toggling to something else
+        ui->actionAxialCoronalHiRes->setChecked(true);
 }
 
 MainWindow::~MainWindow()

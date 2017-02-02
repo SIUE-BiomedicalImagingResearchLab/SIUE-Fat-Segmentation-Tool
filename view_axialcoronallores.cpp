@@ -15,11 +15,6 @@ viewAxialCoronalLoRes::viewAxialCoronalLoRes(QWidget *parent, NIFTImage *fatImag
 {
     this->ui->setupUi(this);
 
-    // Disable the settingsWidget (because you cannot edit it in designer when it is disabled so I just leave
-    // it enabled there). And set current tab to zero in case I am on a different tab in designer.
-    this->ui->settingsWidget->setEnabled(false);
-    this->ui->settingsWidget->setCurrentIndex(0);
-
     connect(undoStack, SIGNAL(canUndoChanged(bool)), this, SLOT(undoStack_canUndoChanged(bool)));
     connect(undoStack, SIGNAL(canRedoChanged(bool)), this, SLOT(undoStack_canRedoChanged(bool)));
     this->ui->glWidgetAxial->setUndoStack(undoStack);
@@ -31,17 +26,16 @@ viewAxialCoronalLoRes::viewAxialCoronalLoRes(QWidget *parent, NIFTImage *fatImag
     this->parentMain()->ui->statusBar->addPermanentWidget(this->ui->lblStatusLocation);
     this->ui->glWidgetAxial->setLocationLabel(this->ui->lblStatusLocation);
 
-    // Disable the shortcuts because the settings menu is disabled
-    this->EATShortcut->setEnabled(false);
-    this->IMATShortcut->setEnabled(false);
-    this->PAATShortcut->setEnabled(false);
-    this->PATShortcut->setEnabled(false);
-    this->SCATShortcut->setEnabled(false);
-    this->VATShortcut->setEnabled(false);
-    this->upShortcut->setEnabled(false);
-    this->downShortcut->setEnabled(false);
-    this->leftShortcut->setEnabled(false);
-    this->rightShortcut->setEnabled(false);
+    // Set current tab to zero in case I am on a different tab in designer.
+    this->ui->settingsWidget->setCurrentIndex(0);
+
+    if (fatImage->isLoaded() && waterImage->isLoaded())
+    {
+        setEnableSettings(true);
+        setupDefaults();
+    }
+    else
+        setEnableSettings(false);
 
     // Connect the shortcuts to the respective radio button toggle slot
     connect(EATShortcut, SIGNAL(activated()), this, SLOT(on_EATRadioBtn_toggled()));
@@ -130,18 +124,7 @@ bool viewAxialCoronalLoRes::loadImage(QString path)
         setWindowTitle(QCoreApplication::applicationName() + " - " + path);
 
         // The settings box is disabled to prevent moving stuff before anything is loaded
-        enableSettings();
-
-        // The default slice that it will go to is half of the zDim
-        QVector4D defaultLocation = QVector4D(Location::NoChange, floor(fatImage->getYDim() / 2), floor(fatImage->getZDim() / 2), Location::NoChange);
-        // In the OpenGL widget, set the default location
-        ui->glWidgetAxial->setLocation(defaultLocation);
-
-        qDebug() << "Axial Widget images are set";
-
-        ui->glWidgetCoronal->setLocation(defaultLocation);
-
-        qDebug() << "Coronal Widget images are set";        
+        setEnableSettings(true);
 
         // Initialize the tracing data to be the same size as the image and all zeros (no traces)
         // Also initialize each layer of time to be the same size as Z dim (one for each slice)
@@ -179,53 +162,57 @@ bool viewAxialCoronalLoRes::loadImage(QString path)
     return false;
 }
 
-void viewAxialCoronalLoRes::enableSettings()
+void viewAxialCoronalLoRes::setEnableSettings(bool enable)
 {
-    // The settings box is disabled to prevent moving stuff before anything is loaded
-    ui->settingsWidget->setEnabled(true);
+    ui->settingsWidget->setEnabled(enable);
 
-    EATShortcut->setEnabled(true);
-    IMATShortcut->setEnabled(true);
-    PAATShortcut->setEnabled(true);
-    PATShortcut->setEnabled(true);
-    SCATShortcut->setEnabled(true);
-    VATShortcut->setEnabled(true);
-    upShortcut->setEnabled(true);
-    downShortcut->setEnabled(true);
-    leftShortcut->setEnabled(true);
-    rightShortcut->setEnabled(true);
+    EATShortcut->setEnabled(enable);
+    IMATShortcut->setEnabled(enable);
+    PAATShortcut->setEnabled(enable);
+    PATShortcut->setEnabled(enable);
+    SCATShortcut->setEnabled(enable);
+    VATShortcut->setEnabled(enable);
+    upShortcut->setEnabled(enable);
+    downShortcut->setEnabled(enable);
+    leftShortcut->setEnabled(enable);
+    rightShortcut->setEnabled(enable);
 }
 
 void viewAxialCoronalLoRes::setupDefaults()
 {
-    QVector4D location = ui->glWidgetAxial->getLocation();
+    // The default slice that it will go to is half of the zDim
+    QVector4D defaultLocation = QVector4D(Location::NoChange, floor(fatImage->getYDim() / 2), floor(fatImage->getZDim() / 2), Location::NoChange);
+
+    // In the OpenGL widget, set the default location
+    ui->glWidgetAxial->setLocation(defaultLocation);
+    ui->glWidgetCoronal->setLocation(defaultLocation);
 
     // -------------------------------------------- Setup Home Tab --------------------------------------------
     // Set the range of the slice spin box to be 0 to the height of the fatImage (this is upper + lower z-height)
     ui->axialSliceSpinBox->setRange(0, fatImage->getZDim() - 1);
     // Set the value of the slice spin box to be what the defaultSlice is.
-    ui->axialSliceSpinBox->setValue(location.z());
+    ui->axialSliceSpinBox->setValue(defaultLocation.z());
 
     // Set the range of the slice slider to be 0 to the height of the fatImage (this is upper + lower z-height)
     ui->axialSliceSlider->setRange(0, fatImage->getZDim() - 1);
     // Set the value of the slice slider to be what the defaultSlice is.
-    ui->axialSliceSlider->setValue(location.z());
+    ui->axialSliceSlider->setValue(defaultLocation.z());
 
     // Coronal slice spin box range is 0 to 1 minus the maximum Y dimension. Set value to default location
     ui->coronalSliceSpinBox->setRange(0, fatImage->getYDim() - 1);
-    ui->coronalSliceSpinBox->setValue(location.y());
+    ui->coronalSliceSpinBox->setValue(defaultLocation.y());
 
     // Coronal slice slider range is 0 to 1 minus the maximum Y dimension. Set value to default location
     ui->coronalSliceSlider->setRange(0, fatImage->getYDim() - 1);
-    ui->coronalSliceSlider->setValue(location.y());
+    ui->coronalSliceSlider->setValue(defaultLocation.y());
 
     // Saggital slice spin box range is 0 to 1 minus the maximum X dimension. Set value to default location
     ui->saggitalSliceSpinBox->setRange(0, fatImage->getXDim() - 1);
-    ui->saggitalSliceSpinBox->setValue(location.x());
+    ui->saggitalSliceSpinBox->setValue(defaultLocation.x());
 
     // Saggital slice slider range is 0 to 1 minus the maximum X dimension. Set value to default location
     ui->saggitalSliceSlider->setRange(0, fatImage->getXDim() - 1);
-    ui->saggitalSliceSlider->setValue(location.x());
+    ui->saggitalSliceSlider->setValue(defaultLocation.x());
 
     // ---------------------------------------- Setup Axial Display Tab ----------------------------------------
     // Set the brightness slider value to the default brightness
@@ -265,7 +252,16 @@ void viewAxialCoronalLoRes::setupDefaults()
 
     // ------------------------------------------- Setup Tracing Tab -------------------------------------------
     // Set the EAT radio button for the default layer to be drawing with
-    ui->EATRadioBtn->setChecked(true);
+    // Set the current radio button based on default layer to be drawing with
+    switch (ui->glWidgetAxial->getTracingLayer())
+    {
+        case TracingLayer::EAT: ui->EATRadioBtn->setChecked(true); break;
+        case TracingLayer::IMAT: ui->IMATRadioBtn->setChecked(true); break;
+        case TracingLayer::PAAT: ui->PAATRadioBtn->setChecked(true); break;
+        case TracingLayer::PAT: ui->PATRadioBtn->setChecked(true); break;
+        case TracingLayer::SCAT: ui->SCATRadioBtn->setChecked(true); break;
+        case TracingLayer::VAT: ui->VATRadioBtn->setChecked(true); break;
+    }
 }
 
 void viewAxialCoronalLoRes::actionOpen_triggered()

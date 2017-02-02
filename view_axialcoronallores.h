@@ -67,7 +67,7 @@ public:
     MainWindow *parentMain();
 
     bool loadImage(QString path);
-    void enableSettings();
+    void setEnableSettings(bool enable);
     void setupDefaults();
 
     void changeSliceView(SliceDisplayType newType);
