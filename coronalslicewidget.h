@@ -96,7 +96,7 @@ public:
 
     void setUndoStack(QUndoStack *stack);
 
-    void setDirty(Dirty bit);
+    void setDirty(int bit);
 
     void updateTexture();
     void updateCrosshairLine();

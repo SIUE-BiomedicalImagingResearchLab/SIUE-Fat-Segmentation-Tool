@@ -28,7 +28,7 @@ void CoronalSliceWidget::imageLoaded()
 {
     sliceTextureInit = false;
 
-    dirty |= (int)Dirty::Slice | (int)Dirty::Crosshair;
+    dirty |= Dirty::Slice | Dirty::Crosshair;
     update();
 }
 
@@ -45,11 +45,11 @@ void CoronalSliceWidget::setLocation(QVector4D location)
 
     // If Y value changed, then update the texture
     if (delta.y())
-        dirty |= (int)Dirty::Slice;
+        dirty |= Dirty::Slice;
 
     // If Z value changed, then update the crosshair line
     if (delta.z())
-        dirty |= (int)Dirty::Crosshair;
+        dirty |= Dirty::Crosshair;
 
     update();
 }
@@ -85,7 +85,7 @@ void CoronalSliceWidget::setDisplayType(SliceDisplayType type)
     displayType = type;
 
     // This will recreate the texture because the display type has changed
-    dirty |= (int)Dirty::Slice;
+    dirty |= Dirty::Slice;
     update();
 }
 
@@ -149,9 +149,9 @@ void CoronalSliceWidget::setUndoStack(QUndoStack *stack)
     undoStack = stack;
 }
 
-void CoronalSliceWidget::setDirty(Dirty bit)
+void CoronalSliceWidget::setDirty(int bit)
 {
-    dirty |= (int)bit;
+    dirty |= bit;
 }
 
 void CoronalSliceWidget::resetView()
@@ -161,7 +161,7 @@ void CoronalSliceWidget::resetView()
     scaling = 1.0f;
 
     // Update the screen
-    dirty |= (int)Dirty::Crosshair;
+    dirty |= Dirty::Crosshair;
     update();
 }
 
@@ -251,8 +251,6 @@ void CoronalSliceWidget::initializeCrosshairLine()
 
 void CoronalSliceWidget::updateTexture()
 {
-    qDebug() << " Coronal Hande Texture...1";
-
     cv::Mat matrix;
     // Get the slice for the fat image. If the result is empty then there was an error retrieving the slice
     matrix = fatImage->getCoronalSlice(location.y(), true);
@@ -292,7 +290,7 @@ void CoronalSliceWidget::updateTexture()
 
     glCheckError();
 
-    dirty &= ~(int)Dirty::Slice;
+    dirty &= ~Dirty::Slice;
 }
 
 void CoronalSliceWidget::updateCrosshairLine()
@@ -335,7 +333,7 @@ void CoronalSliceWidget::updateCrosshairLine()
     lineStart = start.toPoint();
     lineEnd = end.toPoint();
 
-    dirty &= ~(int)Dirty::Crosshair;
+    dirty &= ~Dirty::Crosshair;
 }
 
 void CoronalSliceWidget::resizeGL(int w, int h)
@@ -348,7 +346,7 @@ void CoronalSliceWidget::resizeGL(int w, int h)
     if (!isLoaded())
         return;
 
-    dirty |= (int)Dirty::Crosshair;
+    dirty |= Dirty::Crosshair;
     update();
 }
 
@@ -359,10 +357,10 @@ void CoronalSliceWidget::paintGL()
         return;
 
     // Update relevant OpenGL objects if dirty
-    if (dirty & (int)Dirty::Slice)
+    if (dirty & Dirty::Slice)
         updateTexture();
 
-    if (dirty & (int)Dirty::Crosshair)
+    if (dirty & Dirty::Crosshair)
         updateCrosshairLine();
 
     // After updating, begin rendering

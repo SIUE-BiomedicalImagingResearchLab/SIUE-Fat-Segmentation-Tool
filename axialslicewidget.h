@@ -79,7 +79,7 @@ private:
     GLuint traceTextures[(int)TracingLayer::Count];
     QVector<VertexPT> traceVertices;
     QVector<unsigned short> traceIndices;
-    bool traceTextureInit;
+    std::array<bool, (int)TracingLayer::Count> traceTextureInit;
 
     QPoint lineStart, lineEnd;
     int lineWidth;
@@ -182,7 +182,7 @@ public:
 
     void setUndoStack(QUndoStack *stack);
 
-    void setDirty(Dirty bit);
+    void setDirty(int bit);
 
     void updateTexture();
     void updateCrosshairLine();

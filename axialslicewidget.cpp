@@ -10,6 +10,7 @@ AxialSliceWidget::AxialSliceWidget(QWidget *parent) : QOpenGLWidget(parent),
     startDraw(false), startPan(false), moveID(CommandID::AxialMove)
 {
     this->tracingLayerVisible.fill(true);
+    this->traceTextureInit.fill(false);
 }
 
 void AxialSliceWidget::setup(NIFTImage *fat, NIFTImage *water, TracingData *tracing)
@@ -36,9 +37,9 @@ void AxialSliceWidget::imageLoaded()
 {
     sliceTexturePrimInit = false;
     sliceTextureSecdInit = false;
-    traceTextureInit = false;
+    this->traceTextureInit.fill(false);
 
-    dirty |= (int)Dirty::Slice | (int)Dirty::TracesAll | (int)Dirty::Crosshair;
+    dirty |= Dirty::Slice | Dirty::TracesAll | Dirty::Crosshair;
     update();
 }
 
@@ -55,11 +56,11 @@ void AxialSliceWidget::setLocation(QVector4D location)
 
     // If Y value changed, then update the crosshair line
     if (delta.y())
-        dirty |= (int)Dirty::Crosshair;
+        dirty |= Dirty::Crosshair;
 
     // If Z value changed, then update the texture
     if (delta.z())
-        dirty |= ((int)Dirty::Slice | (int)Dirty::TracesAll);
+        dirty |= (Dirty::Slice | Dirty::TracesAll);
 
     // Update location label
     if (locationLabel)
@@ -109,7 +110,7 @@ void AxialSliceWidget::setDisplayType(SliceDisplayType type)
     displayType = type;
 
     // This will recreate the texture because the display type has changed
-    dirty |= (int)Dirty::Slice;
+    dirty |= Dirty::Slice;
     update();
 }
 
@@ -457,6 +458,13 @@ bool AxialSliceWidget::loadTracingData(QString path)
             for (int ii = 0; ii < numPoints; ++ii)
             {
                 stream >> x >> y >> z_;
+
+                if ((z < 0 || z >= fatImage->getZDim()) || (y < 0 || y >= fatImage->getYDim()) || (x < 0 || x >= fatImage->getXDim()))
+                {
+                    qWarning() << "A point specified was outside the boundary of the current NIFTI image: (" << z << "," << y << "," << x << ")";
+                    return false;
+                }
+
                 layer.data.at<unsigned char>(z, y, x) = 255;
             }
         }
@@ -467,7 +475,7 @@ bool AxialSliceWidget::loadTracingData(QString path)
     undoStack->clear();
 
     // Update all traces textures and update screen
-    dirty |= (int)Dirty::TracesAll;
+    dirty |= Dirty::TracesAll;
     update();
 
     return true;
@@ -523,9 +531,9 @@ void AxialSliceWidget::setUndoStack(QUndoStack *stack)
     undoStack = stack;
 }
 
-void AxialSliceWidget::setDirty(Dirty bit)
+void AxialSliceWidget::setDirty(int bit)
 {
-    dirty |= (int)bit;
+    dirty |= bit;
 }
 
 void AxialSliceWidget::resetView()
@@ -535,7 +543,7 @@ void AxialSliceWidget::resetView()
     scaling = 1.0f;
 
     // Update the screen
-    dirty |= (int)Dirty::Crosshair;
+    dirty |= Dirty::Crosshair;
     update();
 }
 
@@ -641,7 +649,7 @@ void AxialSliceWidget::initializeSliceView()
 
 void AxialSliceWidget::initializeTracing()
 {
-    traceTextureInit = false;
+    this->traceTextureInit.fill(false);
 
     // Setup the trace vertices
     traceVertices.clear();
@@ -933,7 +941,7 @@ void AxialSliceWidget::updateTexture()
         glCheckError();
     }
 
-    dirty &= ~(int)Dirty::Slice;
+    dirty &= ~Dirty::Slice;
 }
 
 void AxialSliceWidget::updateCrosshairLine()
@@ -974,7 +982,7 @@ void AxialSliceWidget::updateCrosshairLine()
     lineStart = start.toPoint();
     lineEnd = end.toPoint();
 
-    dirty &= ~(int)Dirty::Crosshair;
+    dirty &= ~Dirty::Crosshair;
 }
 
 void AxialSliceWidget::updateTrace(TracingLayer layer)
@@ -995,10 +1003,10 @@ void AxialSliceWidget::updateTrace(TracingLayer layer)
     // Upload the texture data from the matrix to the texture. The internal format is an 8 bit char with one channel for red
     // If it hasnt been initialized yet or needs to be reinitialized to a different size, use glTexImage2D, otherwise use
     // the quicker method glTexSubImage2D which just overwrites old data
-    if (!traceTextureInit)
+    if (!traceTextureInit[(int)layer])
     {
         glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, fatImage->getXDim(), fatImage->getYDim(), 0, dataType->openGLFormat, dataType->openGLType, matrix.data);
-        traceTextureInit = true;
+        traceTextureInit[(int)layer] = true;
     }
     else
         glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, fatImage->getXDim(), fatImage->getYDim(), dataType->openGLFormat, dataType->openGLType, matrix.data);
@@ -1012,12 +1020,12 @@ void AxialSliceWidget::updateTraces(bool allOrCurrent)
     {
         for (int i = 0; i < (int)TracingLayer::Count; ++i)
             updateTrace((TracingLayer)i);
-        dirty &= ~((int)Dirty::TracesAll | (int)Dirty::Traces);
+        dirty &= ~(Dirty::TracesAll | Dirty::Traces);
     }
     else
     {
         updateTrace(tracingLayer);
-        dirty &= ~(int)Dirty::Traces;
+        dirty &= ~Dirty::Traces;
     }
 }
 
@@ -1031,7 +1039,7 @@ void AxialSliceWidget::resizeGL(int w, int h)
     if (!isLoaded())
         return;
 
-    dirty |= (int)Dirty::Crosshair;
+    dirty |= Dirty::Crosshair;
     update();
 }
 
@@ -1042,16 +1050,16 @@ void AxialSliceWidget::paintGL()
         return;
 
     // Update relevant OpenGL objects if dirty
-    if (dirty & (int)Dirty::Slice)
+    if (dirty & Dirty::Slice)
         updateTexture();
 
-    if (dirty & (int)Dirty::Crosshair)
+    if (dirty & Dirty::Crosshair)
         updateCrosshairLine();
 
-    if (dirty & (int)Dirty::Traces)
+    if (dirty & Dirty::Traces)
         updateTraces(false);
 
-    if (dirty & (int)Dirty::TracesAll)
+    if (dirty & Dirty::TracesAll)
         updateTraces(true);
 
     // After updating, begin rendering
