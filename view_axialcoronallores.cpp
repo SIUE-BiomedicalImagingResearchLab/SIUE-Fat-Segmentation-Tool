@@ -8,8 +8,12 @@ viewAxialCoronalLoRes::viewAxialCoronalLoRes(QWidget *parent, NIFTImage *fatImag
     ui(new Ui::viewAxialCoronalLoRes),
     fatImage(fatImage), waterImage(waterImage), subConfig(subConfig), tracingData(tracingData),
     undoView(NULL), undoStack(new QUndoStack(this)),
-    EATShortcut(new QShortcut(QKeySequence("1"), this)), IMATShortcut(new QShortcut(QKeySequence("2"), this)), PAATShortcut(new QShortcut(QKeySequence("3"), this)),
-    PATShortcut(new QShortcut(QKeySequence("4"), this)), SCATShortcut(new QShortcut(QKeySequence("5"), this)), VATShortcut(new QShortcut(QKeySequence("6"), this)),
+    EATRadioBtnShortcut(new QShortcut(QKeySequence("1"), this)), IMATRadioBtnShortcut(new QShortcut(QKeySequence("2"), this)),
+    PAATRadioBtnShortcut(new QShortcut(QKeySequence("3"), this)), PATRadioBtnShortcut(new QShortcut(QKeySequence("4"), this)),
+    SCATRadioBtnShortcut(new QShortcut(QKeySequence("5"), this)), VATRadioBtnShortcut(new QShortcut(QKeySequence("6"), this)),
+    EATCheckBoxShortcut(new QShortcut(QKeySequence("Ctrl+1"), this)), IMATCheckBoxShortcut(new QShortcut(QKeySequence("Ctrl+2"), this)),
+    PAATCheckBoxShortcut(new QShortcut(QKeySequence("Ctrl+3"), this)), PATCheckBoxShortcut(new QShortcut(QKeySequence("Ctrl+4"), this)),
+    SCATCheckBoxShortcut(new QShortcut(QKeySequence("Ctrl+5"), this)), VATCheckBoxShortcut(new QShortcut(QKeySequence("Ctrl+6"), this)),
     upShortcut(new QShortcut(QKeySequence("up"), this)), downShortcut(new QShortcut(QKeySequence("down"), this)),
     leftShortcut(new QShortcut(QKeySequence("left"), this)), rightShortcut(new QShortcut(QKeySequence("right"), this))
 {
@@ -38,12 +42,20 @@ viewAxialCoronalLoRes::viewAxialCoronalLoRes(QWidget *parent, NIFTImage *fatImag
         setEnableSettings(false);
 
     // Connect the shortcuts to the respective radio button toggle slot
-    connect(EATShortcut, SIGNAL(activated()), this, SLOT(on_EATRadioBtn_toggled()));
-    connect(IMATShortcut, SIGNAL(activated()), this, SLOT(on_IMATRadioBtn_toggled()));
-    connect(PAATShortcut, SIGNAL(activated()), this, SLOT(on_PAATRadioBtn_toggled()));
-    connect(PATShortcut, SIGNAL(activated()), this, SLOT(on_PATRadioBtn_toggled()));
-    connect(SCATShortcut, SIGNAL(activated()), this, SLOT(on_SCATRadioBtn_toggled()));
-    connect(VATShortcut, SIGNAL(activated()), this, SLOT(on_VATRadioBtn_toggled()));
+    connect(EATRadioBtnShortcut, SIGNAL(activated()), ui->EATRadioBtn, SLOT(toggle()));
+    connect(IMATRadioBtnShortcut, SIGNAL(activated()), ui->IMATRadioBtn, SLOT(toggle()));
+    connect(PAATRadioBtnShortcut, SIGNAL(activated()), ui->PAATRadioBtn, SLOT(toggle()));
+    connect(PATRadioBtnShortcut, SIGNAL(activated()), ui->PATRadioBtn, SLOT(toggle()));
+    connect(SCATRadioBtnShortcut, SIGNAL(activated()), ui->SCATRadioBtn, SLOT(toggle()));
+    connect(VATRadioBtnShortcut, SIGNAL(activated()), ui->VATRadioBtn, SLOT(toggle()));
+
+    connect(EATCheckBoxShortcut, SIGNAL(activated()), ui->EATCheckBox, SLOT(toggle()));
+    connect(IMATCheckBoxShortcut, SIGNAL(activated()), ui->IMATCheckBox, SLOT(toggle()));
+    connect(PAATCheckBoxShortcut, SIGNAL(activated()), ui->PAATCheckBox, SLOT(toggle()));
+    connect(PATCheckBoxShortcut, SIGNAL(activated()), ui->PATCheckBox, SLOT(toggle()));
+    connect(SCATCheckBoxShortcut, SIGNAL(activated()), ui->SCATCheckBox, SLOT(toggle()));
+    connect(VATCheckBoxShortcut, SIGNAL(activated()), ui->VATCheckBox, SLOT(toggle()));
+
     connect(upShortcut, SIGNAL(activated()), this, SLOT(upShortcut_triggered()));
     connect(downShortcut, SIGNAL(activated()), this, SLOT(downShortcut_triggered()));
     connect(leftShortcut, SIGNAL(activated()), this, SLOT(leftShortcut_triggered()));
@@ -72,8 +84,6 @@ bool viewAxialCoronalLoRes::loadImage(QString path)
 
     try
     {
-        qDebug() << "Loading image...";
-
         // Load NIFTI file
         QString fatUpperPath = QDir(path).filePath("fatUpper.nii");
         QString fatLowerPath = QDir(path).filePath("fatLower.nii");
@@ -108,8 +118,6 @@ bool viewAxialCoronalLoRes::loadImage(QString path)
         if (!fatUpperImage || !fatLowerImage || !waterUpperImage || !waterLowerImage)
             EXCEPTION("Unable to load NIFTI file", "An error occurred while loading one of the four NIFTI images.");
 
-        qDebug() << "Read all 4 NIFTI images";
-
         if (!fatImage->setImage(fatUpperImage, fatLowerImage))
             EXCEPTION("Unable to merge upper and lower image", "Unable to merge upper and lower fat images in NIFTImage class.");
 
@@ -119,9 +127,7 @@ bool viewAxialCoronalLoRes::loadImage(QString path)
         if (!fatImage->compatible(waterImage))
             EXCEPTION("Fat and water image are incompatible", "The fat and water image are incompatible in some way. Please check the NIFTI file format of the files and try again.");
 
-        qDebug() << "Setup fat/water images";
-
-        setWindowTitle(QCoreApplication::applicationName() + " - " + path);
+        parentMain()->setWindowTitle(QCoreApplication::applicationName() + " - " + path);
 
         // The settings box is disabled to prevent moving stuff before anything is loaded
         setEnableSettings(true);
@@ -169,12 +175,20 @@ void viewAxialCoronalLoRes::setEnableSettings(bool enable)
 {
     ui->settingsWidget->setEnabled(enable);
 
-    EATShortcut->setEnabled(enable);
-    IMATShortcut->setEnabled(enable);
-    PAATShortcut->setEnabled(enable);
-    PATShortcut->setEnabled(enable);
-    SCATShortcut->setEnabled(enable);
-    VATShortcut->setEnabled(enable);
+    EATRadioBtnShortcut->setEnabled(enable);
+    IMATRadioBtnShortcut->setEnabled(enable);
+    PAATRadioBtnShortcut->setEnabled(enable);
+    PATRadioBtnShortcut->setEnabled(enable);
+    SCATRadioBtnShortcut->setEnabled(enable);
+    VATRadioBtnShortcut->setEnabled(enable);
+
+    EATCheckBoxShortcut->setEnabled(enable);
+    IMATCheckBoxShortcut->setEnabled(enable);
+    PAATCheckBoxShortcut->setEnabled(enable);
+    PATCheckBoxShortcut->setEnabled(enable);
+    SCATCheckBoxShortcut->setEnabled(enable);
+    VATCheckBoxShortcut->setEnabled(enable);
+
     upShortcut->setEnabled(enable);
     downShortcut->setEnabled(enable);
     leftShortcut->setEnabled(enable);
@@ -499,8 +513,6 @@ void viewAxialCoronalLoRes::on_brightnessSlider_valueChanged(int value)
     if (value / 100.0f == ui->glWidgetAxial->getBrightness())
         return;
 
-    qDebug() << "Brightness triggered: " << value;
-
     // Add a BrightnessChangeCommand to change the brightness
     undoStack->push(new BrightnessChangeCommand(value / 100.0f, ui->glWidgetAxial, ui->brightnessSlider, ui->brightnessSpinBox));
 }
@@ -510,8 +522,6 @@ void viewAxialCoronalLoRes::on_brightnessSpinBox_valueChanged(int value)
     // If the new value is equal to the current value, then do nothing
     if (value / 100.0f == ui->glWidgetAxial->getBrightness())
         return;
-
-    qDebug() << "Brightness spin triggered: " << value;
 
     // Add a BrightnessChangeCommand to change the brightness
     undoStack->push(new BrightnessChangeCommand(value / 100.0f, ui->glWidgetAxial, ui->brightnessSlider, ui->brightnessSpinBox));
@@ -741,31 +751,37 @@ void viewAxialCoronalLoRes::on_VATRadioBtn_toggled(bool checked)
 
 void viewAxialCoronalLoRes::on_EATCheckBox_toggled(bool checked)
 {
+    parentMain()->ui->statusBar->showMessage(QObject::tr("%1 EAT tracing layer").arg(checked ? "Showing" : "Hiding"), 4000);
     undoStack->push(new TracingLayerVisibleChangeCommand(TracingLayer::EAT, checked, ui->glWidgetAxial, ui->EATCheckBox));
 }
 
 void viewAxialCoronalLoRes::on_IMATCheckBox_toggled(bool checked)
 {
+    parentMain()->ui->statusBar->showMessage(QObject::tr("%1 IMAT tracing layer").arg(checked ? "Showing" : "Hiding"), 4000);
     undoStack->push(new TracingLayerVisibleChangeCommand(TracingLayer::IMAT, checked, ui->glWidgetAxial, ui->IMATCheckBox));
 }
 
 void viewAxialCoronalLoRes::on_PAATCheckBox_toggled(bool checked)
 {
+    parentMain()->ui->statusBar->showMessage(QObject::tr("%1 PAAT tracing layer").arg(checked ? "Showing" : "Hiding"), 4000);
     undoStack->push(new TracingLayerVisibleChangeCommand(TracingLayer::PAAT, checked, ui->glWidgetAxial, ui->PAATCheckBox));
 }
 
 void viewAxialCoronalLoRes::on_PATCheckBox_toggled(bool checked)
 {
+    parentMain()->ui->statusBar->showMessage(QObject::tr("%1 PAT tracing layer").arg(checked ? "Showing" : "Hiding"), 4000);
     undoStack->push(new TracingLayerVisibleChangeCommand(TracingLayer::PAT, checked, ui->glWidgetAxial, ui->PATCheckBox));
 }
 
 void viewAxialCoronalLoRes::on_SCATCheckBox_toggled(bool checked)
 {
+    parentMain()->ui->statusBar->showMessage(QObject::tr("%1 SCAT tracing layer").arg(checked ? "Showing" : "Hiding"), 4000);
     undoStack->push(new TracingLayerVisibleChangeCommand(TracingLayer::SCAT, checked, ui->glWidgetAxial, ui->SCATCheckBox));
 }
 
 void viewAxialCoronalLoRes::on_VATCheckBox_toggled(bool checked)
 {
+    parentMain()->ui->statusBar->showMessage(QObject::tr("%1 VAT tracing layer").arg(checked ? "Showing" : "Hiding"), 4000);
     undoStack->push(new TracingLayerVisibleChangeCommand(TracingLayer::VAT, checked, ui->glWidgetAxial, ui->VATCheckBox));
 }
 
@@ -781,6 +797,9 @@ void viewAxialCoronalLoRes::undoStack_canRedoChanged(bool canRedo)
 
 viewAxialCoronalLoRes::~viewAxialCoronalLoRes()
 {
+    // Remove location status label from the parent main status bar
+    parentMain()->ui->statusBar->removeWidget(this->ui->lblStatusLocation);
+
     if (undoView)
         delete undoView;
 
@@ -789,12 +808,19 @@ viewAxialCoronalLoRes::~viewAxialCoronalLoRes()
     undoStack->blockSignals(true);
     delete undoStack;
 
-    delete EATShortcut;
-    delete IMATShortcut;
-    delete PAATShortcut;
-    delete PATShortcut;
-    delete SCATShortcut;
-    delete VATShortcut;
+    delete EATRadioBtnShortcut;
+    delete IMATRadioBtnShortcut;
+    delete PAATRadioBtnShortcut;
+    delete PATRadioBtnShortcut;
+    delete SCATRadioBtnShortcut;
+    delete VATRadioBtnShortcut;
+
+    delete EATCheckBoxShortcut;
+    delete IMATCheckBoxShortcut;
+    delete PAATCheckBoxShortcut;
+    delete PATCheckBoxShortcut;
+    delete SCATCheckBoxShortcut;
+    delete VATCheckBoxShortcut;
 
     delete upShortcut;
     delete downShortcut;

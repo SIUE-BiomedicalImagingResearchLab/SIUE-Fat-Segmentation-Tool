@@ -5,35 +5,43 @@
 
 MainWindow *w = NULL;
 Application *app = NULL;
+FILE *logFh = NULL;
 
 void messageLogger(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
-    // Open the stdout as a text stream and write the formatted log message
-    QTextStream out(stdout, QIODevice::WriteOnly);
-    out << qFormatLogMessage(type, context, msg) << endl;
+    QString formattedMsg = qFormatLogMessage(type, context, msg);
+
+    // Open the log file and write the formatted log message
+    QTextStream out(logFh, QIODevice::WriteOnly);
+    out << formattedMsg << endl;
     out.flush(); // Flush so that the changes are seen immediately
 
     switch (type)
     {
         case QtDebugMsg:
+            std::cout << formattedMsg.toStdString() << std::endl;
             break;
 
         case QtInfoMsg:
+            std::cout << formattedMsg.toStdString() << std::endl;
             break;
 
         // For warning, critical, and fatal errors, show a message box to the user
         // Note: Displaying a message box before the window is initialized causes it to crash
         case QtWarningMsg:
+            std::cerr << formattedMsg.toStdString() << std::endl;
             if (w)
                 QMessageBox::warning(w, QObject::tr("%1:%2").arg(context.function).arg(context.line), msg, QMessageBox::Ok);
             break;
 
         case QtCriticalMsg:
+            std::cerr << formattedMsg.toStdString() << std::endl;
             if (w)
                 QMessageBox::critical(w, QObject::tr("%1:%2").arg(context.function).arg(context.line), msg, QMessageBox::Ok);
             break;
 
         case QtFatalMsg:
+            std::cerr << formattedMsg.toStdString() << std::endl;
             if (w)
                 QMessageBox::critical(w, QObject::tr("%1:%2").arg(context.function).arg(context.line), msg, QMessageBox::Ok);
             abort();
@@ -46,12 +54,9 @@ int main(int argc, char *argv[])
 
     try
     {
-        // Note: This will send all output from stdout to the error.log file.
-        // This should be uncommented when deploying the application so that the user will be able to see errors.
-        // However, if compiling within Qt Creator, it is usually better to comment this out so the output will go to the
-        // Qt Creator box instead.
-        //if (!freopen("./error.log", "w", stdout))
-        //    qWarning() << "Unable to redirect stdout to ./error.log. Errors will not be logged in a text file";
+        // Open the log file that will record all information sent to the console
+        if (!(logFh = fopen("./error.log", "a")))
+            qWarning() << "Unable to open log file ./error.log. Errors will not be logged in a text file";
 
         qInstallMessageHandler(messageLogger);
         qSetMessagePattern("[%{time MM/dd/yyyy h:mm:ss}] [%{if-debug}Debug%{endif}%{if-info}Info%{endif}%{if-warning}Warn%{endif}%{if-critical}Crit%{endif}%{if-fatal}Fatal%{endif}] %{function}:%{line} - %{message}");
@@ -92,6 +97,9 @@ int main(int argc, char *argv[])
 
     if (app)
         delete app;
+
+    if (logFh)
+        fclose(logFh);
 
     return ret;
 }

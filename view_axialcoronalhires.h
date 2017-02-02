@@ -47,12 +47,19 @@ private:
     QUndoView *undoView;
     QUndoStack *undoStack;
 
-    QShortcut *EATShortcut;
-    QShortcut *IMATShortcut;
-    QShortcut *PAATShortcut;
-    QShortcut *PATShortcut;
-    QShortcut *SCATShortcut;
-    QShortcut *VATShortcut;
+    QShortcut *EATRadioBtnShortcut;
+    QShortcut *IMATRadioBtnShortcut;
+    QShortcut *PAATRadioBtnShortcut;
+    QShortcut *PATRadioBtnShortcut;
+    QShortcut *SCATRadioBtnShortcut;
+    QShortcut *VATRadioBtnShortcut;
+
+    QShortcut *EATCheckBoxShortcut;
+    QShortcut *IMATCheckBoxShortcut;
+    QShortcut *PAATCheckBoxShortcut;
+    QShortcut *PATCheckBoxShortcut;
+    QShortcut *SCATCheckBoxShortcut;
+    QShortcut *VATCheckBoxShortcut;
 
     QShortcut *upShortcut;
     QShortcut *downShortcut;
@@ -126,14 +133,12 @@ private slots:
 
     void on_resetViewBtn_clicked();
 
-    // Default to true so that the activated() signal in QShortcut
-    // can call this
-    void on_EATRadioBtn_toggled(bool checked = true);
-    void on_IMATRadioBtn_toggled(bool checked = true);
-    void on_PAATRadioBtn_toggled(bool checked = true);
-    void on_PATRadioBtn_toggled(bool checked = true);
-    void on_SCATRadioBtn_toggled(bool checked = true);
-    void on_VATRadioBtn_toggled(bool checked = true);
+    void on_EATRadioBtn_toggled(bool checked);
+    void on_IMATRadioBtn_toggled(bool checked);
+    void on_PAATRadioBtn_toggled(bool checked);
+    void on_PATRadioBtn_toggled(bool checked);
+    void on_SCATRadioBtn_toggled(bool checked);
+    void on_VATRadioBtn_toggled(bool checked);
 
     void on_EATCheckBox_toggled(bool checked);
     void on_IMATCheckBox_toggled(bool checked);

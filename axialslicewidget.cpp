@@ -556,7 +556,8 @@ void AxialSliceWidget::initializeGL()
     sliceProgram->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/shaders/axialslice.frag");
     sliceProgram->link();
     sliceProgram->bind();
-    qDebug() << "Slice Program Log: " << sliceProgram->log();
+    if (!sliceProgram->log().isEmpty())
+        qDebug() << "Slice Program Log: " << sliceProgram->log();
     glCheckError();
 
     sliceProgram->setUniformValue("tex", 0);
@@ -567,7 +568,8 @@ void AxialSliceWidget::initializeGL()
     traceProgram->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/shaders/fattraces.frag");
     traceProgram->link();
     traceProgram->bind();
-    qDebug() << "Trace Program Log: " << traceProgram->log();
+    if (!traceProgram->log().isEmpty())
+        qDebug() << "Trace Program Log: " << traceProgram->log();
     glCheckError();
 
     traceProgram->setUniformValue("tex", 0);

@@ -86,7 +86,7 @@
      <bool>false</bool>
     </property>
     <property name="title">
-     <string>Help</string>
+     <string>&amp;Help</string>
     </property>
     <property name="toolTipsVisible">
      <bool>true</bool>
@@ -98,7 +98,7 @@
      <number>4000</number>
     </property>
     <property name="title">
-     <string>View</string>
+     <string>&amp;View</string>
     </property>
     <property name="toolTipsVisible">
      <bool>true</bool>
@@ -175,23 +175,23 @@
   </action>
   <action name="actionSave">
    <property name="text">
-    <string>Save</string>
+    <string>&amp;Save Tracing Data</string>
    </property>
    <property name="toolTip">
-    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Save&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Performs same function as Save As but uses last saved directory as the saving point. &lt;/p&gt;&lt;p&gt;Each fat layer is saved in its own text file within that directory.&lt;/p&gt;&lt;p&gt;This does &lt;span style=&quot; font-weight:600; text-decoration: underline;&quot;&gt;NOT&lt;/span&gt; alter the NIFTI images in any way nor does it save them.&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Save Tracing Data&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Performs same function as Save As but uses last saved directory as the saving point. &lt;/p&gt;&lt;p&gt;Each fat layer is saved in its own text file within that directory.&lt;/p&gt;&lt;p&gt;This does &lt;span style=&quot; font-weight:600; text-decoration: underline;&quot;&gt;NOT&lt;/span&gt; alter the NIFTI images in any way nor does it save them.&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
    </property>
   </action>
   <action name="actionSaveAs">
    <property name="text">
-    <string>Save As</string>
+    <string>Save Tracing Data &amp;As</string>
    </property>
    <property name="toolTip">
-    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Save As&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Saves the &lt;span style=&quot; text-decoration: underline;&quot;&gt;tracing results&lt;/span&gt; the user has drawn onto the NIFTI image. User will select a directory to save tracing results. Each fat layer is saved in its own text file within that directory.&lt;/p&gt;&lt;p&gt;This does &lt;span style=&quot; font-weight:600; text-decoration: underline;&quot;&gt;NOT&lt;/span&gt; alter the NIFTI images in any way nor does it save them.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Save Tracing Data As&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Saves the &lt;span style=&quot; text-decoration: underline;&quot;&gt;tracing results&lt;/span&gt; the user has drawn onto the NIFTI image. User will select a directory to save tracing results. Each fat layer is saved in its own text file within that directory.&lt;/p&gt;&lt;p&gt;This does &lt;span style=&quot; font-weight:600; text-decoration: underline;&quot;&gt;NOT&lt;/span&gt; alter the NIFTI images in any way nor does it save them.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
    </property>
   </action>
   <action name="actionImportTracingData">
    <property name="text">
-    <string>Import Tracing Data</string>
+    <string>&amp;Import Tracing Data</string>
    </property>
    <property name="toolTip">
     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Import Tracing Data&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Loads previously drawn tracing data into the viewer to be displayed, altered, and saved. &lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Note:&lt;/span&gt; The appropiate NIFTI image must already be loaded before the tracing data is loaded.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -210,7 +210,13 @@
   </action>
   <action name="actionAbout">
    <property name="text">
+    <string>&amp;About</string>
+   </property>
+   <property name="iconText">
     <string>About</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+A</string>
    </property>
   </action>
   <action name="actionAxialCoronalHiRes">
