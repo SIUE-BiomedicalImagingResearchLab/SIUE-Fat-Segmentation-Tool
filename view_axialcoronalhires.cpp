@@ -7,10 +7,10 @@
 #include "ui_mainwindow.h"
 #include "mainwindow.h"
 
-viewAxialCoronalHiRes::viewAxialCoronalHiRes(QWidget *parent, NIFTImage *fatImage, NIFTImage *waterImage, SubjectConfig *subConfig) :
+viewAxialCoronalHiRes::viewAxialCoronalHiRes(QWidget *parent, NIFTImage *fatImage, NIFTImage *waterImage, SubjectConfig *subConfig, TracingData *tracingData) :
     QWidget(parent),
     ui(new Ui::viewAxialCoronalHiRes),
-    fatImage(fatImage), waterImage(waterImage), subConfig(subConfig),
+    fatImage(fatImage), waterImage(waterImage), subConfig(subConfig), tracingData(tracingData),
     undoView(NULL), undoStack(new QUndoStack(this)),
     EATShortcut(new QShortcut(QKeySequence("1"), this)), IMATShortcut(new QShortcut(QKeySequence("2"), this)), PAATShortcut(new QShortcut(QKeySequence("3"), this)),
     PATShortcut(new QShortcut(QKeySequence("4"), this)), SCATShortcut(new QShortcut(QKeySequence("5"), this)), VATShortcut(new QShortcut(QKeySequence("6"), this)),
@@ -28,6 +28,9 @@ viewAxialCoronalHiRes::viewAxialCoronalHiRes(QWidget *parent, NIFTImage *fatImag
     connect(undoStack, SIGNAL(canRedoChanged(bool)), this, SLOT(undoStack_canRedoChanged(bool)));
     this->ui->glWidgetAxial->setUndoStack(undoStack);
     this->ui->glWidgetCoronal->setUndoStack(undoStack);
+
+    this->ui->glWidgetAxial->setup(fatImage, waterImage, tracingData);
+    this->ui->glWidgetCoronal->setup(fatImage, waterImage);
 
     this->parentMain()->ui->statusBar->addPermanentWidget(this->ui->lblStatusLocation);
     this->ui->glWidgetAxial->setLocationLabel(this->ui->lblStatusLocation);
@@ -129,12 +132,18 @@ bool viewAxialCoronalHiRes::loadImage(QString path)
 
         // The default slice that it will go to is half of the zDim
         QVector4D defaultLocation = QVector4D(Location::NoChange, floor(fatImage->getYDim() / 2), floor(fatImage->getZDim() / 2), Location::NoChange);
-        // In the OpenGL widget, set the images and default location
-        ui->glWidgetAxial->setImages(fatImage, waterImage);
-        ui->glWidgetAxial->setLocation(defaultLocation);
 
-        ui->glWidgetCoronal->setImages(fatImage, waterImage);
+        // In the OpenGL widget, set the default location
+        ui->glWidgetAxial->setLocation(defaultLocation);
         ui->glWidgetCoronal->setLocation(defaultLocation);
+
+        // Initialize the tracing data to be the same size as the image and all zeros (no traces)
+        // Also initialize each layer of time to be the same size as Z dim (one for each slice)
+        for (auto &layer : tracingData->layers)
+        {
+            layer.data = cv::Mat({fatImage->getZDim(), fatImage->getYDim(), fatImage->getXDim()}, CV_8UC1, cv::Scalar(0));
+            layer.time.resize(fatImage->getZDim());
+        }
 
         // Setup the default controls in the GUI
         setupDefaults();
@@ -771,9 +780,6 @@ void viewAxialCoronalHiRes::undoStack_canRedoChanged(bool canRedo)
 
 viewAxialCoronalHiRes::~viewAxialCoronalHiRes()
 {
-    delete fatImage;
-    delete waterImage;
-
     if (undoView)
         delete undoView;
 

@@ -74,14 +74,4 @@ QPoint lerp(QPoint start, QPoint end, float percent)
     return lerp(start_, end_, percent).toPoint();
 }
 
-void glCheckError()
-{
-    // If there was an error, then say something
-    // Only print the information as debug because it may be continuously called
-    // and it does get annoying to have many popup messages
-    GLenum err;
-    if ((err = glGetError()) != GL_NO_ERROR)
-        qDebug() << "Unable to perform OpenGL action: " << err;
-}
-
 }

@@ -28,7 +28,15 @@
 #include "niftimage.h"
 #include "vertex.h"
 #include "commands.h"
+#include "tracing.h"
 #include "displayinfo.h"
+
+struct FatLayer
+{
+    cv::Mat points;
+    std::vector<QTime> drawingTime;
+};
+
 
 struct FatLayerSlice
 {
@@ -47,18 +55,28 @@ private:
 
     NIFTImage *fatImage;
     NIFTImage *waterImage;
+    TracingData *tracingData;
 
     std::array<QColor, (size_t)TracingLayer::Count> tracingLayerColors;
-    std::vector<std::array<FatLayerSlice, (size_t)TracingLayer::Count>> layerSlices;
     TracingPointsAddCommand *mouseCommand;
 
-    QOpenGLShaderProgram *program;
+    // Each bit represents whether the specified item in Dirty enum needs to be updated on drawing
+    int dirty;
+
+    QOpenGLShaderProgram *sliceProgram;
     GLuint sliceVertexBuf, sliceIndexBuf;
     GLuint sliceVertexObject;
     GLuint slicePrimTexture;
     GLuint sliceSecdTexture;
     QVector<VertexPT> sliceVertices;
     QVector<unsigned short> sliceIndices;
+
+    QOpenGLShaderProgram *traceProgram;
+    GLuint traceVertexBuf, traceIndexBuf;
+    GLuint traceVertexObject;
+    GLuint traceTextures[(int)TracingLayer::Count];
+    QVector<VertexPT> traceVertices;
+    QVector<unsigned short> traceIndices;
 
     QPoint lineStart, lineEnd;
     int lineWidth;
@@ -110,7 +128,7 @@ public:
     QLabel *getLocationLabel() const;
     void setLocationLabel(QLabel *label);
 
-    void setImages(NIFTImage *fat, NIFTImage *water);
+    void setup(NIFTImage *fat, NIFTImage *water, TracingData *tracing);
     bool isLoaded() const;
 
     SliceDisplayType getDisplayType() const;
@@ -140,12 +158,7 @@ public:
     bool getTracingLayerVisible(TracingLayer layer) const;
     void setTracingLayerVisible(TracingLayer layer, bool value);
 
-    /* Note: This will retrieve a vector of FatLayerSlice for various configurations. The default values:
-     * slice defaulting to Location::NoChange will select the axial slice of the current location (location.z())
-     * layer defaulting to TracingLayer::Count will set the layer to the currently selected layer
-     */
-    std::array<FatLayerSlice, (size_t)TracingLayer::Count> &getFatLayers(int slice = (int)Location::NoChange);
-    FatLayerSlice &getFatLayerSlice(int slice = (int)Location::NoChange, TracingLayer layer = TracingLayer::Count);
+    TracingLayerData &getTraceSlices(TracingLayer layer = TracingLayer::Count);
 
     void resetView();
 
@@ -163,8 +176,12 @@ public:
 
     void setUndoStack(QUndoStack *stack);
 
+    void setDirty(Dirty bit);
+
     void updateTexture();
     void updateCrosshairLine();
+    void updateTraces(bool allOrCurrent);
+    void updateTrace(TracingLayer layer);
 
 protected:
     void initializeGL();
@@ -172,6 +189,7 @@ protected:
     void paintGL();
 
     void initializeSliceView();
+    void initializeTracing();
     void initializeCrosshairLine();
     void initializeColorMaps();
 

@@ -4,7 +4,7 @@
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
-    fatImage(new NIFTImage()), waterImage(new NIFTImage()), subConfig(new SubjectConfig())
+    fatImage(new NIFTImage()), waterImage(new NIFTImage()), subConfig(new SubjectConfig()), tracingData(new TracingData())
 {  
     this->fatImage->setSubjectConfig(subConfig);
     this->waterImage->setSubjectConfig(subConfig);
@@ -21,7 +21,7 @@ MainWindow::MainWindow(QWidget *parent) :
             bool prev = this->ui->actionAxialCoronalLoRes->blockSignals(true);
             this->ui->actionAxialCoronalLoRes->setChecked(true);
             this->ui->actionAxialCoronalLoRes->blockSignals(prev);
-            this->setCentralWidget(new viewAxialCoronalLoRes(this, fatImage, waterImage, subConfig));
+            this->setCentralWidget(new viewAxialCoronalLoRes(this, fatImage, waterImage, subConfig, tracingData));
         }
         break;
 
@@ -30,7 +30,7 @@ MainWindow::MainWindow(QWidget *parent) :
             bool prev = this->ui->actionAxialCoronalHiRes->blockSignals(true);
             this->ui->actionAxialCoronalHiRes->setChecked(true);
             this->ui->actionAxialCoronalHiRes->blockSignals(prev);
-            this->setCentralWidget(new viewAxialCoronalHiRes(this, fatImage, waterImage, subConfig));
+            this->setCentralWidget(new viewAxialCoronalHiRes(this, fatImage, waterImage, subConfig, tracingData));
          }
          break;
     }
@@ -152,6 +152,11 @@ MainWindow::~MainWindow()
 {
     // Save current window settings for next time
     writeSettings();
+
+    delete fatImage;
+    delete waterImage;
+    delete subConfig;
+    delete tracingData;
 
     delete ui;
 }

@@ -22,5 +22,7 @@
         <file>colormaps/greenWhite.png</file>
         <file>colormaps/red.png</file>
         <file>colormaps/redWhite.png</file>
+        <file>shaders/fattraces.frag</file>
+        <file>shaders/fattraces.vert</file>
     </qresource>
 </RCC>

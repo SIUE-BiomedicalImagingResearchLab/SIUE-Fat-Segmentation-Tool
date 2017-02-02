@@ -49,7 +49,8 @@ HEADERS  += mainwindow.h \
     displayinfo.h \
     numerictype.h \
     view_axialcoronalhires.h \
-    view_axialcoronallores.h
+    view_axialcoronallores.h \
+    tracing.h
 
 FORMS    += mainwindow.ui \
     view_axialcoronalhires.ui \

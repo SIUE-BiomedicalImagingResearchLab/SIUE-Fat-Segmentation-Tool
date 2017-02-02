@@ -22,6 +22,7 @@
 #include "util.h"
 #include "exception.h"
 #include "subjectconfig.h"
+#include "tracing.h"
 
 #include "view_axialcoronallores.h"
 #include "view_axialcoronalhires.h"
@@ -43,6 +44,7 @@ protected:
     NIFTImage *fatImage;
     NIFTImage *waterImage;
     SubjectConfig *subConfig;
+    TracingData *tracingData;
 
     QString saveTracingResultsPath;
 

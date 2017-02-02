@@ -8,6 +8,8 @@ namespace opencv
 
 void flip(cv::InputArray src, cv::OutputArray dst, int flip_mode);
 
+void findNonZero(cv::InputArray _src, cv::OutputArray _idx);
+
 }
 
 #endif // OPENCV_H

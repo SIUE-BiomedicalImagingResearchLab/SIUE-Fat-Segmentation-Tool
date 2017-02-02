@@ -2,7 +2,7 @@
 #include "commands.h"
 
 AxialSliceWidget::AxialSliceWidget(QWidget *parent) : QOpenGLWidget(parent),
-    displayType(SliceDisplayType::FatOnly), fatImage(NULL), waterImage(NULL),
+    displayType(SliceDisplayType::FatOnly), fatImage(NULL), waterImage(NULL), tracingData(NULL),
     tracingLayerColors({ Qt::blue, Qt::darkCyan, Qt::cyan, Qt::magenta, Qt::yellow, Qt::green }), mouseCommand(NULL),
     slicePrimTexture(NULL), sliceSecdTexture(NULL),
     location(0, 0, 0, 0), locationLabel(NULL), primColorMap(ColorMap::Gray), primOpacity(1.0f), secdColorMap(ColorMap::Gray), secdOpacity(1.0f),
@@ -12,27 +12,28 @@ AxialSliceWidget::AxialSliceWidget(QWidget *parent) : QOpenGLWidget(parent),
     this->tracingLayerVisible.fill(true);
 }
 
-void AxialSliceWidget::setImages(NIFTImage *fat, NIFTImage *water)
+void AxialSliceWidget::setup(NIFTImage *fat, NIFTImage *water, TracingData *tracing)
 {
-    if (!fat || !water)
+    if (!fat || !water || !tracing)
+    {
+        qDebug() << "Invalid fat image, water image or tracing data in setup: " << fat << water << tracing;
         return;
+    }
 
     qInfo() << "Setting axial images....";
 
     fatImage = fat;
     waterImage = water;
+    tracingData = tracing;
 
     location = QVector4D(0, 0, 0, 0);
-
-    // Resize layerSlices vector to accomodate layers and axial slices
-    this->layerSlices.resize(fatImage->getZDim());
 
     qInfo() << "Axial images set...everything ok";
 }
 
 bool AxialSliceWidget::isLoaded() const
 {
-    return (fatImage && waterImage);
+    return (fatImage->isLoaded() && waterImage->isLoaded());
 }
 
 void AxialSliceWidget::setLocation(QVector4D location)
@@ -48,15 +49,17 @@ void AxialSliceWidget::setLocation(QVector4D location)
 
     // If Y value changed, then update the crosshair line
     if (delta.y())
-        updateCrosshairLine();
+        dirty |= (int)Dirty::Crosshair;
 
     // If Z value changed, then update the texture
     if (delta.z())
-        updateTexture();
+        dirty |= ((int)Dirty::Slice | (int)Dirty::TracesAll);
 
     // Update location label
     if (locationLabel)
         locationLabel->setText(QObject::tr("Location: (%1, %2, %3)").arg(this->location.x()).arg(this->location.y()).arg(this->location.z()));
+
+    update();
 }
 
 QVector4D AxialSliceWidget::getLocation() const
@@ -100,7 +103,8 @@ void AxialSliceWidget::setDisplayType(SliceDisplayType type)
     displayType = type;
 
     // This will recreate the texture because the display type has changed
-    updateTexture();
+    dirty |= (int)Dirty::Slice;
+    update();
 }
 
 ColorMap AxialSliceWidget::getPrimColorMap() const
@@ -262,38 +266,12 @@ void AxialSliceWidget::setTracingLayerVisible(TracingLayer layer, bool value)
     tracingLayerVisible[(int)layer] = value;
 }
 
-std::array<FatLayerSlice, (size_t)TracingLayer::Count> &AxialSliceWidget::getFatLayers(int slice)
+TracingLayerData &AxialSliceWidget::getTraceSlices(TracingLayer layer)
 {
-    if (slice == Location::NoChange)
-        slice = location.z();
-    else if (slice < 0 || slice >= fatImage->getZDim())
-    {
-        qWarning() << "Invalid slice given for getFatLayers in AxialSliceWidget: " << slice;
-        slice = 0; // Since a reference is returned, just set a dummy slice
-    }
-
-    return layerSlices[slice];
-}
-
-FatLayerSlice &AxialSliceWidget::getFatLayerSlice(int slice, TracingLayer layer)
-{
-    if (slice == Location::NoChange)
-        slice = location.z();
-    else if (slice < 0 || slice >= fatImage->getZDim())
-    {
-        qWarning() << "Invalid slice given for getFatLayerSlice in AxialSliceWidget: " << slice;
-        slice = 0; // Since a reference is returned, just set a dummy slice
-    }
-
     if (layer == TracingLayer::Count)
         layer = tracingLayer;
-    else if (layer < TracingLayer::EAT || layer > TracingLayer::Count)
-    {
-        qWarning() << "Invalid tracing layer given for getFatLayerSlice in AxialSliceWidget: " << (int)layer;
-        layer = TracingLayer::EAT; // Since a reference is returned, just set a dummy layer
-    }
 
-    return layerSlices[slice][(int)layer];
+    return tracingData->layers[(int)layer];
 }
 
 float &AxialSliceWidget::rscaling()
@@ -322,7 +300,8 @@ bool AxialSliceWidget::saveTracingData(QString path, bool promptOnOverwrite)
             if (QFileInfo(fullPath).exists())
             {
                 // Not a fan of the prompt option
-                if (!QMessageBox::warning((QWidget *)parent(), "Confirm Save As", "Tracing data already exists in folder.\nDo you want to replace it?", QMessageBox::Yes, QMessageBox::No))
+                if (QMessageBox::warning((QWidget *)parent(), "Confirm Save As", "Tracing data already exists in folder.\nDo you want to replace it?", QMessageBox::Yes, QMessageBox::No)
+                        != QMessageBox::Yes)
                     return false;
                 break;
             }
@@ -344,15 +323,28 @@ bool AxialSliceWidget::saveTracingData(QString path, bool promptOnOverwrite)
         const int zDim = fatImage->getZDim();
         for (int z = 0; z < zDim; ++z)
         {
-            auto &layerSlice = getFatLayerSlice(z, (TracingLayer)i);
+            auto &layer = this->getTraceSlices((TracingLayer)i);
+            cv::Mat slice = layer.data({cv::Range(z, z + 1), cv::Range::all(), cv::Range::all()});
+
+            cv::Mat points;
+            opencv::findNonZero(slice, points);
+
+            // TODO: Sort points by index to make it more readable
+            //cv::sortIdx(points, points, );
 
             stream << "#" << z << endl;
-            stream << layerSlice.points.size() << endl;
+            stream << points.total() << endl;
 
-            for (QPointF point : layerSlice.points)
-                stream << forcepoint << point.x() << " " << point.y() << " " << (float)z << endl;
+            for (int i = 0; i < points.total(); ++i)
+            {
+                const cv::Vec3i point = points.at<cv::Vec3i>(i);
+                stream << forcepoint << (float)point[2] << " " << (float)point[1] << " " << (float)z << endl;
+            }
         }
     }
+
+    // Set stack to clean to notify the application that no unsaved changes are present
+    undoStack->setClean();
 
     return true;
 }
@@ -364,6 +356,25 @@ bool AxialSliceWidget::loadTracingData(QString path)
     {
         qWarning() << "Tracing data cannot be imported into an application until the correct NIFTI image is loaded first.\nPlease load the correct NIFTI file and then try again.";
         return false;
+    }
+
+    bool hasData = false;
+    for (auto &layer : this->tracingData->layers)
+    {
+        if (cv::countNonZero(layer.data) > 0)
+        {
+            hasData = true;
+            break;
+        }
+    }
+
+    // If there is data in the fat layers and the stack is not clean, then prompt user if they are sure they want to import tracing data
+    // NOTE: This has the flaw that even simple settings such as changing color map and stuff will make the stack not clean.
+    if (hasData && !undoStack->isClean())
+    {
+        if (QMessageBox::warning((QWidget *)parent(), "Confirm Import", "Unsaved tracing data is present in this image.\nAre you sure you want to load this new tracing data and discard current changes?", QMessageBox::Yes, QMessageBox::No)
+                != QMessageBox::Yes)
+            return false;
     }
 
     const QString layerFilename[(int)TracingLayer::Count] = {"EAT.txt", "IMAT.txt", "PAAT.txt", "PAT.txt", "SCAT.txt", "VAT.txt"};
@@ -415,10 +426,13 @@ bool AxialSliceWidget::loadTracingData(QString path)
             return false; // Note: Return false because the other layers should be mismatched as well
         }
 
+        auto &layer = this->getTraceSlices((TracingLayer)i);
+
+        // Discard previous data by setting everything to 0
+        layer.data.setTo(0);
+
         for (int z = 0; z < zDim; ++z)
         {
-            auto &layerSlice = getFatLayerSlice(z, (TracingLayer)i);
-
             // Skip the #Z where Z is the axial slice
             stream.skipWhiteSpace();
             stream.readLine();
@@ -427,18 +441,22 @@ bool AxialSliceWidget::loadTracingData(QString path)
             int numPoints = 0;
             stream >> numPoints;
 
-            // Clear the old points and reserve enough space for new points
-            layerSlice.points.clear();
-            layerSlice.points.reserve(numPoints);
-
             float x, y, z_;
             for (int ii = 0; ii < numPoints; ++ii)
             {
                 stream >> x >> y >> z_;
-                layerSlice.points.push_back(QPoint(x, y));
+                layer.data.at<unsigned char>(z, y, x) = 255;
             }
         }
     }
+
+    // Clear the undoStack so that all of the tracing commands are deleted from beforehand
+    // This may cause unwanted commands to be deleted but it is okay
+    undoStack->clear();
+
+    // Update all traces textures and update screen
+    dirty |= (int)Dirty::TracesAll;
+    update();
 
     return true;
 }
@@ -493,6 +511,11 @@ void AxialSliceWidget::setUndoStack(QUndoStack *stack)
     undoStack = stack;
 }
 
+void AxialSliceWidget::setDirty(Dirty bit)
+{
+    dirty |= (int)bit;
+}
+
 void AxialSliceWidget::resetView()
 {
     // Reset translation and scaling factors
@@ -500,7 +523,7 @@ void AxialSliceWidget::resetView()
     scaling = 1.0f;
 
     // Update the screen
-    updateCrosshairLine();
+    dirty |= (int)Dirty::Crosshair;
     update();
 }
 
@@ -516,17 +539,29 @@ void AxialSliceWidget::initializeGL()
     scaling = 1.0f;
     translation = QVector3D(0.0f, 0.0f, 0.0f);
 
-    program = new QOpenGLShaderProgram();
-    program->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/shaders/axialslice.vert");
-    program->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/shaders/axialslice.frag");
-    program->link();
-    program->bind();
-    util::glCheckError();
+    sliceProgram = new QOpenGLShaderProgram();
+    sliceProgram->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/shaders/axialslice.vert");
+    sliceProgram->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/shaders/axialslice.frag");
+    sliceProgram->link();
+    sliceProgram->bind();
+    qDebug() << "Slice Program Log: " << sliceProgram->log();
+    glCheckError();
 
-    program->setUniformValue("tex", 0);
-    program->setUniformValue("mappingTexture", 0);
+    sliceProgram->setUniformValue("tex", 0);
+    sliceProgram->setUniformValue("mappingTexture", 0);
+
+    traceProgram = new QOpenGLShaderProgram();
+    traceProgram->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/shaders/fattraces.vert");
+    traceProgram->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/shaders/fattraces.frag");
+    traceProgram->link();
+    traceProgram->bind();
+    qDebug() << "Trace Program Log: " << traceProgram->log();
+    glCheckError();
+
+    traceProgram->setUniformValue("tex", 0);
 
     initializeSliceView();
+    initializeTracing();
     initializeCrosshairLine();
     initializeColorMaps();
 }
@@ -559,13 +594,13 @@ void AxialSliceWidget::initializeSliceView()
     glGenBuffers(1, &sliceVertexBuf);
     glBindBuffer(GL_ARRAY_BUFFER, sliceVertexBuf);
     glBufferData(GL_ARRAY_BUFFER, sliceVertices.size() * sizeof(VertexPT), sliceVertices.constData(), GL_STATIC_DRAW);
-    util::glCheckError();
+    glCheckError();
 
     // Generate index buffer for the axial slice. The sliceIndices data is uploaded to the IBO
     glGenBuffers(1, &sliceIndexBuf);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, sliceIndexBuf);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sliceIndices.size() * sizeof(GLushort), sliceIndices.constData(), GL_STATIC_DRAW);
-    util::glCheckError();
+    glCheckError();
 
     // Generate VAO for the axial slice vertices uploaded. Location 0 is the position and location 1 is the texture position
     glGenVertexArrays(1, &sliceVertexObject);
@@ -574,12 +609,56 @@ void AxialSliceWidget::initializeSliceView()
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(0, VertexPT::PosTupleSize, GL_FLOAT, true, VertexPT::stride(), static_cast<const char *>(0) + VertexPT::posOffset());
     glVertexAttribPointer(1, VertexPT::TexPosTupleSize, GL_FLOAT, true, VertexPT::stride(), static_cast<const char *>(0) + VertexPT::texPosOffset());
-    util::glCheckError();
+    glCheckError();
 
     // Generate a blank texture for the axial slice
     glGenTextures(1, &this->slicePrimTexture);
     glGenTextures(1, &this->sliceSecdTexture);
-    util::glCheckError();
+    glCheckError();
+
+    // Release (unbind) all
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+}
+
+void AxialSliceWidget::initializeTracing()
+{
+    // Setup the trace vertices
+    traceVertices.clear();
+    traceVertices.append(VertexPT(QVector3D(-1.0f, -1.0f, 0.0f), QVector2D(0.0f, 0.0f)));
+    traceVertices.append(VertexPT(QVector3D(-1.0f, 1.0f, 0.0f), QVector2D(0.0f, 1.0f)));
+    traceVertices.append(VertexPT(QVector3D(1.0f, -1.0f, 0.0f), QVector2D(1.0f, 0.0f)));
+    traceVertices.append(VertexPT(QVector3D(1.0f, 1.0f, 0.0f), QVector2D(1.0f, 1.0f)));
+
+    // Setup the trace indices
+    traceIndices.clear();
+    traceIndices.append({ 0, 1, 2, 3});
+
+    // Generate vertex buffer for the axial slice. The sliceVertices data is uploaded to the VBO
+    glGenBuffers(1, &traceVertexBuf);
+    glBindBuffer(GL_ARRAY_BUFFER, traceVertexBuf);
+    glBufferData(GL_ARRAY_BUFFER, traceVertices.size() * sizeof(VertexPT), traceVertices.constData(), GL_STATIC_DRAW);
+    glCheckError();
+
+    // Generate index buffer for the axial slice. The sliceIndices data is uploaded to the IBO
+    glGenBuffers(1, &traceIndexBuf);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, traceIndexBuf);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, traceIndices.size() * sizeof(GLushort), traceIndices.constData(), GL_STATIC_DRAW);
+    glCheckError();
+
+    // Generate VAO for the axial slice vertices uploaded. Location 0 is the position and location 1 is the texture position
+    glGenVertexArrays(1, &traceVertexObject);
+    glBindVertexArray(traceVertexObject);
+    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(0, VertexPT::PosTupleSize, GL_FLOAT, true, VertexPT::stride(), static_cast<const char *>(0) + VertexPT::posOffset());
+    glVertexAttribPointer(1, VertexPT::TexPosTupleSize, GL_FLOAT, true, VertexPT::stride(), static_cast<const char *>(0) + VertexPT::texPosOffset());
+    glCheckError();
+
+    // Generate a blank texture for the axial slice
+    glGenTextures((int)TracingLayer::Count, &this->traceTextures[0]);
+    glCheckError();
 
     // Release (unbind) all
     glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -605,7 +684,7 @@ void AxialSliceWidget::initializeColorMaps()
 
     // Create textures for each of the color maps
     glGenTextures((GLsizei)ColorMap::Count, &this->colorMapTexture[0]);
-    util::glCheckError();
+    glCheckError();
 
     for (int i = 0; i < (int)ColorMap::Count; ++i)
     {
@@ -643,10 +722,10 @@ void AxialSliceWidget::initializeColorMaps()
         // This parameter will clamp points to [0.0, 1.0]. This means that anything above 1.0 will become 1.0
         // and anything below 0.0 will become 0.0
         glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-        util::glCheckError();
+        glCheckError();
 
         glTexImage1D(GL_TEXTURE_1D, 0, internalFormat, image.width(), 0, format, type, image.bits());
-        util::glCheckError();
+        glCheckError();
     }
 }
 
@@ -794,13 +873,13 @@ void AxialSliceWidget::updateTexture()
     // like GL_NEAREST would.
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    util::glCheckError();
+    glCheckError();
 
     // Get the OpenGL datatype of the matrix
     auto dataType = NumericType::OpenCV(primMatrix.type());
     // Upload the texture data from the matrix to the texture. The internal format is 32 bit floats with one channel for red
     glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, fatImage->getXDim(), fatImage->getYDim(), 0, dataType->openGLFormat, dataType->openGLType, primMatrix.data);
-    util::glCheckError();
+    glCheckError();
 
     // Repeat the process if the second matrix is available
     if (!secdMatrix.empty())
@@ -809,15 +888,15 @@ void AxialSliceWidget::updateTexture()
 
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        util::glCheckError();
+        glCheckError();
 
         dataType = NumericType::OpenCV(primMatrix.type());
 
         glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, fatImage->getXDim(), fatImage->getYDim(), 0, dataType->openGLFormat, dataType->openGLType, secdMatrix.data);
-        util::glCheckError();
+        glCheckError();
     }
 
-    update();
+    dirty &= ~(int)Dirty::Slice;
 }
 
 void AxialSliceWidget::updateCrosshairLine()
@@ -858,7 +937,43 @@ void AxialSliceWidget::updateCrosshairLine()
     lineStart = start.toPoint();
     lineEnd = end.toPoint();
 
-    update();
+    dirty &= ~(int)Dirty::Crosshair;
+}
+
+void AxialSliceWidget::updateTrace(TracingLayer layer)
+{
+    // Bind the texture and setup the parameters for it
+    glBindTexture(GL_TEXTURE_2D, traceTextures[(int)layer]);
+    // Set pixel parameters
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glCheckError();
+
+    // Grab current slice of the tracing data matrix at given layer
+    cv::Mat matrix = tracingData->layers[(int)layer].data({ cv::Range(location.z(), location.z() + 1), cv::Range::all(), cv::Range::all() });
+
+    // Get the OpenGL datatype of the matrix
+    auto dataType = NumericType::OpenCV(matrix.type());
+
+    // TODO: glTexImage2D destroys all buffer and allocates new. If the data is same as old size, glSubTexImage2D will be much faster
+    // Upload the texture data from the matrix to the texture. The internal format is an 8 bit char with one channel for red
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, fatImage->getXDim(), fatImage->getYDim(), 0, dataType->openGLFormat, dataType->openGLType, matrix.data);
+    glCheckError();
+}
+
+void AxialSliceWidget::updateTraces(bool allOrCurrent)
+{
+    if (allOrCurrent)
+    {
+        for (int i = 0; i < (int)TracingLayer::Count; ++i)
+            updateTrace((TracingLayer)i);
+        dirty &= ~((int)Dirty::TracesAll | (int)Dirty::Traces);
+    }
+    else
+    {
+        updateTrace(tracingLayer);
+        dirty &= ~(int)Dirty::Traces;
+    }
 }
 
 void AxialSliceWidget::resizeGL(int w, int h)
@@ -871,7 +986,8 @@ void AxialSliceWidget::resizeGL(int w, int h)
     if (!isLoaded())
         return;
 
-    updateCrosshairLine();
+    dirty |= (int)Dirty::Crosshair;
+    update();
 }
 
 void AxialSliceWidget::paintGL()
@@ -880,6 +996,20 @@ void AxialSliceWidget::paintGL()
     if (!isLoaded())
         return;
 
+    // Update relevant OpenGL objects if dirty
+    if (dirty & (int)Dirty::Slice)
+        updateTexture();
+
+    if (dirty & (int)Dirty::Crosshair)
+        updateCrosshairLine();
+
+    if (dirty & (int)Dirty::Traces)
+        updateTraces(false);
+
+    if (dirty & (int)Dirty::TracesAll)
+        updateTraces(true);
+
+    // After updating, begin rendering
     QPainter painter(this);
 
     // With painter, call beginNativePainting before doing any custom OpenGL commands
@@ -893,49 +1023,49 @@ void AxialSliceWidget::paintGL()
     glDisable(GL_DEPTH_TEST);
 
     glClear(GL_COLOR_BUFFER_BIT);
-    util::glCheckError();
+    glCheckError();
 
     // Calculate the ModelViewProjection (MVP) matrix to transform the location of the axial slices
     QMatrix4x4 mvpMatrix = getMVPMatrix();
 
-    program->bind();
-    program->setUniformValue("brightness", brightness);
-    program->setUniformValue("contrast", contrast);
-    program->setUniformValue("MVP", mvpMatrix);
-    util::glCheckError();
+    sliceProgram->bind();
+    sliceProgram->setUniformValue("brightness", brightness);
+    sliceProgram->setUniformValue("contrast", contrast);
+    sliceProgram->setUniformValue("MVP", mvpMatrix);
+    glCheckError();
 
-    program->setUniformValue("opacity", primOpacity);
-    util::glCheckError();
+    sliceProgram->setUniformValue("opacity", primOpacity);
+    glCheckError();
 
     // Bind the VAO, bind texture to GL_TEXTURE0, bind VBO, bind IBO
     glBindVertexArray(sliceVertexObject);
     glBindBuffer(GL_ARRAY_BUFFER, sliceVertexBuf);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, sliceIndexBuf);
-    util::glCheckError();
+    glCheckError();
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, slicePrimTexture);
     glBindTexture(GL_TEXTURE_1D, colorMapTexture[(int)primColorMap]);
-    util::glCheckError();
+    glCheckError();
 
     // Draw a triangle strip of 4 elements which is two triangles. The indices are unsigned shorts
     glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_SHORT, 0);
-    util::glCheckError();
+    glCheckError();
 
     if (displayType == SliceDisplayType::FatWater || displayType == SliceDisplayType::WaterFat)
     {
-        program->setUniformValue("opacity", secdOpacity);
-        util::glCheckError();
+        sliceProgram->setUniformValue("opacity", secdOpacity);
+        glCheckError();
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, sliceSecdTexture);
         glBindTexture(GL_TEXTURE_1D, colorMapTexture[(int)secdColorMap]);
-        util::glCheckError();
+        glCheckError();
 
         // Draw a triangle strip of 4 elements which is two triangles. The indices are unsigned shorts
         // Drawing again for the secondary image
         glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_SHORT, 0);
-        util::glCheckError();
+        glCheckError();
     }
 
     // Release (unbind) the binded objects in reverse order
@@ -946,7 +1076,7 @@ void AxialSliceWidget::paintGL()
     glBindTexture(GL_TEXTURE_1D, 0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-    program->release();
+    sliceProgram->release();
 
     painter.endNativePainting();
 
@@ -954,18 +1084,55 @@ void AxialSliceWidget::paintGL()
     painter.setPen(QPen(Qt::red, lineWidth, Qt::SolidLine, Qt::RoundCap));
     painter.drawLine(lineStart, lineEnd);
 
-    painter.setTransform(getWindowToNIFTIMatrix().inverted().toTransform());
+    // With painter, call beginNativePainting before doing any custom OpenGL commands
+    // This is called again because the crosshair line needs to be after the NIFT image but before the tracing
+    // This shows the user if they have placed a trace over the crosshair line
+    painter.beginNativePainting();
 
-    auto &layersSlice = layerSlices[location.z()];
+    // Sets up transparency for the tracing colors; NOTE: The tracing colors can be set to a transparent value
+    // if desired
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glDisable(GL_DEPTH_TEST);
+
+    traceProgram->bind();
+    traceProgram->setUniformValue("MVP", mvpMatrix);
+    glCheckError();
+
+    // Bind the VAO, bind texture to GL_TEXTURE0, bind VBO, bind IBO
+    glBindVertexArray(traceVertexObject);
+    glBindBuffer(GL_ARRAY_BUFFER, traceVertexBuf);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, traceIndexBuf);
+    glCheckError();
+
     for (int i = 0; i < (int)TracingLayer::Count; ++i)
     {
-        auto &layer = layersSlice[i];
-        if (tracingLayerVisible[i] && layer.points.size() > 0)
+        if (tracingLayerVisible[i])
         {
-            painter.setPen(QPen(tracingLayerColors[i], 1, Qt::SolidLine, Qt::SquareCap));
-            painter.drawPoints(layer.points.data(), (int)layer.points.size());
+            // Tell the shader program what color to use for this layer
+            traceProgram->setUniformValue("traceColor", tracingLayerColors[i]);
+
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, traceTextures[i]);
+            glCheckError();
+
+            // Draw a triangle strip of 4 elements which is two triangles. The indices are unsigned shorts
+            glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_SHORT, 0);
+            glCheckError();
         }
     }
+
+    // Release (unbind) the binded objects in reverse order
+    // This is a simple protocol to prevent anything happening to the objects outside of this function without
+    // explicitly binding the objects
+    glBindVertexArray(0);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glBindTexture(GL_TEXTURE_1D, 0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    traceProgram->release();
+
+    painter.endNativePainting();
 }
 
 void AxialSliceWidget::addPoint(QPointF mouseCoord)
@@ -974,9 +1141,6 @@ void AxialSliceWidget::addPoint(QPointF mouseCoord)
 
     if (QRect(0, 0, fatImage->getXDim(), fatImage->getYDim()).contains(NIFTICoord))
     {
-        auto &layerSlice = layerSlices[location.z()][(int)tracingLayer];
-        auto &layerPoints = layerSlice.points;
-
         // Mouse Command Created is a boolean variable to store whether a TracingPointsAddCommand
         // was added since the mouse has been clicked down. This is necessary because the user can
         // mouse down outside of the NIFTI image, move around, and end up outside the NIFTI image
@@ -984,54 +1148,13 @@ void AxialSliceWidget::addPoint(QPointF mouseCoord)
         // whenever the first point is to be added to the list.
         if (!mouseCommand)
         {
-            mouseCommand = new TracingPointsAddCommand((int)layerPoints.size(), this);
+            mouseCommand = new TracingPointsAddCommand(NIFTICoord, this);
             undoStack->push(mouseCommand);
         }
-
-        if ((layerPoints.size() - mouseCommand->getIndex()) > 0) // There must be existing points in the list
+        else
         {
-            // Perform linear interpolation between current point (NIFTICoord)
-            // and last point in layerPoints
-            const QPointF lastPoint = layerPoints.back();
-
-            // Dont add duplicate points
-            if (lastPoint == NIFTICoord)
-                return;
-
-            // The length approximates how many units are between the two points
-            // Therefore, 1/length should be the approximate step value in percent
-            // to get all of the points between currentPoint and lastPoint
-            const float steps = 1 / QVector2D(NIFTICoord - lastPoint).length();
-            float percent = 0.0f;
-
-            while (percent < 1.0f)
-            {
-                QPoint interPoint = util::lerp(lastPoint, NIFTICoord, percent).toPoint();
-
-                // Skip if the previous point equals this point
-                // This will occur when rounding errors happen and return the same point
-                if (interPoint != layerPoints.back())
-                    layerPoints.push_back(interPoint);
-
-                percent += steps;
-            }
+            mouseCommand->addPoint(NIFTICoord);
         }
-
-        layerPoints.push_back(NIFTICoord);
-
-        const int smoothPoints = std::min(2, (int)layerPoints.size() - mouseCommand->getIndex());
-        if (smoothPoints > 2)
-        {
-            const float a = 0.25f;
-            const size_t stopLayerPoints = layerPoints.size() - 1 - smoothPoints;
-            for (size_t i = layerPoints.size() - 2; i > stopLayerPoints; i--)
-            {
-                const QPointF pEnd = layerPoints[i] * a + layerPoints[i+1] * (1 - a);
-                layerPoints[i] = pEnd.toPoint();
-            }
-        }
-
-        update();
     }
 }
 
@@ -1042,8 +1165,7 @@ void AxialSliceWidget::mouseMoveEvent(QMouseEvent *eventMove)
 
     if (startDraw)
     {
-        QPointF mouseCoord = eventMove->pos();
-        addPoint(mouseCoord);
+        addPoint(eventMove->pos());
     }
     else if (startPan)
     {
@@ -1091,7 +1213,7 @@ void AxialSliceWidget::mousePressEvent(QMouseEvent *eventPress)
             startPan = false;
 
         startDraw = true;
-        drawTimer.start();
+        //drawTimer.start();
         addPoint(eventPress->pos());
     }
     else if (eventPress->button() == Qt::MiddleButton)
@@ -1122,8 +1244,8 @@ void AxialSliceWidget::mouseReleaseEvent(QMouseEvent *eventRelease)
     if (eventRelease->button() == Qt::LeftButton && startDraw)
     {
         addPoint(eventRelease->pos());
-        auto elapsed = drawTimer.elapsed();
-        layerSlices[location.z()][(int)tracingLayer].drawingTime.addMSecs(elapsed);
+        //auto elapsed = drawTimer.elapsed();
+        //layerSlices[location.z()][(int)tracingLayer].drawingTime.addMSecs(elapsed);
         startDraw = false;
         mouseCommand = NULL;
     }
@@ -1161,6 +1283,11 @@ AxialSliceWidget::~AxialSliceWidget()
     glDeleteBuffers(1, &sliceIndexBuf);
     glDeleteTextures(1, &slicePrimTexture);
     glDeleteTextures(1, &sliceSecdTexture);
+    glDeleteVertexArrays(1, &traceVertexObject);
+    glDeleteBuffers(1, &traceVertexBuf);
+    glDeleteBuffers(1, &traceIndexBuf);
+    glDeleteTextures((int)TracingLayer::Count, &traceTextures[0]);
     glDeleteTextures((int)ColorMap::Count, &colorMapTexture[0]);
-    delete program;
+    delete sliceProgram;
+    delete traceProgram;
 }

@@ -283,17 +283,16 @@ public:
 class TracingPointsAddCommand : public QUndoCommand
 {
 private:
-    int index;
-    std::vector<QPointF> points;
+    std::vector<QPoint> points;
     AxialSliceWidget *widget;
 
 public:
-    TracingPointsAddCommand(int index, AxialSliceWidget *widget, QUndoCommand *parent = NULL);
+    TracingPointsAddCommand(QPoint point, AxialSliceWidget *widget, QUndoCommand *parent = NULL);
 
     void undo() override;
     void redo() override;
 
-    int getIndex() const;
+    void addPoint(QPoint newPoint);
 };
 
 #endif // COMMANDS_H

@@ -21,6 +21,7 @@
 #include "displayinfo.h"
 #include "niftimage.h"
 #include "util.h"
+#include "tracing.h"
 #include "exception.h"
 #include "subjectconfig.h"
 
@@ -41,6 +42,7 @@ private:
     NIFTImage *fatImage;
     NIFTImage *waterImage;
     SubjectConfig *subConfig;
+    TracingData *tracingData;
 
     QUndoView *undoView;
     QUndoStack *undoStack;
@@ -58,7 +60,7 @@ private:
     QShortcut *rightShortcut;
 
 public:
-    explicit viewAxialCoronalHiRes(QWidget *parent, NIFTImage *fatImage, NIFTImage *waterImage, SubjectConfig *subConfig);
+    explicit viewAxialCoronalHiRes(QWidget *parent, NIFTImage *fatImage, NIFTImage *waterImage, SubjectConfig *subConfig, TracingData *tracingData);
     ~viewAxialCoronalHiRes();
 
     MainWindow *parentMain();

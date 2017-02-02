@@ -8,7 +8,7 @@ CoronalSliceWidget::CoronalSliceWidget(QWidget *parent) : QOpenGLWidget(parent),
 
 }
 
-void CoronalSliceWidget::setImages(NIFTImage *fat, NIFTImage *water)
+void CoronalSliceWidget::setup(NIFTImage *fat, NIFTImage *water)
 {
     if (!fat || !water)
         return;
@@ -21,7 +21,7 @@ void CoronalSliceWidget::setImages(NIFTImage *fat, NIFTImage *water)
 
 bool CoronalSliceWidget::isLoaded() const
 {
-    return (fatImage && waterImage);
+    return (fatImage->isLoaded() && waterImage->isLoaded());
 }
 
 void CoronalSliceWidget::setLocation(QVector4D location)

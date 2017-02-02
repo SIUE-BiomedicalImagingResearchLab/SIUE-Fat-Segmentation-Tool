@@ -326,6 +326,9 @@ void LocationChangeCommand::redo()
         saggitalSpinBox->setValue(newLocation.x());
         saggitalSpinBox->blockSignals(prev);
     }
+
+    //if (delta.isNull())
+    //    setObsolete(true);
 }
 
 bool LocationChangeCommand::mergeWith(const QUndoCommand *command)
@@ -780,9 +783,11 @@ void TracingLayerVisibleChangeCommand::redo()
 
 // TracingPointsAddCommand
 // --------------------------------------------------------------------------------------------------------------------
-TracingPointsAddCommand::TracingPointsAddCommand(int index, AxialSliceWidget *widget, QUndoCommand *parent) : QUndoCommand(parent),
-    index(index), widget(widget)
+TracingPointsAddCommand::TracingPointsAddCommand(QPoint point, AxialSliceWidget *widget, QUndoCommand *parent) : QUndoCommand(parent),
+    widget(widget)
 {
+    this->points.push_back(point);
+
     // Get a text string based on the layer that points are being added too (current layer)
     QString str;
     switch (widget->getTracingLayer())
@@ -801,44 +806,75 @@ TracingPointsAddCommand::TracingPointsAddCommand(int index, AxialSliceWidget *wi
 
 void TracingPointsAddCommand::undo()
 {
-    // Get a vector of the points contained in the current layer and axial slice
-    auto &layerPoints = widget->getFatLayerSlice().points;
+    auto z = widget->getLocation().z();
 
-    // If the number of points is below the index number, then something is wrong
-    // because there are no points to copy
-    if (layerPoints.size() <= index)
-    {
-        qWarning() << "Number of points contained in layerPoints is less than index. Layer points size: " << layerPoints.size() << " Index: " << index;
-        return;
-    }
+    for (QPoint point : points)
+        widget->getTraceSlices().data.at<unsigned char>(z, point.y(), point.x()) = 0;
 
-    // Store points start from index to end of vector. Then erase the points from layerPoints.
-    // Note: This is taken as a reference, so this will actually erase the data in AxialSliceWidget points variable
-    points.assign(layerPoints.begin() + index, layerPoints.end());
-    layerPoints.erase(layerPoints.begin() + index, layerPoints.end());
-
-    // Tell AxialSliceWidget to redraw the scene since points were removed
+    widget->setDirty(Dirty::Traces);
     widget->update();
 }
 
 void TracingPointsAddCommand::redo()
 {
-    // Get a vector of the points contained in the current layer and axial slice
-    auto &layerPoints = widget->getFatLayerSlice().points;
+    auto z = widget->getLocation().z();
 
-    // If there are no points to restore, do nothing. Presumably, this is the first
-    // call of redo() when inserting on stack.
-    if (points.size() == 0)
-        return;
+    for (QPoint point : points)
+        widget->getTraceSlices().data.at<unsigned char>(z, point.y(), point.x()) = 255;
 
-    layerPoints.insert(layerPoints.end(), points.begin(), points.end());
-    points.clear();
-
-    // Tell AxialSliceWidget to redraw the scene since points were added
+    widget->setDirty(Dirty::Traces);
     widget->update();
 }
 
-int TracingPointsAddCommand::getIndex() const
+void TracingPointsAddCommand::addPoint(QPoint newPoint)
 {
-    return index;
+    auto &pointVal = widget->getTraceSlices().data.at<unsigned char>(widget->getLocation().z(), newPoint.y(), newPoint.x());
+
+    // If the point is already set, then dont set it again
+    if (pointVal == 255)
+        return;
+
+    if (points.size() > 0) // There must be existing points in the list
+    {
+        // Perform linear interpolation between current point (newPoint)
+        // and last point in points
+        const QPointF newPointF = newPoint;
+        const QPointF lastPoint = points.back();
+
+        // Dont add duplicate points
+        if (lastPoint == newPointF)
+            return;
+
+        // The length approximates how many units are between the two points
+        // Therefore, 1/length should be the approximate step value in percent
+        // to get all of the points between currentPoint and lastPoint
+        const float steps = 1 / QVector2D(newPointF - lastPoint).length();
+        float percent = 0.0f;
+
+        while (percent < 1.0f)
+        {
+            QPoint interPoint = util::lerp(lastPoint, newPointF, percent).toPoint();
+
+            // Skip if the previous point equals this point
+            // This will occur when rounding errors happen and return the same point
+            if (interPoint != points.back())
+            {
+                // Skip if the point is already set to be a fat point. No need to set it twice
+                auto &interVal = widget->getTraceSlices().data.at<unsigned char>(widget->getLocation().z(), interPoint.y(), interPoint.x());
+                if (interVal != 255)
+                {
+                    points.push_back(interPoint);
+                    interVal = 255;
+                }
+            }
+
+            percent += steps;
+        }
+    }
+
+    points.push_back(newPoint);
+    pointVal = 255;
+
+    widget->setDirty(Dirty::Traces);
+    widget->update();
 }

@@ -70,7 +70,7 @@ public:
     QVector4D getLocation() const;
     QVector4D transformLocation(QVector4D location) const;
 
-    void setImages(NIFTImage *fat, NIFTImage *water);
+    void setup(NIFTImage *fat, NIFTImage *water);
     bool isLoaded() const;
 
     SliceDisplayType getDisplayType() const;

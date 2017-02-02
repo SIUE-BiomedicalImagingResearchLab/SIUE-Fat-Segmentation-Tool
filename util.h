@@ -9,6 +9,11 @@
 #include <QKeySequence>
 #include <QDebug>
 
+// Checks if there was an OpenGL error
+#define glCheckError() { GLenum err; \
+    if ((err = glGetError()) != GL_NO_ERROR) \
+        qDebug() << "Unable to perform OpenGL action: " << err; }
+
 namespace util
 {
 
@@ -28,8 +33,6 @@ QVector3D lerp(QVector3D start, QVector3D end, float percent);
 QVector2D lerp(QVector2D start, QVector2D end, float percent);
 QPointF lerp(QPointF start, QPointF end, float percent);
 QPoint lerp(QPoint start, QPoint end, float percent);
-
-void glCheckError();
 
 }
 

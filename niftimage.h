@@ -47,6 +47,8 @@ public:
     int getYDim() const;
     int getZDim() const;
 
+    bool isLoaded() const;
+
     cv::Mat getRegion(std::vector<cv::Range> region, bool clone = false);
 
     cv::Mat getAxialSlice(int z, bool clone = false);

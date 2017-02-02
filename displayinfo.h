@@ -1,6 +1,14 @@
 #ifndef DISPLAYINFO_H
 #define DISPLAYINFO_H
 
+enum class Dirty : unsigned char
+{
+    Slice =     1,
+    Crosshair = 2,
+    Traces =    4, // Updates only the active layer of traces
+    TracesAll = 8  // Updates each layer (Typically used when loading trace data)
+};
+
 enum class SliceDisplayType : int
 {
     FatOnly,

@@ -262,6 +262,11 @@ int NIFTImage::getZDim() const
     return zDim;
 }
 
+bool NIFTImage::isLoaded() const
+{
+    return (upper && lower);
+}
+
 /* getRegion returns a region of the data matrix. The region vector can be done using initializer
  * lists in C++11 which makes this a simple function to use. The number of items in the region
  * vector must be 3 because the dimension of the data matrix is 3. The clone parameter is whether
