@@ -8,6 +8,7 @@ viewAxialCoronalLoRes::viewAxialCoronalLoRes(QWidget *parent, NIFTImage *fatImag
     ui(new Ui::viewAxialCoronalLoRes),
     fatImage(fatImage), waterImage(waterImage), subConfig(subConfig), tracingData(tracingData),
     undoView(NULL), undoStack(new QUndoStack(this)),
+    lblStatusLocation(new QLabel(this)),
     EATRadioBtnShortcut(new QShortcut(QKeySequence("1"), this)), IMATRadioBtnShortcut(new QShortcut(QKeySequence("2"), this)),
     PAATRadioBtnShortcut(new QShortcut(QKeySequence("3"), this)), PATRadioBtnShortcut(new QShortcut(QKeySequence("4"), this)),
     SCATRadioBtnShortcut(new QShortcut(QKeySequence("5"), this)), VATRadioBtnShortcut(new QShortcut(QKeySequence("6"), this)),
@@ -27,8 +28,8 @@ viewAxialCoronalLoRes::viewAxialCoronalLoRes(QWidget *parent, NIFTImage *fatImag
     this->ui->glWidgetAxial->setup(fatImage, waterImage, tracingData);
     this->ui->glWidgetCoronal->setup(fatImage, waterImage);
 
-    this->parentMain()->ui->statusBar->addPermanentWidget(this->ui->lblStatusLocation);
-    this->ui->glWidgetAxial->setLocationLabel(this->ui->lblStatusLocation);
+    this->parentMain()->ui->statusBar->addPermanentWidget(this->lblStatusLocation);
+    this->ui->glWidgetAxial->setLocationLabel(this->lblStatusLocation);
 
     // Set current tab to zero in case I am on a different tab in designer.
     this->ui->settingsWidget->setCurrentIndex(0);
@@ -298,10 +299,10 @@ void viewAxialCoronalLoRes::actionOpen_triggered()
 
 void viewAxialCoronalLoRes::actionSave_triggered()
 {
-    if (saveTracingResultsPath.isNull())
+    if (parentMain()->saveTracingResultsPath.isNull())
         actionSaveAs_triggered();
-    else if (ui->glWidgetAxial->saveTracingData(saveTracingResultsPath, false))
-        parentMain()->ui->statusBar->showMessage(QObject::tr("Successfully saved file at %1").arg(saveTracingResultsPath), 4000);
+    else if (ui->glWidgetAxial->saveTracingData(parentMain()->saveTracingResultsPath, false))
+        parentMain()->ui->statusBar->showMessage(QObject::tr("Successfully saved file at %1").arg(parentMain()->saveTracingResultsPath), 4000);
 }
 
 void viewAxialCoronalLoRes::actionSaveAs_triggered()
@@ -322,7 +323,7 @@ void viewAxialCoronalLoRes::actionSaveAs_triggered()
     {
         // Since the NIFTI files were successfully saved, the default path in the dialog next time will be this path
         parentMain()->defaultSaveDir = path;
-        saveTracingResultsPath = path;
+        parentMain()->saveTracingResultsPath = path;
         parentMain()->ui->statusBar->showMessage(QObject::tr("Successfully saved file at %1").arg(path), 4000);
     }
     else
@@ -347,7 +348,7 @@ void viewAxialCoronalLoRes::actionImportTracingData_triggered()
     {
         // Since the NIFTI files were successfully loaded, the default path in the dialog next time will be this path
         parentMain()->defaultSaveDir = path;
-        saveTracingResultsPath = path;
+        parentMain()->saveTracingResultsPath = path;
         parentMain()->ui->statusBar->showMessage(QObject::tr("Successfully loaded tracing results in %1").arg(path), 4000);
     }
 }
@@ -798,7 +799,10 @@ void viewAxialCoronalLoRes::undoStack_canRedoChanged(bool canRedo)
 viewAxialCoronalLoRes::~viewAxialCoronalLoRes()
 {
     // Remove location status label from the parent main status bar
-    parentMain()->ui->statusBar->removeWidget(this->ui->lblStatusLocation);
+    // Note: If the user exits the application, then the ui will be nullptr for parent and so
+    // we need to not try and remove the widget
+    if (parentMain()->ui)
+        parentMain()->ui->statusBar->removeWidget(lblStatusLocation);
 
     if (undoView)
         delete undoView;

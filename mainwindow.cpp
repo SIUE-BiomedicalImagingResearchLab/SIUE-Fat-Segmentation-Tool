@@ -155,4 +155,5 @@ MainWindow::~MainWindow()
     delete tracingData;
 
     delete ui;
+    ui = nullptr;
 }

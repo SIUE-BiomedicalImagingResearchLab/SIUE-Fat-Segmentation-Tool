@@ -33,7 +33,8 @@ SOURCES += main.cpp\
     coronalslicewidget.cpp \
     numerictype.cpp \
     view_axialcoronalhires.cpp \
-    view_axialcoronallores.cpp
+    view_axialcoronallores.cpp \
+    tracing.cpp
 
 HEADERS  += mainwindow.h \
     application.h \

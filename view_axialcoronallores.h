@@ -14,6 +14,7 @@
 #include <QVector4D>
 #include <QWhatsThis>
 #include <QShortcut>
+#include <QLabel>
 
 #include <nifti/nifti1.h>
 #include <nifti/nifti1_io.h>
@@ -46,7 +47,7 @@ private:
     QUndoView *undoView;
     QUndoStack *undoStack;
 
-    QString saveTracingResultsPath;
+    QLabel *lblStatusLocation;
 
     QShortcut *EATRadioBtnShortcut;
     QShortcut *IMATRadioBtnShortcut;

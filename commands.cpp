@@ -806,10 +806,10 @@ TracingPointsAddCommand::TracingPointsAddCommand(QPoint point, AxialSliceWidget 
 
 void TracingPointsAddCommand::undo()
 {
-    auto z = widget->getLocation().z();
+    const auto z = widget->getLocation().z();
 
     for (QPoint point : points)
-        widget->getTraceSlices().data.at<unsigned char>(z, point.y(), point.x()) = 0;
+        widget->getTraceSlices().reset(point.x(), point.y(), z);
 
     widget->setDirty(Dirty::Traces);
     widget->update();
@@ -817,10 +817,10 @@ void TracingPointsAddCommand::undo()
 
 void TracingPointsAddCommand::redo()
 {
-    auto z = widget->getLocation().z();
+    const auto z = widget->getLocation().z();
 
     for (QPoint point : points)
-        widget->getTraceSlices().data.at<unsigned char>(z, point.y(), point.x()) = 255;
+        widget->getTraceSlices().set(point.x(), point.y(), z);
 
     widget->setDirty(Dirty::Traces);
     widget->update();
@@ -828,7 +828,7 @@ void TracingPointsAddCommand::redo()
 
 void TracingPointsAddCommand::addPoint(QPoint newPoint)
 {
-    auto &pointVal = widget->getTraceSlices().data.at<unsigned char>(widget->getLocation().z(), newPoint.y(), newPoint.x());
+    auto &pointVal = widget->getTraceSlices().at(newPoint.x(), newPoint.y(), widget->getLocation().z());
 
     // If the point is already set, then dont set it again
     if (pointVal == 255)
@@ -860,7 +860,7 @@ void TracingPointsAddCommand::addPoint(QPoint newPoint)
             if (interPoint != points.back())
             {
                 // Skip if the point is already set to be a fat point. No need to set it twice
-                auto &interVal = widget->getTraceSlices().data.at<unsigned char>(widget->getLocation().z(), interPoint.y(), interPoint.x());
+                auto &interVal = widget->getTraceSlices().at(interPoint.x(), interPoint.y(), widget->getLocation().z());
                 if (interVal != 255)
                 {
                     points.push_back(interPoint);

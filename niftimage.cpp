@@ -297,7 +297,7 @@ cv::Mat NIFTImage::getRegion(std::vector<cv::Range> region, bool clone)
  */
 cv::Mat NIFTImage::getAxialSlice(int z, bool clone)
 {
-    if (data.empty() || z < 0 || z > zDim - 1)
+    if (data.empty() || z < 0 || z >= zDim)
         return cv::Mat();
 
     const cv::Range region[] = { cv::Range(z, z + 1), cv::Range::all(), cv::Range::all() };
@@ -309,7 +309,7 @@ cv::Mat NIFTImage::getAxialSlice(int z, bool clone)
     else
         ret = cv::Mat(data, region);
 
-    int dims[] = { data.size[2], data.size[1] };
+    int dims[] = { data.size[1], data.size[2] };
     return ret.reshape(0, 2, dims);
 }
 
@@ -320,7 +320,7 @@ cv::Mat NIFTImage::getAxialSlice(int z, bool clone)
  */
 cv::Mat NIFTImage::getCoronalSlice(int y, bool clone)
 {
-    if (data.empty() || y < 0 || y > yDim - 1)
+    if (data.empty() || y < 0 || y >= yDim)
         return cv::Mat();
 
     const cv::Range region[] = { cv::Range::all(), cv::Range(y, y + 1), cv::Range::all() };
@@ -332,7 +332,7 @@ cv::Mat NIFTImage::getCoronalSlice(int y, bool clone)
     else
         ret = cv::Mat(data, region);
 
-    int dims[] = { data.size[2], data.size[0] };
+    int dims[] = { data.size[0], data.size[2] };
     return ret.reshape(0, 2, dims);
 }
 
@@ -343,7 +343,7 @@ cv::Mat NIFTImage::getCoronalSlice(int y, bool clone)
  */
 cv::Mat NIFTImage::getSaggitalSlice(int x, bool clone)
 {
-    if (data.empty() || x < 0 || x > xDim - 1)
+    if (data.empty() || x < 0 || x >= xDim)
         return cv::Mat();
 
     const cv::Range region[] = { cv::Range::all(), cv::Range::all(), cv::Range(x, x + 1) };

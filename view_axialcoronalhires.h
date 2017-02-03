@@ -47,6 +47,8 @@ private:
     QUndoView *undoView;
     QUndoStack *undoStack;
 
+    QLabel *lblStatusLocation;
+
     QShortcut *EATRadioBtnShortcut;
     QShortcut *IMATRadioBtnShortcut;
     QShortcut *PAATRadioBtnShortcut;

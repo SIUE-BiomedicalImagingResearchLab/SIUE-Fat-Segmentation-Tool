@@ -278,7 +278,7 @@ TracingLayerData &AxialSliceWidget::getTraceSlices(TracingLayer layer)
     if (layer == TracingLayer::Count)
         layer = tracingLayer;
 
-    return tracingData->layers[(int)layer];
+    return (*tracingData)[layer];
 }
 
 float &AxialSliceWidget::rscaling()
@@ -330,8 +330,7 @@ bool AxialSliceWidget::saveTracingData(QString path, bool promptOnOverwrite)
         const int zDim = fatImage->getZDim();
         for (int z = 0; z < zDim; ++z)
         {
-            auto &layer = this->getTraceSlices((TracingLayer)i);
-            cv::Mat slice = layer.data({cv::Range(z, z + 1), cv::Range::all(), cv::Range::all()});
+            cv::Mat slice = (*tracingData)[i].getAxialSlice(z);
 
             cv::Mat points;
             opencv::findNonZero(slice, points);
@@ -340,8 +339,8 @@ bool AxialSliceWidget::saveTracingData(QString path, bool promptOnOverwrite)
             if (points.total() > 0)
             {
                 // Sort based on Z, then Y, then X value.
-                std::sort(points.begin<cv::Vec3i>(), points.end<cv::Vec3i>(), [](const cv::Vec3i &a, const cv::Vec3i &b) {
-                    return !((a[0] >= b[0]) && (a[0] != b[0] || a[1] >= b[1]) && (a[0] != b[0] || a[1] != b[1] || a[2] >= b[2]));
+                std::sort(points.begin<cv::Vec2i>(), points.end<cv::Vec2i>(), [](const cv::Vec2i &a, const cv::Vec2i &b) {
+                    return !((a[0] >= b[0]) && (a[0] != b[0] || a[1] >= b[1]));
                 });
             }
 
@@ -350,8 +349,8 @@ bool AxialSliceWidget::saveTracingData(QString path, bool promptOnOverwrite)
 
             for (int i = 0; i < points.total(); ++i)
             {
-                const cv::Vec3i point = points.at<cv::Vec3i>(i);
-                stream << forcepoint << (float)point[2] << " " << (float)point[1] << " " << (float)z << endl;
+                const cv::Vec2i point = points.at<cv::Vec2i>(i);
+                stream << forcepoint << (float)point[1] << " " << (float)point[0] << " " << (float)z << endl;
             }
         }
     }
@@ -439,7 +438,7 @@ bool AxialSliceWidget::loadTracingData(QString path)
             return false; // Note: Return false because the other layers should be mismatched as well
         }
 
-        auto &layer = this->getTraceSlices((TracingLayer)i);
+        auto &layer = (*tracingData)[i];
 
         // Discard previous data by setting everything to 0
         layer.data.setTo(0);
@@ -465,7 +464,7 @@ bool AxialSliceWidget::loadTracingData(QString path)
                     return false;
                 }
 
-                layer.data.at<unsigned char>(z, y, x) = 255;
+                layer.set(x, y, z);
             }
         }
     }
@@ -995,7 +994,7 @@ void AxialSliceWidget::updateTrace(TracingLayer layer)
     glCheckError();
 
     // Grab current slice of the tracing data matrix at given layer
-    cv::Mat matrix = tracingData->layers[(int)layer].data({ cv::Range(location.z(), location.z() + 1), cv::Range::all(), cv::Range::all() });
+    cv::Mat matrix = (*tracingData)[layer].getAxialSlice(location.z());
 
     // Get the OpenGL datatype of the matrix
     auto dataType = NumericType::OpenCV(matrix.type());
