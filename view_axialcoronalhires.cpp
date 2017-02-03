@@ -315,6 +315,12 @@ void viewAxialCoronalHiRes::setupDefaults()
         case TracingLayer::SCAT: ui->SCATRadioBtn->setChecked(true); break;
         case TracingLayer::VAT: ui->VATRadioBtn->setChecked(true); break;
     }
+
+    switch (ui->glWidgetAxial->getDrawMode())
+    {
+        case DrawMode::Points: ui->drawPointsBtn->setChecked(true); break;
+        case DrawMode::Erase: ui->eraserBtn->setChecked(true); break;
+    }
 }
 
 void viewAxialCoronalHiRes::actionOpen_triggered()
@@ -820,6 +826,42 @@ void viewAxialCoronalHiRes::on_VATCheckBox_toggled(bool checked)
 {
     parentMain()->ui->statusBar->showMessage(QObject::tr("%1 VAT tracing layer").arg(checked ? "Showing" : "Hiding"), 4000);
     undoStack->push(new TracingLayerVisibleChangeCommand(TracingLayer::VAT, checked, ui->glWidgetAxial, ui->VATCheckBox));
+}
+
+void viewAxialCoronalHiRes::changeDrawMode(DrawMode newMode)
+{
+    if (newMode == ui->glWidgetAxial->getDrawMode())
+        return; // If old and new draw mode are the same, do nothing
+
+    QPushButton *newBtn = NULL;
+    QString newModeStr;
+    switch (newMode)
+    {
+        case DrawMode::Points: newBtn = ui->drawPointsBtn; newModeStr = "Draw Points"; break;
+        case DrawMode::Erase: newBtn = ui->eraserBtn; newModeStr = "Erase"; break;
+    }
+
+    QPushButton *oldBtn = NULL;
+    switch (ui->glWidgetAxial->getDrawMode())
+    {
+        case DrawMode::Points: oldBtn = ui->drawPointsBtn; break;
+        case DrawMode::Erase: oldBtn = ui->eraserBtn; break;
+    }
+
+    parentMain()->ui->statusBar->showMessage(QObject::tr("Change draw mode to %1").arg(newModeStr), 4000);
+    undoStack->push(new DrawModeChangeCommand(newMode, ui->glWidgetAxial, oldBtn, newBtn, newModeStr));
+}
+
+void viewAxialCoronalHiRes::on_drawPointsBtn_toggled(bool checked)
+{
+    if (checked)
+        changeDrawMode(DrawMode::Points);
+}
+
+void viewAxialCoronalHiRes::on_eraserBtn_toggled(bool checked)
+{
+    if (checked)
+        changeDrawMode(DrawMode::Erase);
 }
 
 void viewAxialCoronalHiRes::undoStack_canUndoChanged(bool canUndo)

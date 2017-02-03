@@ -61,3 +61,5 @@ RESOURCES += \
     resources.qrc
 
 exists(custom.pro): include(custom.pro)
+
+DISTFILES +=

@@ -102,6 +102,8 @@ private:
     float brightness;
     float contrast;
 
+    // Sets whether drawing or erasing...useful if new draw modes are added like drawing lines
+    DrawMode drawMode;
     bool startDraw;
     QElapsedTimer drawTimer;
 
@@ -158,6 +160,9 @@ public:
 
     float getContrast() const;
     void setContrast(float contrast);
+
+    DrawMode getDrawMode() const;
+    void setDrawMode(DrawMode mode);
 
     TracingLayer getTracingLayer() const;
     void setTracingLayer(TracingLayer layer);

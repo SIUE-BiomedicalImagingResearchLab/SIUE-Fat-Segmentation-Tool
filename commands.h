@@ -9,6 +9,7 @@
 #include <QSpinBox>
 #include <QComboBox>
 #include <QRadioButton>
+#include <QPushButton>
 #include <QCheckBox>
 
 #include "displayinfo.h"
@@ -293,6 +294,22 @@ public:
     void redo() override;
 
     void addPoint(QPoint newPoint);
+};
+
+class DrawModeChangeCommand : public QUndoCommand
+{
+private:
+    DrawMode oldDrawMode;
+    DrawMode newDrawMode;
+    AxialSliceWidget *widget;
+    QPushButton *oldBtn;
+    QPushButton *newBtn;
+
+public:
+    DrawModeChangeCommand(DrawMode newDrawMode, AxialSliceWidget *widget, QPushButton *oldBtn, QPushButton *newBtn, QString str, QUndoCommand *parent = NULL);
+
+    void undo() override;
+    void redo() override;
 };
 
 #endif // COMMANDS_H

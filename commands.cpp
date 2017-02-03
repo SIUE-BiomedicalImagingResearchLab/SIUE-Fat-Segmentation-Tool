@@ -878,3 +878,37 @@ void TracingPointsAddCommand::addPoint(QPoint newPoint)
     widget->setDirty(Dirty::Traces);
     widget->update();
 }
+
+
+// DrawModeChangeCommand
+// --------------------------------------------------------------------------------------------------------------------
+DrawModeChangeCommand::DrawModeChangeCommand(DrawMode newDrawMode, AxialSliceWidget *widget, QPushButton *oldBtn, QPushButton *newBtn, QString str, QUndoCommand *parent) : QUndoCommand(parent),
+    oldDrawMode(widget->getDrawMode()), newDrawMode(newDrawMode), widget(widget), oldBtn(oldBtn), newBtn(newBtn)
+{
+    // Updates text that is shown on QUndoView
+    setText(QObject::tr("Draw mode set to %1").arg(str));
+}
+
+void DrawModeChangeCommand::undo()
+{
+    // Go back to the old drawing mode
+    widget->setDrawMode(oldDrawMode);
+
+    // Check the old button which will automatically deselect the currently selected button
+    // It blocks all signals from being called so that a duplicate DrawModeChangeCommand is not created
+    bool prev = oldBtn->blockSignals(true);
+    oldBtn->setChecked(true);
+    oldBtn->blockSignals(prev);
+}
+
+void DrawModeChangeCommand::redo()
+{
+    // Go to the new drawing mode
+    widget->setDrawMode(newDrawMode);
+
+    // Check the new button which will automatically deselect the currently selected button
+    // It blocks all signals from being called so that a duplicate DrawModeChangeCommand is not created
+    bool prev = newBtn->blockSignals(true);
+    newBtn->setChecked(true);
+    newBtn->blockSignals(prev);
+}

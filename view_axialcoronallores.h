@@ -91,6 +91,7 @@ public:
 
     void changeSliceView(SliceDisplayType newType);
     void changeTracingLayer(TracingLayer newLayer);
+    void changeDrawMode(DrawMode newMode);
 
     friend class viewAxialCoronalHiRes;
 
@@ -159,6 +160,9 @@ private slots:
     void on_PATCheckBox_toggled(bool checked);
     void on_SCATCheckBox_toggled(bool checked);
     void on_VATCheckBox_toggled(bool checked);
+
+    void on_drawPointsBtn_toggled(bool checked);
+    void on_eraserBtn_toggled(bool checked);
 
     void undoStack_canUndoChanged(bool canUndo);
     void undoStack_canRedoChanged(bool canRedo);

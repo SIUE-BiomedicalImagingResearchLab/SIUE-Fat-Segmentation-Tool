@@ -6,7 +6,7 @@ AxialSliceWidget::AxialSliceWidget(QWidget *parent) : QOpenGLWidget(parent),
     tracingLayerColors({ Qt::blue, Qt::darkCyan, Qt::cyan, Qt::magenta, Qt::yellow, Qt::green }), mouseCommand(NULL),
     slicePrimTexture(NULL), sliceSecdTexture(NULL),
     location(0, 0, 0, 0), locationLabel(NULL), primColorMap(ColorMap::Gray), primOpacity(1.0f), secdColorMap(ColorMap::Gray), secdOpacity(1.0f),
-    brightness(0.0f), contrast(1.0f), tracingLayer(TracingLayer::EAT),
+    brightness(0.0f), contrast(1.0f), tracingLayer(TracingLayer::EAT), drawMode(DrawMode::Points),
     startDraw(false), startPan(false), moveID(CommandID::AxialMove)
 {
     this->tracingLayerVisible.fill(true);
@@ -230,6 +230,16 @@ void AxialSliceWidget::setContrast(float contrast)
 
     // Redraw the screen because the contrast has changed
     update();
+}
+
+DrawMode AxialSliceWidget::getDrawMode() const
+{
+    return drawMode;
+}
+
+void AxialSliceWidget::setDrawMode(DrawMode mode)
+{
+    drawMode = mode;
 }
 
 TracingLayer AxialSliceWidget::getTracingLayer() const
@@ -496,7 +506,6 @@ bool AxialSliceWidget::loadTracingData(QString path)
             QString str;
             unsigned int h, m, s, ms;
             timeStream >> dummy >> z__ >> ws >> h >> str >> ws >> m >> str >> ws >> s >> str >> ws >> ms >> str >> ws;
-            qDebug() << "Layer " << z__ << " " << h << " " << m << " " << s << " " << ms;
             layer.time[z] = (std::chrono::hours(h) + std::chrono::minutes(m) + std::chrono::seconds(s) + std::chrono::milliseconds(ms));
         }
     }

@@ -86,4 +86,10 @@ enum class WindowViewType : int
     AxialCoronalHiRes
 };
 
+enum class DrawMode : int
+{
+    Points = 0,
+    Erase
+};
+
 #endif // DISPLAYINFO_H

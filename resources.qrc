@@ -24,5 +24,9 @@
         <file>colormaps/redWhite.png</file>
         <file>shaders/fattraces.frag</file>
         <file>shaders/fattraces.vert</file>
+        <file>images/noun_3715.png</file>
+        <file>images/noun_3716.png</file>
+        <file>images/noun_811391.png</file>
+        <file>images/noun_811392.png</file>
     </qresource>
 </RCC>
