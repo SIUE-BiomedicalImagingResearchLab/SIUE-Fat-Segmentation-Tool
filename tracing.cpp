@@ -100,6 +100,12 @@ void TracingLayerData::reset(int x, int y, int z)
     data.at<unsigned char>(z, y, x) = 0;
 }
 
+void TracingLayerData::load(int x, int y, int z)
+{
+    data = cv::Mat({z, y, x}, CV_8UC1, cv::Scalar(0));
+    time.resize(z);
+}
+
 const NumericType *TracingLayerData::getType() const
 {
     if (data.empty())

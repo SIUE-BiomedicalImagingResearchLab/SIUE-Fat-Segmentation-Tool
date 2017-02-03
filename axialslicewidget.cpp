@@ -294,11 +294,16 @@ QVector3D &AxialSliceWidget::rtranslation()
 bool AxialSliceWidget::saveTracingData(QString path, bool promptOnOverwrite)
 {
     const QString layerFilename[(int)TracingLayer::Count] = {"EAT.txt", "IMAT.txt", "PAAT.txt", "PAT.txt", "SCAT.txt", "VAT.txt"};
+    const QString timeDir = "times";
     QString layerFullPath[(int)TracingLayer::Count];
+    QString layerTimeFullPath[(int)TracingLayer::Count];
 
     // Create absolute path to each of the layer filenames by joining directory path (path) with each filename (layerFilename)
     for (int i = 0; i < (int)TracingLayer::Count; ++i)
+    {
         layerFullPath[i] = QDir(path).filePath(layerFilename[i]);
+        layerTimeFullPath[i] = QDir(path).filePath(timeDir + "/" + layerFilename[i]); // TODO: Better solution? Not platform independent
+    }
 
     if (promptOnOverwrite)
     {
@@ -315,22 +320,38 @@ bool AxialSliceWidget::saveTracingData(QString path, bool promptOnOverwrite)
         }
     }
 
+    // Create timing directory if it does not already exist
+    QDir timesDir = QDir(path).filePath(timeDir);
+    if (!timesDir.exists())
+        timesDir.mkdir(".");
+
     for (int i = 0; i < (int)TracingLayer::Count; ++i)
     {
-        QFile file(layerFullPath[i]);
-        if (!file.open(QIODevice::WriteOnly | QIODevice::Truncate))
+        QFile sliceFile(layerFullPath[i]);
+        if (!sliceFile.open(QIODevice::WriteOnly | QIODevice::Truncate))
         {
             qWarning() << "Error opening file to save tracing data. Skipping layer: " << layerFullPath[i];
             continue;
         }
 
-        QTextStream stream(&file);
-        stream << fatImage->getZDim() << endl;
+        QTextStream sliceStream(&sliceFile);
+        sliceStream << fatImage->getZDim() << endl;
+
+        QFile timeFile(layerTimeFullPath[i]);
+        if (!timeFile.open(QIODevice::WriteOnly | QIODevice::Truncate))
+        {
+            qWarning() << "Error opening file to save tracing data. Skipping layer: " << layerTimeFullPath[i];
+            continue;
+        }
+
+        QTextStream timeStream(&timeFile);
+        timeStream << fatImage->getZDim() << endl;
 
         const int zDim = fatImage->getZDim();
         for (int z = 0; z < zDim; ++z)
         {
-            cv::Mat slice = (*tracingData)[i].getAxialSlice(z);
+            auto &traceLayer = (*tracingData)[i];
+            cv::Mat slice = traceLayer.getAxialSlice(z);
 
             cv::Mat points;
             opencv::findNonZero(slice, points);
@@ -344,14 +365,21 @@ bool AxialSliceWidget::saveTracingData(QString path, bool promptOnOverwrite)
                 });
             }
 
-            stream << "#" << z << endl;
-            stream << points.total() << endl;
+            sliceStream << "#" << z << endl;
+            sliceStream << points.total() << endl;
 
             for (int i = 0; i < points.total(); ++i)
             {
                 const cv::Vec2i point = points.at<cv::Vec2i>(i);
-                stream << forcepoint << (float)point[1] << " " << (float)point[0] << " " << (float)z << endl;
+                sliceStream << forcepoint << (float)point[1] << " " << (float)point[0] << " " << (float)z << endl;
             }
+
+            auto time = traceLayer.time[z];
+            auto h = std::chrono::duration_cast<std::chrono::hours>(time);
+            auto m = std::chrono::duration_cast<std::chrono::minutes>(time -= h);
+            auto s = std::chrono::duration_cast<std::chrono::seconds>(time -= m);
+            auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(time -= s);
+            timeStream << "#" << z << " " << h.count() << "h " << m.count() << "m " << s.count() << "s " << ms.count() << "ms" << endl;
         }
     }
 
@@ -390,49 +418,43 @@ bool AxialSliceWidget::loadTracingData(QString path)
     }
 
     const QString layerFilename[(int)TracingLayer::Count] = {"EAT.txt", "IMAT.txt", "PAAT.txt", "PAT.txt", "SCAT.txt", "VAT.txt"};
+    const QString timeDir = "times";
     QString layerFullPath[(int)TracingLayer::Count];
-    std::vector<int> skipLayers;
+    QString layerTimeFullPath[(int)TracingLayer::Count];
 
     // Create absolute path to each of the layer filenames by joining directory path (path) with each filename (layerFilename)
     for (int i = 0; i < (int)TracingLayer::Count; ++i)
     {
         layerFullPath[i] = QDir(path).filePath(layerFilename[i]);
-
-        if (!QFileInfo(layerFullPath[i]).exists())
-        {
-            qDebug() << "Filename does not exist in directory for importing tracing data: " << layerFullPath[i];
-            skipLayers.push_back(i);
-        }
+        layerTimeFullPath[i] = QDir(path).filePath(timeDir + "/" + layerFilename[i]); // TODO: Better solution? Not platform independent
     }
 
     for (int i = 0; i < (int)TracingLayer::Count; ++i)
     {
-        bool nextLayer = false;
-        for (int skipLayer : skipLayers)
-        {
-            if (i == skipLayer)
-            {
-                nextLayer = true;
-                break;
-            }
-        }
-
-        if (nextLayer)
-            continue;
-
-        QFile file(layerFullPath[i]);
-        if (!file.open(QIODevice::ReadOnly))
+        QFile sliceFile(layerFullPath[i]);
+        if (!sliceFile.open(QIODevice::ReadOnly))
         {
             qWarning() << "Error opening file to load tracing data. Skipping layer: " << layerFullPath[i];
             continue;
         }
 
-        QTextStream stream(&file);
+        QTextStream sliceStream(&sliceFile);
 
-        int zDim;
-        stream >> zDim;
+        QFile timeFile(layerTimeFullPath[i]);
+        if (!timeFile.open(QIODevice::ReadOnly))
+        {
+            qWarning() << "Error opening file to load tracing data. Skipping layer: " << layerTimeFullPath[i];
+            continue;
+        }
 
-        if (zDim != fatImage->getZDim())
+        QTextStream timeStream(&timeFile);
+
+        int zDim, zDim_;
+        sliceStream >> zDim;
+        timeStream >> zDim_;
+
+
+        if (zDim != fatImage->getZDim() || zDim_ != fatImage->getZDim())
         {
             qWarning() << "Number of axial slices in the data does not match the NIFTI image loaded.";
             return false; // Note: Return false because the other layers should be mismatched as well
@@ -446,17 +468,18 @@ bool AxialSliceWidget::loadTracingData(QString path)
         for (int z = 0; z < zDim; ++z)
         {
             // Skip the #Z where Z is the axial slice
-            stream.skipWhiteSpace();
-            stream.readLine();
+            sliceStream.skipWhiteSpace();
+            sliceStream.readLine();
+            timeStream.skipWhiteSpace();
 
             // Get the number of points on the slices
             int numPoints = 0;
-            stream >> numPoints;
+            sliceStream >> numPoints;
 
             float x, y, z_;
             for (int ii = 0; ii < numPoints; ++ii)
             {
-                stream >> x >> y >> z_;
+                sliceStream >> x >> y >> z_;
 
                 if ((z < 0 || z >= fatImage->getZDim()) || (y < 0 || y >= fatImage->getYDim()) || (x < 0 || x >= fatImage->getXDim()))
                 {
@@ -466,6 +489,15 @@ bool AxialSliceWidget::loadTracingData(QString path)
 
                 layer.set(x, y, z);
             }
+
+            // Read timing
+            char dummy;
+            int z__;
+            QString str;
+            unsigned int h, m, s, ms;
+            timeStream >> dummy >> z__ >> ws >> h >> str >> ws >> m >> str >> ws >> s >> str >> ws >> ms >> str >> ws;
+            qDebug() << "Layer " << z__ << " " << h << " " << m << " " << s << " " << ms;
+            layer.time[z] = (std::chrono::hours(h) + std::chrono::minutes(m) + std::chrono::seconds(s) + std::chrono::milliseconds(ms));
         }
     }
 
@@ -1265,7 +1297,7 @@ void AxialSliceWidget::mousePressEvent(QMouseEvent *eventPress)
             startPan = false;
 
         startDraw = true;
-        //drawTimer.start();
+        drawTimer.start();
         addPoint(eventPress->pos());
     }
     else if (eventPress->button() == Qt::MiddleButton)
@@ -1296,8 +1328,7 @@ void AxialSliceWidget::mouseReleaseEvent(QMouseEvent *eventRelease)
     if (eventRelease->button() == Qt::LeftButton && startDraw)
     {
         addPoint(eventRelease->pos());
-        //auto elapsed = drawTimer.elapsed();
-        //layerSlices[location.z()][(int)tracingLayer].drawingTime.addMSecs(elapsed);
+        (*tracingData)[tracingLayer].time[location.z()] += std::chrono::milliseconds(drawTimer.elapsed());
         startDraw = false;
         mouseCommand = NULL;
     }

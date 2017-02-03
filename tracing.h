@@ -3,6 +3,7 @@
 
 #include <array>
 #include <QTime>
+#include <chrono>
 
 #include <opencv2/opencv.hpp>
 
@@ -13,7 +14,7 @@ class TracingLayerData
 {
 public:
     cv::Mat data;
-    std::vector<QTime> time;
+    std::vector<std::chrono::milliseconds> time;
 
     int getXDim() const;
     int getYDim() const;
@@ -30,6 +31,8 @@ public:
     unsigned char &at(int x, int y, int z);
     void set(int x, int y, int z);
     void reset(int x, int y, int z);
+
+    void load(int x, int y, int z);
 
     const NumericType *getType() const;
 };

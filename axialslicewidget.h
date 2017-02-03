@@ -15,6 +15,7 @@
 #include <QUndoStack>
 #include <QPainter>
 #include <array>
+#include <chrono>
 #include <QMessageBox>
 #include <QLabel>
 #include <QTime>

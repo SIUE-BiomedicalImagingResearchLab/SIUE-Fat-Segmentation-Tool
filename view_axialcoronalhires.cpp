@@ -163,12 +163,7 @@ bool viewAxialCoronalHiRes::loadImage(QString path)
         // Initialize the tracing data to be the same size as the image and all zeros (no traces)
         // Also initialize each layer of time to be the same size as Z dim (one for each slice)
         for (auto &layer : tracingData->layers)
-        {
-            //layer.load(fatImage->getXDim(), fatImage->getYDim(), fatImage->getZDim());
-            layer.data = cv::Mat({fatImage->getZDim(), fatImage->getYDim(), fatImage->getXDim()}, CV_8UC1, cv::Scalar(0));
-            layer.time.resize(fatImage->getZDim());
-            layer.time.clear();
-        }
+            layer.load(fatImage->getXDim(), fatImage->getYDim(), fatImage->getZDim());
 
         ui->glWidgetAxial->imageLoaded();
         ui->glWidgetCoronal->imageLoaded();
