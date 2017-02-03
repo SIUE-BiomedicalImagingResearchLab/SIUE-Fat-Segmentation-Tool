@@ -1,5 +1,6 @@
 #include "view_axialcoronallores.h"
 #include "ui_view_axialcoronallores.h"
+
 #include "ui_mainwindow.h"
 #include "mainwindow.h"
 
@@ -9,14 +10,28 @@ viewAxialCoronalLoRes::viewAxialCoronalLoRes(QWidget *parent, NIFTImage *fatImag
     fatImage(fatImage), waterImage(waterImage), subConfig(subConfig), tracingData(tracingData),
     undoView(NULL), undoStack(new QUndoStack(this)),
     lblStatusLocation(new QLabel(this)),
+
+    // Home Tab Shortcuts
+    upShortcut(new QShortcut(QKeySequence("up"), this)), downShortcut(new QShortcut(QKeySequence("down"), this)),
+    leftShortcut(new QShortcut(QKeySequence("left"), this)), rightShortcut(new QShortcut(QKeySequence("right"), this)),
+
+    // Axial Display Tab Shortcuts
+    fatRadioBtnShortcut(new QShortcut(QKeySequence("q"), this)),
+    waterRadioBtnShortcut(new QShortcut(QKeySequence("w"), this)),
+    fatFracRadioBtnShortcut(new QShortcut(QKeySequence("e"), this)),
+    waterFracRadioBtnShortcut(new QShortcut(QKeySequence("r"), this)),
+    fatWaterRadioBtnShortcut(new QShortcut(QKeySequence("t"), this)),
+    waterFatRadioBtnShortcut(new QShortcut(QKeySequence("y"), this)),
+
+    resetViewShortcut(new QShortcut(QKeySequence("Space"), this)),
+
+    // Tracing Tab Shortcuts
     EATRadioBtnShortcut(new QShortcut(QKeySequence("1"), this)), IMATRadioBtnShortcut(new QShortcut(QKeySequence("2"), this)),
     PAATRadioBtnShortcut(new QShortcut(QKeySequence("3"), this)), PATRadioBtnShortcut(new QShortcut(QKeySequence("4"), this)),
     SCATRadioBtnShortcut(new QShortcut(QKeySequence("5"), this)), VATRadioBtnShortcut(new QShortcut(QKeySequence("6"), this)),
     EATCheckBoxShortcut(new QShortcut(QKeySequence("Ctrl+1"), this)), IMATCheckBoxShortcut(new QShortcut(QKeySequence("Ctrl+2"), this)),
     PAATCheckBoxShortcut(new QShortcut(QKeySequence("Ctrl+3"), this)), PATCheckBoxShortcut(new QShortcut(QKeySequence("Ctrl+4"), this)),
-    SCATCheckBoxShortcut(new QShortcut(QKeySequence("Ctrl+5"), this)), VATCheckBoxShortcut(new QShortcut(QKeySequence("Ctrl+6"), this)),
-    upShortcut(new QShortcut(QKeySequence("up"), this)), downShortcut(new QShortcut(QKeySequence("down"), this)),
-    leftShortcut(new QShortcut(QKeySequence("left"), this)), rightShortcut(new QShortcut(QKeySequence("right"), this))
+    SCATCheckBoxShortcut(new QShortcut(QKeySequence("Ctrl+5"), this)), VATCheckBoxShortcut(new QShortcut(QKeySequence("Ctrl+6"), this))
 {
     this->ui->setupUi(this);
 
@@ -42,7 +57,23 @@ viewAxialCoronalLoRes::viewAxialCoronalLoRes(QWidget *parent, NIFTImage *fatImag
     else
         setEnableSettings(false);
 
-    // Connect the shortcuts to the respective radio button toggle slot
+    // Home Tab Shortcuts
+    connect(upShortcut, SIGNAL(activated()), this, SLOT(upShortcut_triggered()));
+    connect(downShortcut, SIGNAL(activated()), this, SLOT(downShortcut_triggered()));
+    connect(leftShortcut, SIGNAL(activated()), this, SLOT(leftShortcut_triggered()));
+    connect(rightShortcut, SIGNAL(activated()), this, SLOT(rightShortcut_triggered()));
+
+    // Axial Display Tab Shortcuts
+    connect(fatRadioBtnShortcut, SIGNAL(activated()), ui->fatRadioBtn, SLOT(toggle()));
+    connect(waterRadioBtnShortcut, SIGNAL(activated()), ui->waterRadioBtn, SLOT(toggle()));
+    connect(fatFracRadioBtnShortcut, SIGNAL(activated()), ui->fatFracRadioBtn, SLOT(toggle()));
+    connect(waterFracRadioBtnShortcut, SIGNAL(activated()), ui->waterFracRadioBtn, SLOT(toggle()));
+    connect(fatWaterRadioBtnShortcut, SIGNAL(activated()), ui->fatWaterRadioBtn, SLOT(toggle()));
+    connect(waterFatRadioBtnShortcut, SIGNAL(activated()), ui->waterFatRadioBtn, SLOT(toggle()));
+
+    connect(resetViewShortcut, SIGNAL(activated()), ui->resetViewBtn, SLOT(click()));
+
+    // Tracing Tab Shortcuts
     connect(EATRadioBtnShortcut, SIGNAL(activated()), ui->EATRadioBtn, SLOT(toggle()));
     connect(IMATRadioBtnShortcut, SIGNAL(activated()), ui->IMATRadioBtn, SLOT(toggle()));
     connect(PAATRadioBtnShortcut, SIGNAL(activated()), ui->PAATRadioBtn, SLOT(toggle()));
@@ -57,11 +88,7 @@ viewAxialCoronalLoRes::viewAxialCoronalLoRes(QWidget *parent, NIFTImage *fatImag
     connect(SCATCheckBoxShortcut, SIGNAL(activated()), ui->SCATCheckBox, SLOT(toggle()));
     connect(VATCheckBoxShortcut, SIGNAL(activated()), ui->VATCheckBox, SLOT(toggle()));
 
-    connect(upShortcut, SIGNAL(activated()), this, SLOT(upShortcut_triggered()));
-    connect(downShortcut, SIGNAL(activated()), this, SLOT(downShortcut_triggered()));
-    connect(leftShortcut, SIGNAL(activated()), this, SLOT(leftShortcut_triggered()));
-    connect(rightShortcut, SIGNAL(activated()), this, SLOT(rightShortcut_triggered()));
-
+    // Actions
     connect(parentMain()->ui->actionOpen, SIGNAL(triggered()), this, SLOT(actionOpen_triggered()));
     connect(parentMain()->ui->actionSave, SIGNAL(triggered()), this, SLOT(actionSave_triggered()));
     connect(parentMain()->ui->actionSaveAs, SIGNAL(triggered()), this, SLOT(actionSaveAs_triggered()));
@@ -176,6 +203,23 @@ void viewAxialCoronalLoRes::setEnableSettings(bool enable)
 {
     ui->settingsWidget->setEnabled(enable);
 
+    // Home Tab Shortcuts
+    upShortcut->setEnabled(enable);
+    downShortcut->setEnabled(enable);
+    leftShortcut->setEnabled(enable);
+    rightShortcut->setEnabled(enable);
+
+    // Axial Display Tab Shortcuts
+    fatRadioBtnShortcut->setEnabled(enable);
+    waterRadioBtnShortcut->setEnabled(enable);
+    fatFracRadioBtnShortcut->setEnabled(enable);
+    waterFracRadioBtnShortcut->setEnabled(enable);
+    fatWaterRadioBtnShortcut->setEnabled(enable);
+    waterFatRadioBtnShortcut->setEnabled(enable);
+
+    resetViewShortcut->setEnabled(enable);
+
+    // Tracing Tab Shortcuts
     EATRadioBtnShortcut->setEnabled(enable);
     IMATRadioBtnShortcut->setEnabled(enable);
     PAATRadioBtnShortcut->setEnabled(enable);
@@ -189,11 +233,6 @@ void viewAxialCoronalLoRes::setEnableSettings(bool enable)
     PATCheckBoxShortcut->setEnabled(enable);
     SCATCheckBoxShortcut->setEnabled(enable);
     VATCheckBoxShortcut->setEnabled(enable);
-
-    upShortcut->setEnabled(enable);
-    downShortcut->setEnabled(enable);
-    leftShortcut->setEnabled(enable);
-    rightShortcut->setEnabled(enable);
 }
 
 void viewAxialCoronalLoRes::setupDefaults()
@@ -636,6 +675,7 @@ void viewAxialCoronalLoRes::changeSliceView(SliceDisplayType newType)
     }
 
     // Enable the secondary image box if FatWater or WaterFat selected, otherwise disable
+    parentMain()->ui->statusBar->showMessage(QObject::tr("Change slice view to %1").arg(newBtn->text()), 4000);
     ui->secondaryImageBox->setEnabled((newType == SliceDisplayType::FatWater || newType == SliceDisplayType::WaterFat));
 
     undoStack->push(new SliceViewChangeCommand(newType, ui->glWidgetAxial, oldBtn, newBtn));
@@ -812,6 +852,23 @@ viewAxialCoronalLoRes::~viewAxialCoronalLoRes()
     undoStack->blockSignals(true);
     delete undoStack;
 
+    // Home Tab Shortcuts
+    delete upShortcut;
+    delete downShortcut;
+    delete leftShortcut;
+    delete rightShortcut;
+
+    // Axial Display Tab Shortcuts
+    delete fatRadioBtnShortcut;
+    delete waterRadioBtnShortcut;
+    delete fatFracRadioBtnShortcut;
+    delete waterFracRadioBtnShortcut;
+    delete fatWaterRadioBtnShortcut;
+    delete waterFatRadioBtnShortcut;
+
+    delete resetViewShortcut;
+
+    // Tracing Tab Shortcuts
     delete EATRadioBtnShortcut;
     delete IMATRadioBtnShortcut;
     delete PAATRadioBtnShortcut;
@@ -825,11 +882,6 @@ viewAxialCoronalLoRes::~viewAxialCoronalLoRes()
     delete PATCheckBoxShortcut;
     delete SCATCheckBoxShortcut;
     delete VATCheckBoxShortcut;
-
-    delete upShortcut;
-    delete downShortcut;
-    delete leftShortcut;
-    delete rightShortcut;
 
     delete ui;
 }

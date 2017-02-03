@@ -49,6 +49,17 @@ private:
 
     QLabel *lblStatusLocation;
 
+    // Axial Display Tab Shortcuts
+    QShortcut *fatRadioBtnShortcut;
+    QShortcut *waterRadioBtnShortcut;
+    QShortcut *fatFracRadioBtnShortcut;
+    QShortcut *waterFracRadioBtnShortcut;
+    QShortcut *fatWaterRadioBtnShortcut;
+    QShortcut *waterFatRadioBtnShortcut;
+
+    QShortcut *resetViewShortcut;
+
+    // Tracing Tab Shortcuts
     QShortcut *EATRadioBtnShortcut;
     QShortcut *IMATRadioBtnShortcut;
     QShortcut *PAATRadioBtnShortcut;

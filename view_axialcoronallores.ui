@@ -63,7 +63,7 @@
           </size>
          </property>
          <property name="currentIndex">
-          <number>2</number>
+          <number>1</number>
          </property>
          <widget class="QWidget" name="homeTab">
           <attribute name="title">
@@ -299,7 +299,7 @@
                 <item>
                  <widget class="QRadioButton" name="fatRadioBtn">
                   <property name="toolTip">
-                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Fat Only&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Displays only the fat image from the NIFTI files.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Primary Image: &lt;/span&gt;Fat image&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Secondary Image: &lt;/span&gt;N/A&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Fat Only&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Displays only the fat image from the NIFTI files.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Primary Image: &lt;/span&gt;Fat image&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Secondary Image: &lt;/span&gt;N/A&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Shortcut: &lt;/span&gt;Q&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                   </property>
                   <property name="toolTipDuration">
                    <number>4000</number>
@@ -315,7 +315,7 @@
                 <item>
                  <widget class="QRadioButton" name="waterRadioBtn">
                   <property name="toolTip">
-                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Water Only&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Displays only the water image from the NIFTI files.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Primary Image: &lt;/span&gt;Water image&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Secondary Image: &lt;/span&gt;N/A&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Water Only&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Displays only the water image from the NIFTI files.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Primary Image: &lt;/span&gt;Water image&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Secondary Image: &lt;/span&gt;N/A&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Shortcut: &lt;/span&gt;W&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                   </property>
                   <property name="toolTipDuration">
                    <number>4000</number>
@@ -328,7 +328,7 @@
                 <item>
                  <widget class="QRadioButton" name="fatFracRadioBtn">
                   <property name="toolTip">
-                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Fat Fraction&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Displays an image that represents the ratio of fat to water.&lt;/p&gt;&lt;p&gt;Fat Fraction = Fat / (Fat + Water)&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Primary Image: &lt;/span&gt;Fat Fraction image&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Secondary Image: &lt;/span&gt;N/A&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Fat Fraction&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Displays an image that represents the ratio of fat to water.&lt;/p&gt;&lt;p&gt;Fat Fraction = Fat / (Fat + Water)&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Primary Image: &lt;/span&gt;Fat Fraction image&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Secondary Image: &lt;/span&gt;N/A&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Shortcut: &lt;/span&gt;E&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                   </property>
                   <property name="toolTipDuration">
                    <number>4000</number>
@@ -341,7 +341,7 @@
                 <item>
                  <widget class="QRadioButton" name="waterFracRadioBtn">
                   <property name="toolTip">
-                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Water Fraction&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Displays an image that represents the ratio of water to fat.&lt;/p&gt;&lt;p&gt;Water Fraction = Water / (Fat + Water)&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Primary Image: &lt;/span&gt;Water Fraction image&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Secondary Image: &lt;/span&gt;N/A&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Water Fraction&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Displays an image that represents the ratio of water to fat.&lt;/p&gt;&lt;p&gt;Water Fraction = Water / (Fat + Water)&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Primary Image: &lt;/span&gt;Water Fraction image&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Secondary Image: &lt;/span&gt;N/A&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Shortcut: &lt;/span&gt;R&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                   </property>
                   <property name="toolTipDuration">
                    <number>4000</number>
@@ -354,7 +354,7 @@
                 <item>
                  <widget class="QRadioButton" name="fatWaterRadioBtn">
                   <property name="toolTip">
-                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Fat / Water&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Displays fat image with water image on top at the specified opacities.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Primary Image: &lt;/span&gt;Fat image&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Secondary Image: &lt;/span&gt;Water image&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Fat / Water&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Displays fat image with water image on top at the specified opacities.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Primary Image: &lt;/span&gt;Fat image&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Secondary Image: &lt;/span&gt;Water image&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Shortcut: &lt;/span&gt;T&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                   </property>
                   <property name="toolTipDuration">
                    <number>4000</number>
@@ -367,7 +367,7 @@
                 <item>
                  <widget class="QRadioButton" name="waterFatRadioBtn">
                   <property name="toolTip">
-                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Water / Fat&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Displays water image with fat image on top at the specified opacities.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Primary Image: &lt;/span&gt;Water image&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Secondary Image: &lt;/span&gt;Fat image&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Water / Fat&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Displays water image with fat image on top at the specified opacities.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Primary Image: &lt;/span&gt;Water image&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Secondary Image: &lt;/span&gt;Fat image&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Shortcut: &lt;/span&gt;Y&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                   </property>
                   <property name="toolTipDuration">
                    <number>4000</number>
@@ -502,16 +502,13 @@
              <item>
               <widget class="QPushButton" name="resetViewBtn">
                <property name="toolTip">
-                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Reset View&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Resets the axial slice view and coronal slice view to center with no scaling.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Note: &lt;/span&gt;This does &lt;span style=&quot; font-weight:600; text-decoration: underline;&quot;&gt;NOT&lt;/span&gt; change the current location of the user.&lt;/p&gt;&lt;p&gt;Shortcut: &lt;span style=&quot; font-weight:600;&quot;&gt;Space bar&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Reset View&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Resets the axial slice view and coronal slice view to center with no scaling.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Note: &lt;/span&gt;This does &lt;span style=&quot; font-weight:600; text-decoration: underline;&quot;&gt;NOT&lt;/span&gt; change the current location of the user.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Shortcut: &lt;/span&gt;Space bar&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                </property>
                <property name="toolTipDuration">
                 <number>4000</number>
                </property>
                <property name="text">
                 <string>Reset View</string>
-               </property>
-               <property name="shortcut">
-                <string>Space</string>
                </property>
               </widget>
              </item>
