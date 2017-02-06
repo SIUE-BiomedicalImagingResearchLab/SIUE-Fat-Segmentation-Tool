@@ -235,6 +235,8 @@ DrawMode AxialSliceWidget::getDrawMode() const
 void AxialSliceWidget::setDrawMode(DrawMode mode)
 {
     drawMode = mode;
+
+    update();
 }
 
 TracingLayer AxialSliceWidget::getTracingLayer() const
@@ -1154,6 +1156,25 @@ void AxialSliceWidget::paintGL()
     traceProgram->release();
 
     painter.endNativePainting();
+
+    // Draw Crosshair Line (Set matrix to transform NIFTI coordinates -> Window coordinates)
+    // Then draw a line with a width of 1 from left of screen to right of screen at coronal location
+    if (drawMode == DrawMode::Erase && underMouse())
+    {
+        //QPainterPath path;
+
+        //path.addRect(QRect(-4, -4, 8, 8).translated(lastMousePosNIFTI));
+
+        painter.setTransform(getWindowToNIFTIMatrix().inverted().toTransform());
+        painter.setPen(QPen(Qt::green, 1, Qt::SolidLine, Qt::SquareCap, Qt::MiterJoin));
+        //painter.setPen(QPen(Qt::red, 1, Qt::SolidLine, Qt::RoundCap));
+        painter.fillRect(QRectF(-4-0.5f, -4-0.5f, 8 - 0.0f, 8 - 0.0f).translated(lastMousePosNIFTI), QBrush(QColor(128, 128, 255, 128)));
+        //painter.fillRect(QRect(-4, -4, 8, 8).translated(lastMousePosNIFTI), Qt::red); // Doesnt work
+        //painter.drawRect(QRect(-4, -4, 8, 8).translated(lastMousePosNIFTI)); // Works fine, width/height is 9
+        //painter.fillPath(path, Qt::red);
+        //painter.drawPath(path);
+        //painter.drawLine(QPoint(0, location.y()), QPoint(fatImage->getXDim() - 1, location.y()));
+    }
 }
 
 void AxialSliceWidget::addPoint(QPoint newPoint, bool first)
@@ -1246,7 +1267,7 @@ void AxialSliceWidget::erasePoint(QPoint newPoint, bool first)
     {
         std::vector<QPoint> points;
 
-        const QRect brushRect(-4, -4, 4, 4); // Maybe QRectF? Nah, round it to QRect
+        const QRect brushRect(-4, -4, 8, 8); // Maybe QRectF? Nah, round it to QRect
         int x1, x2, y1, y2;
 
         auto translated = util::clamp(brushRect.translated(NIFTICoord), bounds);
@@ -1316,7 +1337,7 @@ void AxialSliceWidget::erasePoint(QPoint newPoint, bool first)
     // TODO: Set brush width programatically
     // Left/Top is -brushWidth / 2
     // Right/Bottom is brushWidth / 2
-    const QRect brushRect(-4, -4, 4, 4); // Maybe QRectF? Nah, round it to QRect
+    const QRect brushRect(-4, -4, 8, 8); // Maybe QRectF? Nah, round it to QRect
     int x1, x2, y1, y2;
 
     for (QPoint eraseCenter : eraseCenterPoints)
@@ -1379,6 +1400,11 @@ void AxialSliceWidget::mouseMoveEvent(QMouseEvent *eventMove)
     }
 
     lastMousePos = eventMove->pos();
+    lastMousePosNIFTI = (getWindowToNIFTIMatrix() * lastMousePos);
+
+    // The erase mode shows a rectangle of what will be erased so this needs to be updated if the mouse moves
+    if (drawMode == DrawMode::Erase)
+        update();
 }
 
 void AxialSliceWidget::mousePressEvent(QMouseEvent *eventPress)
@@ -1433,6 +1459,7 @@ void AxialSliceWidget::mousePressEvent(QMouseEvent *eventPress)
     }
 
     lastMousePos = eventPress->pos();
+    lastMousePosNIFTI = (getWindowToNIFTIMatrix() * lastMousePos);
 }
 
 void AxialSliceWidget::mouseReleaseEvent(QMouseEvent *eventRelease)
@@ -1481,6 +1508,16 @@ void AxialSliceWidget::wheelEvent(QWheelEvent *event)
         if (scaleDelta != 0.0f)
             undoStack->push(new AxialScaleCommand(scaleDelta, this));
     }
+}
+
+void AxialSliceWidget::leaveEvent(QEvent *event)
+{
+    // Parameter not used
+    (void)event;
+
+    // Since the eraser has a rectangle that follows the cursor, tell the widget to redraw and exclude the rectangle when the mouse is off the widget
+    if (drawMode == DrawMode::Erase)
+        update();
 }
 
 AxialSliceWidget::~AxialSliceWidget()

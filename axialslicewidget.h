@@ -106,6 +106,7 @@ private:
 
     bool startPan;
     QPoint lastMousePos;
+    QPoint lastMousePosNIFTI;
     CommandID moveID;
 
     QMatrix4x4 projectionMatrix;
@@ -207,6 +208,8 @@ protected:
     void mouseReleaseEvent(QMouseEvent *eventRelease);
 
     void wheelEvent(QWheelEvent *event);
+
+    void leaveEvent(QEvent *event);
 };
 
 #endif // AXIALSLICEWIDGET_H
