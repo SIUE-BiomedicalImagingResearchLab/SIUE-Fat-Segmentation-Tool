@@ -275,6 +275,9 @@
           <layout class="QGridLayout" name="gridLayout_3">
            <item row="0" column="5">
             <widget class="QSpinBox" name="brightnessThresSpinBox">
+             <property name="toolTip">
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Change Brightness Threshold&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Enter percentage or use up/down arrows to change the brightness threshold currently displayed on the main widget.&lt;/p&gt;&lt;p&gt;Any intensities that are greater than or equal to the brightness threshold will be altered by the specified brightness.&lt;/p&gt;&lt;p&gt;A brightness threshold of 0% will adjust the brightness of the entire image.&lt;/p&gt;&lt;p&gt;A brightness threshold of 100% will only adjust the brightness where the intensity level is 100%.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             </property>
              <property name="suffix">
               <string>%</string>
              </property>
