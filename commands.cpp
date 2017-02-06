@@ -810,7 +810,7 @@ void TracingPointsAddCommand::undo()
     for (QPoint point : points)
         widget->getTraceSlices().reset(point.x(), point.y(), z);
 
-    widget->setDirty(Dirty::Traces);
+    widget->setDirty(Dirty::Trace(widget->getTracingLayer()));
     widget->update();
 }
 
@@ -822,7 +822,7 @@ void TracingPointsAddCommand::redo()
     for (QPoint point : points)
         widget->getTraceSlices().set(point.x(), point.y(), z);
 
-    widget->setDirty(Dirty::Traces);
+    widget->setDirty(Dirty::Trace(widget->getTracingLayer()));
     widget->update();
 }
 
@@ -854,7 +854,7 @@ void TracingPointsEraseCommand::undo()
     for (QPoint point : points)
         widget->getTraceSlices().set(point.x(), point.y(), z);
 
-    widget->setDirty(Dirty::Traces);
+    widget->setDirty(Dirty::Trace(widget->getTracingLayer()));
     widget->update();
 }
 
@@ -865,7 +865,7 @@ void TracingPointsEraseCommand::redo()
     for (QPoint point : points)
         widget->getTraceSlices().reset(point.x(), point.y(), z);
 
-    widget->setDirty(Dirty::Traces);
+    widget->setDirty(Dirty::Trace(widget->getTracingLayer()));
     widget->update();
 }
 

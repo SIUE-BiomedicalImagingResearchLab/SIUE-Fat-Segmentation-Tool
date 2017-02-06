@@ -1,14 +1,6 @@
 #ifndef DISPLAYINFO_H
 #define DISPLAYINFO_H
 
-namespace Dirty
-{
-    constexpr int Slice = 0x01,
-                  Crosshair = 0x02,
-                  Traces = 0x04, // Updates only the active layer of traces
-                  TracesAll = 0x08; // Updates each layer (Typically used when loading trace data)
-}
-
 enum class SliceDisplayType : int
 {
     FatOnly,
@@ -79,6 +71,20 @@ enum class TracingLayer : int
     VAT,
     Count
 };
+
+namespace Dirty
+{
+    constexpr int Slice                 = 1 << 1,
+                  Crosshair             = 1 << 2,
+                  TracesStart           = 1 << 3,
+                  TracesEnd             = 1 << (3 + (int)TracingLayer::Count),
+                  TracesAll             = (2^((int)TracingLayer::Count) - 1) << 3; // Updates each layer (Typically used when loading trace data)
+
+    constexpr int Trace(TracingLayer layer)
+    {
+        return TracesStart << (int)layer;
+    }
+}
 
 enum class WindowViewType : int
 {

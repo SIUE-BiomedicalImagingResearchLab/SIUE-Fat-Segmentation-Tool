@@ -1051,6 +1051,8 @@ void AxialSliceWidget::updateTrace(TracingLayer layer)
         glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, fatImage->getXDim(), fatImage->getYDim(), dataType->openGLFormat, dataType->openGLType, matrix.data);
 
     glCheckError();
+
+    dirty &= ~Dirty::Trace(layer);
 }
 
 void AxialSliceWidget::updateTraces(bool allOrCurrent)
@@ -1059,12 +1061,12 @@ void AxialSliceWidget::updateTraces(bool allOrCurrent)
     {
         for (int i = 0; i < (int)TracingLayer::Count; ++i)
             updateTrace((TracingLayer)i);
-        dirty &= ~(Dirty::TracesAll | Dirty::Traces);
+        //dirty &= ~(Dirty::TracesAll | Dirty::Traces);
     }
     else
     {
         updateTrace(tracingLayer);
-        dirty &= ~Dirty::Traces;
+        //dirty &= ~Dirty::Traces;
     }
 }
 
@@ -1095,11 +1097,9 @@ void AxialSliceWidget::paintGL()
     if (dirty & Dirty::Crosshair)
         updateCrosshairLine();
 
-    if (dirty & Dirty::Traces)
-        updateTraces(false);
-
-    if (dirty & Dirty::TracesAll)
-        updateTraces(true);
+    for (int i = 0; i < (int)TracingLayer::Count; ++i)
+        if (dirty & Dirty::Trace((TracingLayer)i))
+            updateTrace((TracingLayer)i);
 
     // After updating, begin rendering
     QPainter painter(this);
@@ -1297,7 +1297,7 @@ void AxialSliceWidget::addPoint(QPoint newPoint, bool first)
     // Add points to the mouse command so that it can be undone/redone
     mouseCommand->addPoint(points);
 
-    dirty |= Dirty::Traces;
+    dirty |= Dirty::Trace(tracingLayer);
     update();
 }
 
@@ -1414,7 +1414,7 @@ void AxialSliceWidget::erasePoint(QPoint newPoint, bool first)
     // Add points to the mouse command so that it can be undone/redone
     mouseCommand->addPoint(points);
 
-    dirty |= Dirty::Traces;
+    dirty |= Dirty::Trace(tracingLayer);
     update();
 }
 
