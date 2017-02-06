@@ -75,10 +75,9 @@ enum class TracingLayer : int
 namespace Dirty
 {
     constexpr int Slice                 = 1 << 1,
-                  Crosshair             = 1 << 2,
-                  TracesStart           = 1 << 3,
-                  TracesEnd             = 1 << (3 + (int)TracingLayer::Count),
-                  TracesAll             = (2^((int)TracingLayer::Count) - 1) << 3; // Updates each layer (Typically used when loading trace data)
+                  TracesStart           = 1 << 2,
+                  TracesEnd             = 1 << (2 + (int)TracingLayer::Count),
+                  TracesAll             = (2^((int)TracingLayer::Count) - 1) << 2; // Updates each layer (Typically used when loading trace data)
 
     constexpr int Trace(TracingLayer layer)
     {

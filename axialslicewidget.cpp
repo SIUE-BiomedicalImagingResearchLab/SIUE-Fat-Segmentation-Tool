@@ -39,7 +39,7 @@ void AxialSliceWidget::imageLoaded()
     sliceTextureSecdInit = false;
     this->traceTextureInit.fill(false);
 
-    dirty |= Dirty::Slice | Dirty::TracesAll | Dirty::Crosshair;
+    dirty |= Dirty::Slice | Dirty::TracesAll;
     update();
 }
 
@@ -53,10 +53,6 @@ void AxialSliceWidget::setLocation(QVector4D location)
     QVector4D delta = transformedLocation - this->location;
 
     this->location = transformedLocation;
-
-    // If Y value changed, then update the crosshair line
-    if (delta.y())
-        dirty |= Dirty::Crosshair;
 
     // If Z value changed, then update the texture
     if (delta.z())
@@ -556,7 +552,7 @@ QMatrix4x4 AxialSliceWidget::getNIFTIToOpenGLMatrix(bool includeMVP, bool flipY)
     QMatrix4x4 NIFTIToOpenGLMatrix;
 
     NIFTIToOpenGLMatrix.translate(-1.0f, flipY ? 1.0f : -1.0f);
-    NIFTIToOpenGLMatrix.scale(2.0f / fatImage->getXDim(), (flipY ? -2.0f : 2.0f) / fatImage->getYDim());
+    NIFTIToOpenGLMatrix.scale(2.0f / (fatImage->getXDim() - 1), (flipY ? -2.0f : 2.0f) / (fatImage->getYDim() - 1));
 
     if (includeMVP)
         return (getMVPMatrix() * NIFTIToOpenGLMatrix);
@@ -582,7 +578,6 @@ void AxialSliceWidget::resetView()
     scaling = 1.0f;
 
     // Update the screen
-    dirty |= Dirty::Crosshair;
     update();
 }
 
@@ -623,7 +618,6 @@ void AxialSliceWidget::initializeGL()
 
     initializeSliceView();
     initializeTracing();
-    initializeCrosshairLine();
     initializeColorMaps();
 }
 
@@ -730,13 +724,6 @@ void AxialSliceWidget::initializeTracing()
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
-}
-
-void AxialSliceWidget::initializeCrosshairLine()
-{
-    lineStart = QPoint(0, 0);
-    lineEnd = QPoint(0, 0);
-    lineWidth = 0;
 }
 
 void AxialSliceWidget::initializeColorMaps()
@@ -983,47 +970,6 @@ void AxialSliceWidget::updateTexture()
     dirty &= ~Dirty::Slice;
 }
 
-void AxialSliceWidget::updateCrosshairLine()
-{
-    // Start with calculating the thickness of each axial layer according to the translation/scaling factors
-    // Need to get this in terms of window coordinates b/c that is the system QPainter uses
-
-    // The NIFTI to Window matrix will be used to simply convert from NIFTI coordinates to window coordinates
-    QMatrix4x4 NIFTIToWindowMatrix = getWindowToNIFTIMatrix().inverted();
-
-    // Create a start point at top of screen (coronalSlice 0)
-    // Set the end point to be one slice down (coronalsSlice 1)
-    QVector4D start(0.0f, 0.0f, 0.0f, 1.0f);
-    QVector4D end(0.0f, 1.0f, 0.0f, 1.0f);
-
-    // Transform the start and end points from OpenGL to Window matrix (this takes into account the MVP matrix)
-    start = NIFTIToWindowMatrix * start;
-    end = NIFTIToWindowMatrix * end;
-
-    // Get the difference between the start and end point. The length is the necessary line width to accurately show how
-    // large one coronal slice is
-    QVector4D delta = end - start;
-
-    // Set lineWidth to be an integer value of the delta length. However, the
-    // lineWidth must be at least 1 so that the pen will be shown
-    lineWidth = std::max((int)std::floor(delta.length()), 1);
-
-    // Start line is left of screen at specified y value and end value is right of screen at specified y value
-    // Note: These are in NIFTI coordinate system (0 -> XDim - 1, 0 -> YDim - 1)
-    start = QVector4D(0, location.y(), 0.0f, 1.0f);
-    end = QVector4D(fatImage->getXDim() - 1, location.y(), 0.0f, 1.0f);
-
-    // Transform the points to window matrix (factors in OpenGL MVP)
-    start = NIFTIToWindowMatrix * start;
-    end = NIFTIToWindowMatrix * end;
-
-    // Convert to 2D points
-    lineStart = start.toPoint();
-    lineEnd = end.toPoint();
-
-    dirty &= ~Dirty::Crosshair;
-}
-
 void AxialSliceWidget::updateTrace(TracingLayer layer)
 {
     // Bind the texture and setup the parameters for it
@@ -1065,7 +1011,6 @@ void AxialSliceWidget::resizeGL(int w, int h)
     if (!isLoaded())
         return;
 
-    dirty |= Dirty::Crosshair;
     update();
 }
 
@@ -1078,9 +1023,6 @@ void AxialSliceWidget::paintGL()
     // Update relevant OpenGL objects if dirty
     if (dirty & Dirty::Slice)
         updateTexture();
-
-    if (dirty & Dirty::Crosshair)
-        updateCrosshairLine();
 
     for (int i = 0; i < (int)TracingLayer::Count; ++i)
         if (dirty & Dirty::Trace((TracingLayer)i))
@@ -1157,9 +1099,11 @@ void AxialSliceWidget::paintGL()
 
     painter.endNativePainting();
 
-    // Draw crosshair line
-    painter.setPen(QPen(Qt::red, lineWidth, Qt::SolidLine, Qt::RoundCap));
-    painter.drawLine(lineStart, lineEnd);
+    // Draw Crosshair Line (Set matrix to transform NIFTI coordinates -> Window coordinates)
+    // Then draw a line with a width of 1 from left of screen to right of screen at coronal location
+    painter.setTransform(getWindowToNIFTIMatrix().inverted().toTransform());
+    painter.setPen(QPen(Qt::red, 1, Qt::SolidLine, Qt::RoundCap));
+    painter.drawLine(QPoint(0, location.y()), QPoint(fatImage->getXDim() - 1, location.y()));
 
     // With painter, call beginNativePainting before doing any custom OpenGL commands
     // This is called again because the crosshair line needs to be after the NIFT image but before the tracing

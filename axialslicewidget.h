@@ -82,9 +82,6 @@ private:
     QVector<unsigned short> traceIndices;
     std::array<bool, (int)TracingLayer::Count> traceTextureInit;
 
-    QPoint lineStart, lineEnd;
-    int lineWidth;
-
     GLuint colorMapTexture[ColorMap::Count];
 
     // Location of where the user is viewing.
@@ -194,7 +191,6 @@ public:
     void setDirty(int bit);
 
     void updateTexture();
-    void updateCrosshairLine();
     void updateTrace(TracingLayer layer);
 
 protected:
@@ -204,7 +200,6 @@ protected:
 
     void initializeSliceView();
     void initializeTracing();
-    void initializeCrosshairLine();
     void initializeColorMaps();
 
     void mouseMoveEvent(QMouseEvent *eventMove);

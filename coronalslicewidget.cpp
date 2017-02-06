@@ -28,7 +28,7 @@ void CoronalSliceWidget::imageLoaded()
 {
     sliceTextureInit = false;
 
-    dirty |= Dirty::Slice | Dirty::Crosshair;
+    dirty |= Dirty::Slice;
     update();
 }
 
@@ -46,10 +46,6 @@ void CoronalSliceWidget::setLocation(QVector4D location)
     // If Y value changed, then update the texture
     if (delta.y())
         dirty |= Dirty::Slice;
-
-    // If Z value changed, then update the crosshair line
-    if (delta.z())
-        dirty |= Dirty::Crosshair;
 
     update();
 }
@@ -161,7 +157,6 @@ void CoronalSliceWidget::resetView()
     scaling = 1.0f;
 
     // Update the screen
-    dirty |= Dirty::Crosshair;
     update();
 }
 
@@ -186,7 +181,6 @@ void CoronalSliceWidget::initializeGL()
     program->setUniformValue("tex", 0);
 
     initializeSliceView();
-    initializeCrosshairLine();
 }
 
 void CoronalSliceWidget::initializeSliceView()
@@ -242,13 +236,6 @@ void CoronalSliceWidget::initializeSliceView()
     glBindVertexArray(0);
 }
 
-void CoronalSliceWidget::initializeCrosshairLine()
-{
-    lineStart = QPoint(0, 0);
-    lineEnd = QPoint(0, 0);
-    lineWidth = 0;
-}
-
 void CoronalSliceWidget::updateTexture()
 {
     cv::Mat matrix;
@@ -293,49 +280,6 @@ void CoronalSliceWidget::updateTexture()
     dirty &= ~Dirty::Slice;
 }
 
-void CoronalSliceWidget::updateCrosshairLine()
-{
-    // Start with calculating the thickness of each axial layer according to the translation/scaling factors
-    // Need to get this in terms of window coordinates b/c that is the system QPainter uses
-
-    // The NIFTI to Window matrix will be used to simply convert from NIFTI coordinates to window coordinates
-    QMatrix4x4 NIFTIToWindowMatrix = getWindowToNIFTIMatrix().inverted();
-
-    // Create a start point at top of screen (axialSlice 0)
-    // Set the end point to be one slice down (axialSlice 1)
-    QVector4D start(0.0f, 0.0f, 0.0f, 1.0f);
-    QVector4D end(0.0f, 1.0f, 0.0f, 1.0f);
-
-    // Transform the points from NIFTI coord. system to window coord system.
-    // Note: This takes into account the MVP matrix in OpenGL, so any translation,
-    // rotation, or scaling is factored in.
-    start = NIFTIToWindowMatrix * start;
-    end = NIFTIToWindowMatrix * end;
-
-    // Get the difference between the start and end point. The length is the necessary line width to accurately show how
-    // large one axial slice is
-    QVector4D delta = end - start;
-
-    // Set lineWidth to be an integer value of the delta length. However, the
-    // lineWidth must be at least 1 so that the pen will be shown
-    lineWidth = std::max((int)std::floor(delta.length()), 1);
-
-    // Start line is left of screen at specified y value and end value is right of screen at specified y value
-    // Note: These are in NIFTI coordinate system (0 -> XDim - 1, 0 -> ZDim - 1)
-    start = QVector4D(0.0f, location.z(), 0.0f, 1.0f);
-    end = QVector4D((fatImage->getXDim() - 1), location.z(), 0.0f, 1.0f);
-
-    // Transform the points to window matrix (factors in OpenGL MVP)
-    start = NIFTIToWindowMatrix * start;
-    end = NIFTIToWindowMatrix * end;
-
-    // Convert to 2D points
-    lineStart = start.toPoint();
-    lineEnd = end.toPoint();
-
-    dirty &= ~Dirty::Crosshair;
-}
-
 void CoronalSliceWidget::resizeGL(int w, int h)
 {
     // Shuts compiler up about unused variables w and h.
@@ -346,7 +290,6 @@ void CoronalSliceWidget::resizeGL(int w, int h)
     if (!isLoaded())
         return;
 
-    dirty |= Dirty::Crosshair;
     update();
 }
 
@@ -359,9 +302,6 @@ void CoronalSliceWidget::paintGL()
     // Update relevant OpenGL objects if dirty
     if (dirty & Dirty::Slice)
         updateTexture();
-
-    if (dirty & Dirty::Crosshair)
-        updateCrosshairLine();
 
     // After updating, begin rendering
     QPainter painter(this);
@@ -401,9 +341,11 @@ void CoronalSliceWidget::paintGL()
 
     painter.endNativePainting();
 
-    // Draw crosshair line
-    painter.setPen(QPen(Qt::red, lineWidth, Qt::SolidLine, Qt::RoundCap));
-    painter.drawLine(lineStart, lineEnd);
+    // Draw Crosshair Line (Set matrix to transform NIFTI coordinates -> Window coordinates)
+    // Then draw a line with a width of 1 from left of screen to right of screen at coronal location
+    painter.setTransform(getWindowToNIFTIMatrix().inverted().toTransform());
+    painter.setPen(QPen(Qt::red, 1, Qt::SolidLine, Qt::RoundCap));
+    painter.drawLine(QPoint(0, location.z()), QPoint(fatImage->getXDim() - 1, location.z()));
 }
 
 void CoronalSliceWidget::mouseMoveEvent(QMouseEvent *eventMove)
