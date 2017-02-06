@@ -32,6 +32,7 @@ enum class CommandID : int
     CoronalScale,
     LocationChange,
     BrightnessChange,
+    BrightnessThresChange,
     ContrastChange,
     PrimOpacityChange,
     SecdOpacityChange
@@ -144,6 +145,23 @@ public:
     void redo() override;
     bool mergeWith(const QUndoCommand *command) override;
     int id() const override { return (int)CommandID::BrightnessChange; }
+};
+
+class BrightnessThresChangeCommand : public QUndoCommand
+{
+private:
+    float oldThreshold;
+    float newThreshold;
+    AxialSliceWidget *widget;
+    QSpinBox *spinBox;
+
+public:
+    BrightnessThresChangeCommand(float newThreshold, AxialSliceWidget *widget, QSpinBox *spinBox, QUndoCommand *parent = NULL);
+
+    void undo() override;
+    void redo() override;
+    bool mergeWith(const QUndoCommand *command) override;
+    int id() const override { return (int)CommandID::BrightnessThresChange; }
 };
 
 class ContrastChangeCommand : public QUndoCommand

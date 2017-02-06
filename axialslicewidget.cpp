@@ -6,7 +6,7 @@ AxialSliceWidget::AxialSliceWidget(QWidget *parent) : QOpenGLWidget(parent),
     tracingLayerColors({ Qt::blue, Qt::darkCyan, Qt::cyan, Qt::magenta, Qt::yellow, Qt::green }), mouseCommand(NULL),
     slicePrimTexture(NULL), sliceSecdTexture(NULL),
     location(0, 0, 0, 0), locationLabel(NULL), primColorMap(ColorMap::Gray), primOpacity(1.0f), secdColorMap(ColorMap::Gray), secdOpacity(1.0f),
-    brightness(0.0f), contrast(1.0f), tracingLayer(TracingLayer::EAT), drawMode(DrawMode::Points), eraserBrushWidth(1),
+    brightness(0.0f), brightnessThreshold(0.0f), contrast(1.0f), tracingLayer(TracingLayer::EAT), drawMode(DrawMode::Points), eraserBrushWidth(1),
     startDraw(false), startPan(false), moveID(CommandID::AxialMove)
 {
     this->tracingLayerVisible.fill(true);
@@ -204,6 +204,28 @@ void AxialSliceWidget::setBrightness(float brightness)
     this->brightness = brightness;
 
     // Redraw the screen because the brightness has changed
+    dirty |= Dirty::Slice;
+    update();
+}
+
+float AxialSliceWidget::getBrightnessThreshold() const
+{
+    return brightnessThreshold;
+}
+
+void AxialSliceWidget::setBrightnessThreshold(float threshold)
+{
+    // If the brightness is out of the acceptable range, then do nothing
+    if (threshold < 0.0f || threshold > 1.0f)
+    {
+        qWarning() << "Invalid brightness threshold was specified for AxialSliceWidget: " << threshold;
+        return;
+    }
+
+    this->brightnessThreshold = threshold;
+
+    // Redraw the screen because the brightness has changed
+    dirty |= Dirty::Slice;
     update();
 }
 
@@ -224,6 +246,7 @@ void AxialSliceWidget::setContrast(float contrast)
     this->contrast = contrast;
 
     // Redraw the screen because the contrast has changed
+    dirty |= Dirty::Slice;
     update();
 }
 
@@ -933,6 +956,12 @@ void AxialSliceWidget::updateTexture()
         break;
     }
 
+    // Apply brightness and contrast to primary matrix
+    auto mask = (primMatrix >= brightnessThreshold);
+    cv::add(primMatrix, brightness, primMatrix, mask);
+
+    primMatrix *= contrast;
+
     // Bind the texture and setup the parameters for it
     glBindTexture(GL_TEXTURE_2D, slicePrimTexture);
     // These parameters basically say the pixel value is equal to the average of the nearby pixel values when magnifying or minifying the values
@@ -960,6 +989,12 @@ void AxialSliceWidget::updateTexture()
     // Repeat the process if the second matrix is available
     if (!secdMatrix.empty())
     {
+        // Apply brightness and contrast to secondary matrix
+        auto mask = (secdMatrix >= brightnessThreshold);
+        cv::add(secdMatrix, brightness, secdMatrix, mask);
+
+        secdMatrix *= contrast;
+
         glBindTexture(GL_TEXTURE_2D, sliceSecdTexture);
 
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -1062,8 +1097,6 @@ void AxialSliceWidget::paintGL()
     QMatrix4x4 mvpMatrix = getMVPMatrix();
 
     sliceProgram->bind();
-    sliceProgram->setUniformValue("brightness", brightness);
-    sliceProgram->setUniformValue("contrast", contrast);
     sliceProgram->setUniformValue("MVP", mvpMatrix);
     glCheckError();
 

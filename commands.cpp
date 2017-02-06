@@ -418,6 +418,56 @@ bool BrightnessChangeCommand::mergeWith(const QUndoCommand *command)
     return true;
 }
 
+// BrightnessThresChangeCommand
+// --------------------------------------------------------------------------------------------------------------------
+BrightnessThresChangeCommand::BrightnessThresChangeCommand(float newThreshold, AxialSliceWidget *widget, QSpinBox *spinBox, QUndoCommand *parent) : QUndoCommand(parent),
+    oldThreshold(widget->getBrightnessThreshold()), newThreshold(newThreshold), widget(widget), spinBox(spinBox)
+{
+    // Updates text that is shown on QUndoView
+    setText(QObject::tr("Brightness threshold set to %1%").arg(int(newThreshold * 100.0f)));
+}
+
+void BrightnessThresChangeCommand::undo()
+{
+    // Go back to the old brightness threshold
+    widget->setBrightnessThreshold(oldThreshold);
+
+    // Set the spin box value to be equal to the old brightness. It blocks all signals from the setValue so that way
+    // the valueChanged is not called again and creates a new BrightnessThresChangeCommand.
+    bool prev = spinBox->blockSignals(true);
+    spinBox->setValue(int(oldThreshold * 100.0f));
+    spinBox->blockSignals(prev);
+}
+
+void BrightnessThresChangeCommand::redo()
+{
+    // Go to the new brightness threshold
+    widget->setBrightnessThreshold(newThreshold);
+
+    // Set the spin box value to be equal to the new brightness. It blocks all signals from the setValue so that way
+    // the valueChanged is not called again and creates a new BrightnessThresChangeCommand.
+    bool prev = spinBox->blockSignals(true);
+    spinBox->setValue(int(newThreshold * 100.0f));
+    spinBox->blockSignals(prev);
+}
+
+bool BrightnessThresChangeCommand::mergeWith(const QUndoCommand *command)
+{
+    const BrightnessThresChangeCommand *brightnessThresChangeCommand = static_cast<const BrightnessThresChangeCommand *>(command);
+
+    // Since the newest command will get merged with the older command, this means the oldBrightness of the current command (this) will stay
+    // the same but the newBrightness will change to what the merged command is
+    newThreshold = brightnessThresChangeCommand->newThreshold;
+
+    // Updates text that is shown on QUndoView
+    setText(QObject::tr("Brightness threshold set to %1%").arg(int(newThreshold * 100.0f)));
+
+    //if (newThreshold == oldThreshold)
+    //   setObsolete(true);
+
+    return true;
+}
+
 // ContrastChangeCommand
 // --------------------------------------------------------------------------------------------------------------------
 ContrastChangeCommand::ContrastChangeCommand(float newContrast, AxialSliceWidget *widget, QSlider *slider, QSpinBox *spinBox, QUndoCommand *parent) : QUndoCommand(parent),

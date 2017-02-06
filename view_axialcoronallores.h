@@ -130,6 +130,8 @@ private slots:
     void on_brightnessSlider_valueChanged(int value);
     void on_brightnessSpinBox_valueChanged(int value);
 
+    void on_brightnessThresSpinBox_valueChanged(int value);
+
     void on_contrastSlider_valueChanged(int value);
     void on_contrastSpinBox_valueChanged(int value);
 

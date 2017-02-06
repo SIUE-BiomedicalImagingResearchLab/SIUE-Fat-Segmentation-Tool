@@ -581,6 +581,16 @@ void viewAxialCoronalLoRes::on_brightnessSpinBox_valueChanged(int value)
     undoStack->push(new BrightnessChangeCommand(value / 100.0f, ui->glWidgetAxial, ui->brightnessSlider, ui->brightnessSpinBox));
 }
 
+void viewAxialCoronalLoRes::on_brightnessThresSpinBox_valueChanged(int value)
+{
+    // If the new value is equal to the current value, then do nothing
+    if (value / 100.0f == ui->glWidgetAxial->getBrightnessThreshold())
+        return;
+
+    // Add a BrightnessThresChangeCommand to change the brightness threshold
+    undoStack->push(new BrightnessThresChangeCommand(value / 100.0f, ui->glWidgetAxial, ui->brightnessThresSpinBox));
+}
+
 void viewAxialCoronalLoRes::on_contrastSlider_valueChanged(int value)
 {
     // If the new value is equal to the current value, then do nothing

@@ -97,6 +97,7 @@ private:
     float secdOpacity;
 
     float brightness;
+    float brightnessThreshold;
     float contrast;
 
     // Sets whether drawing or erasing...useful if new draw modes are added like drawing lines
@@ -157,6 +158,9 @@ public:
 
     float getBrightness() const;
     void setBrightness(float brightness);
+
+    float getBrightnessThreshold() const;
+    void setBrightnessThreshold(float threshold);
 
     float getContrast() const;
     void setContrast(float contrast);
