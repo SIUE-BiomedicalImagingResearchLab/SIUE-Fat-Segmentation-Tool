@@ -1161,8 +1161,10 @@ void AxialSliceWidget::addPoint(QPoint newPoint, bool first)
     const auto windowToNIFTIMatrix = getWindowToNIFTIMatrix();
     const QPoint lastPoint = lastMousePos;
 
-    QPoint NIFTICoord = (windowToNIFTIMatrix * newPoint);
-    QPoint lastNIFTICoord = (windowToNIFTIMatrix * lastPoint);
+    QPoint NIFTICoord = (windowToNIFTIMatrix * QPointF(newPoint)).toPoint();
+    QPoint lastNIFTICoord = (windowToNIFTIMatrix * QPointF(lastPoint)).toPoint();
+
+    qDebug() << "Adding point at " << NIFTICoord << "Mouse Point: " << newPoint;
 
     // Handle adding the first point to the mouse command
     // This requires a different path because linear interpolation and other methods are not required
