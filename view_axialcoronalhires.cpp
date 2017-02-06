@@ -31,7 +31,10 @@ viewAxialCoronalHiRes::viewAxialCoronalHiRes(QWidget *parent, NIFTImage *fatImag
     SCATRadioBtnShortcut(new QShortcut(QKeySequence("5"), this)), VATRadioBtnShortcut(new QShortcut(QKeySequence("6"), this)),
     EATCheckBoxShortcut(new QShortcut(QKeySequence("Ctrl+1"), this)), IMATCheckBoxShortcut(new QShortcut(QKeySequence("Ctrl+2"), this)),
     PAATCheckBoxShortcut(new QShortcut(QKeySequence("Ctrl+3"), this)), PATCheckBoxShortcut(new QShortcut(QKeySequence("Ctrl+4"), this)),
-    SCATCheckBoxShortcut(new QShortcut(QKeySequence("Ctrl+5"), this)), VATCheckBoxShortcut(new QShortcut(QKeySequence("Ctrl+6"), this))
+    SCATCheckBoxShortcut(new QShortcut(QKeySequence("Ctrl+5"), this)), VATCheckBoxShortcut(new QShortcut(QKeySequence("Ctrl+6"), this)),
+
+    drawPointsModeShortcut(new QShortcut(QKeySequence("z"), this)),
+    erasePointsModeShortcut(new QShortcut(QKeySequence("x"), this))
 {
     this->ui->setupUi(this);
 
@@ -87,6 +90,9 @@ viewAxialCoronalHiRes::viewAxialCoronalHiRes(QWidget *parent, NIFTImage *fatImag
     connect(PATCheckBoxShortcut, SIGNAL(activated()), ui->PATCheckBox, SLOT(toggle()));
     connect(SCATCheckBoxShortcut, SIGNAL(activated()), ui->SCATCheckBox, SLOT(toggle()));
     connect(VATCheckBoxShortcut, SIGNAL(activated()), ui->VATCheckBox, SLOT(toggle()));
+
+    connect(drawPointsModeShortcut, SIGNAL(activated()), ui->drawPointsBtn, SLOT(click()));
+    connect(erasePointsModeShortcut, SIGNAL(activated()), ui->eraserBtn, SLOT(click()));
 
     // Actions
     connect(parentMain()->ui->actionOpen, SIGNAL(triggered()), this, SLOT(actionOpen_triggered()));
@@ -230,6 +236,9 @@ void viewAxialCoronalHiRes::setEnableSettings(bool enable)
     PATCheckBoxShortcut->setEnabled(enable);
     SCATCheckBoxShortcut->setEnabled(enable);
     VATCheckBoxShortcut->setEnabled(enable);
+
+    drawPointsModeShortcut->setEnabled(enable);
+    erasePointsModeShortcut->setEnabled(enable);
 }
 
 void viewAxialCoronalHiRes::setupDefaults()
@@ -934,7 +943,10 @@ viewAxialCoronalHiRes::~viewAxialCoronalHiRes()
     delete PAATCheckBoxShortcut;
     delete PATCheckBoxShortcut;
     delete SCATCheckBoxShortcut;
-    delete VATCheckBoxShortcut;;
+    delete VATCheckBoxShortcut;
+
+    delete drawPointsModeShortcut;
+    delete erasePointsModeShortcut;
 
     delete ui;
 }

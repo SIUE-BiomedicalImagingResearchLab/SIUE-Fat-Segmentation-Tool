@@ -956,7 +956,7 @@
               <item row="0" column="0">
                <widget class="QPushButton" name="drawPointsBtn">
                 <property name="toolTip">
-                 <string>Draw Points</string>
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Draw Points&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Shortcut: &lt;/span&gt;Z&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                 </property>
                 <property name="text">
                  <string/>
@@ -986,7 +986,7 @@
               <item row="0" column="1">
                <widget class="QPushButton" name="eraserBtn">
                 <property name="toolTip">
-                 <string>Eraser</string>
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Eraser&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Shortcut: &lt;/span&gt;Z&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                 </property>
                 <property name="text">
                  <string/>

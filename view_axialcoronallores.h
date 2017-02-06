@@ -49,6 +49,12 @@ private:
 
     QLabel *lblStatusLocation;
 
+    // Home Tab Shortcuts
+    QShortcut *upShortcut;
+    QShortcut *downShortcut;
+    QShortcut *leftShortcut;
+    QShortcut *rightShortcut;
+
     // Axial Display Tab Shortcuts
     QShortcut *fatRadioBtnShortcut;
     QShortcut *waterRadioBtnShortcut;
@@ -74,10 +80,8 @@ private:
     QShortcut *SCATCheckBoxShortcut;
     QShortcut *VATCheckBoxShortcut;
 
-    QShortcut *upShortcut;
-    QShortcut *downShortcut;
-    QShortcut *leftShortcut;
-    QShortcut *rightShortcut;
+    QShortcut *drawPointsModeShortcut;
+    QShortcut *erasePointsModeShortcut;
 
 public:
     explicit viewAxialCoronalLoRes(QWidget *parent, NIFTImage *fatImage, NIFTImage *waterImage, SubjectConfig *subConfig, TracingData *tracingData);
