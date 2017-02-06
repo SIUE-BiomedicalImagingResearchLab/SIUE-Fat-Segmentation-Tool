@@ -195,7 +195,6 @@ public:
 
     void updateTexture();
     void updateCrosshairLine();
-    void updateTraces(bool allOrCurrent);
     void updateTrace(TracingLayer layer);
 
 protected:
@@ -207,8 +206,6 @@ protected:
     void initializeTracing();
     void initializeCrosshairLine();
     void initializeColorMaps();
-
-    //void addPoint(QPoint mouseCoord);
 
     void mouseMoveEvent(QMouseEvent *eventMove);
     void mousePressEvent(QMouseEvent *eventPress);

@@ -1055,21 +1055,6 @@ void AxialSliceWidget::updateTrace(TracingLayer layer)
     dirty &= ~Dirty::Trace(layer);
 }
 
-void AxialSliceWidget::updateTraces(bool allOrCurrent)
-{
-    if (allOrCurrent)
-    {
-        for (int i = 0; i < (int)TracingLayer::Count; ++i)
-            updateTrace((TracingLayer)i);
-        //dirty &= ~(Dirty::TracesAll | Dirty::Traces);
-    }
-    else
-    {
-        updateTrace(tracingLayer);
-        //dirty &= ~Dirty::Traces;
-    }
-}
-
 void AxialSliceWidget::resizeGL(int w, int h)
 {
     // Shuts compiler up about unused variables w and h.
@@ -1303,7 +1288,6 @@ void AxialSliceWidget::addPoint(QPoint newPoint, bool first)
 
 void AxialSliceWidget::erasePoint(QPoint newPoint, bool first)
 {
-    qDebug() << "Point erased...";
     const auto windowToNIFTIMatrix = getWindowToNIFTIMatrix();
     const QPoint lastPoint = lastMousePos;
 
