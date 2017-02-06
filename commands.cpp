@@ -217,7 +217,7 @@ LocationChangeCommand::LocationChangeCommand(QVector4D newLocation, AxialSliceWi
     saggitalSlider(saggitalSlider), saggitalSpinBox(saggitalSpinBox)
 {
     // Set text shown on QUndoView
-    QVector4D delta = newLocation - oldLocation;
+    QVector4D delta = this->newLocation - oldLocation;
     QString str("Move to ");
 
     if (delta.x())
@@ -783,11 +783,9 @@ void TracingLayerVisibleChangeCommand::redo()
 
 // TracingPointsAddCommand
 // --------------------------------------------------------------------------------------------------------------------
-TracingPointsAddCommand::TracingPointsAddCommand(QPoint point, AxialSliceWidget *widget, QUndoCommand *parent) : QUndoCommand(parent),
+TracingPointsAddCommand::TracingPointsAddCommand(AxialSliceWidget *widget, QUndoCommand *parent) : TracingCommand(parent),
     widget(widget)
 {
-    this->points.push_back(point);
-
     // Get a text string based on the layer that points are being added too (current layer)
     QString str;
     switch (widget->getTracingLayer())
@@ -806,6 +804,7 @@ TracingPointsAddCommand::TracingPointsAddCommand(QPoint point, AxialSliceWidget 
 
 void TracingPointsAddCommand::undo()
 {
+    qDebug() << "Undo! " << (int)widget->getTracingLayer();
     const auto z = widget->getLocation().z();
 
     for (QPoint point : points)
@@ -817,6 +816,7 @@ void TracingPointsAddCommand::undo()
 
 void TracingPointsAddCommand::redo()
 {
+    qDebug() << "Redo! " << (int)widget->getTracingLayer();
     const auto z = widget->getLocation().z();
 
     for (QPoint point : points)
@@ -826,59 +826,48 @@ void TracingPointsAddCommand::redo()
     widget->update();
 }
 
-void TracingPointsAddCommand::addPoint(QPoint newPoint)
+// TracingPointsEraseCommand
+// --------------------------------------------------------------------------------------------------------------------
+TracingPointsEraseCommand::TracingPointsEraseCommand(AxialSliceWidget *widget, QUndoCommand *parent) : TracingCommand(parent),
+    widget(widget)
 {
-    auto &pointVal = widget->getTraceSlices().at(newPoint.x(), newPoint.y(), widget->getLocation().z());
-
-    // If the point is already set, then dont set it again
-    if (pointVal == 255)
-        return;
-
-    if (points.size() > 0) // There must be existing points in the list
+    // Get a text string based on the layer that points are being added too (current layer)
+    QString str;
+    switch (widget->getTracingLayer())
     {
-        // Perform linear interpolation between current point (newPoint)
-        // and last point in points
-        const QPointF newPointF = newPoint;
-        const QPointF lastPoint = points.back();
-
-        // Dont add duplicate points
-        if (lastPoint == newPointF)
-            return;
-
-        // The length approximates how many units are between the two points
-        // Therefore, 1/length should be the approximate step value in percent
-        // to get all of the points between currentPoint and lastPoint
-        const float steps = 1 / QVector2D(newPointF - lastPoint).length();
-        float percent = 0.0f;
-
-        while (percent < 1.0f)
-        {
-            QPoint interPoint = util::lerp(lastPoint, newPointF, percent).toPoint();
-
-            // Skip if the previous point equals this point
-            // This will occur when rounding errors happen and return the same point
-            if (interPoint != points.back())
-            {
-                // Skip if the point is already set to be a fat point. No need to set it twice
-                auto &interVal = widget->getTraceSlices().at(interPoint.x(), interPoint.y(), widget->getLocation().z());
-                if (interVal != 255)
-                {
-                    points.push_back(interPoint);
-                    interVal = 255;
-                }
-            }
-
-            percent += steps;
-        }
+        case TracingLayer::EAT: str = "EAT"; break;
+        case TracingLayer::IMAT: str = "IMAT"; break;
+        case TracingLayer::PAAT: str = "PAAT"; break;
+        case TracingLayer::PAT: str = "PAT"; break;
+        case TracingLayer::SCAT: str = "SCAT"; break;
+        case TracingLayer::VAT: str = "VAT"; break;
     }
 
-    points.push_back(newPoint);
-    pointVal = 255;
+    // Updates text that is shown on QUndoView
+    setText(QObject::tr("Erased points from %1 layer").arg(str));
+}
+
+void TracingPointsEraseCommand::undo()
+{
+    const auto z = widget->getLocation().z();
+
+    for (QPoint point : points)
+        widget->getTraceSlices().set(point.x(), point.y(), z);
 
     widget->setDirty(Dirty::Traces);
     widget->update();
 }
 
+void TracingPointsEraseCommand::redo()
+{
+    const auto z = widget->getLocation().z();
+
+    for (QPoint point : points)
+        widget->getTraceSlices().reset(point.x(), point.y(), z);
+
+    widget->setDirty(Dirty::Traces);
+    widget->update();
+}
 
 // DrawModeChangeCommand
 // --------------------------------------------------------------------------------------------------------------------

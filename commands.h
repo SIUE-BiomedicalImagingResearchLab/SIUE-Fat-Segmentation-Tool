@@ -276,24 +276,45 @@ public:
     void redo() override;
 };
 
+class TracingCommand : public QUndoCommand
+{
+protected:
+    std::vector<QPoint> points;
+
+public:
+    TracingCommand(QUndoCommand *parent = NULL) : QUndoCommand(parent) { }
+
+    void addPoint(QPoint newPoint) { points.push_back(newPoint); }
+    void addPoint(std::vector<QPoint> &newPoints) { points.insert(std::end(points), std::begin(newPoints), std::end(newPoints)); }
+};
+
 /* Note: This class will assume that the layer and axial slice that is being drawn on is the current layer and axial slice.
  * This is a safe assumption so long as QUndoStack keeps track of all layer changes and axial slice changes. This will cause
  * a new class to be made for each axial slice AND layer. Also, the user must release their mouse before they can change the
  * slice or layer. (Which will cause the command to be done)
  */
-class TracingPointsAddCommand : public QUndoCommand
+class TracingPointsAddCommand : public TracingCommand
 {
 private:
-    std::vector<QPoint> points;
     AxialSliceWidget *widget;
 
 public:
-    TracingPointsAddCommand(QPoint point, AxialSliceWidget *widget, QUndoCommand *parent = NULL);
+    TracingPointsAddCommand(AxialSliceWidget *widget, QUndoCommand *parent = NULL);
 
     void undo() override;
     void redo() override;
+};
 
-    void addPoint(QPoint newPoint);
+class TracingPointsEraseCommand : public TracingCommand
+{
+private:
+    AxialSliceWidget *widget;
+
+public:
+    TracingPointsEraseCommand(AxialSliceWidget *widget, QUndoCommand *parent = NULL);
+
+    void undo() override;
+    void redo() override;
 };
 
 class DrawModeChangeCommand : public QUndoCommand

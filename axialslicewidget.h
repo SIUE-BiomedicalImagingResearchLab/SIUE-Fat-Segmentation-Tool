@@ -59,7 +59,7 @@ private:
     TracingData *tracingData;
 
     std::array<QColor, (size_t)TracingLayer::Count> tracingLayerColors;
-    TracingPointsAddCommand *mouseCommand;
+    TracingCommand *mouseCommand;
 
     // Each bit represents whether the specified item in Dirty enum needs to be updated on drawing
     int dirty;
@@ -180,6 +180,9 @@ public:
     bool saveTracingData(QString path, bool promptOnOverwrite = true);
     bool loadTracingData(QString path);
 
+    void addPoint(QPoint newPoint, bool first);
+    void erasePoint(QPoint newPoint, bool first);
+
     QMatrix4x4 getMVPMatrix() const;
 
     QMatrix4x4 getWindowToNIFTIMatrix(bool includeMVP = true) const;
@@ -205,7 +208,7 @@ protected:
     void initializeCrosshairLine();
     void initializeColorMaps();
 
-    void addPoint(QPointF mouseCoord);
+    //void addPoint(QPoint mouseCoord);
 
     void mouseMoveEvent(QMouseEvent *eventMove);
     void mousePressEvent(QMouseEvent *eventPress);

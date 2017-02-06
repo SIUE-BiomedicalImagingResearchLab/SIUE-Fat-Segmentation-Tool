@@ -77,7 +77,6 @@ QVector4D AxialSliceWidget::getLocation() const
 QVector4D AxialSliceWidget::transformLocation(QVector4D location) const
 {
     // This function returns a QVector4D that replaces Location::NoChange's from location variable with actual location value
-
     QVector4D temp(location.x() == Location::NoChange, location.y() == Location::NoChange, location.z() == Location::NoChange, location.w() == Location::NoChange);
     QVector4D notTemp = QVector4D(1.0f, 1.0f, 1.0f, 1.0f) - temp;
     return (location * notTemp) + (this->location * temp);
@@ -1228,27 +1227,195 @@ void AxialSliceWidget::paintGL()
     painter.endNativePainting();
 }
 
-void AxialSliceWidget::addPoint(QPointF mouseCoord)
+void AxialSliceWidget::addPoint(QPoint newPoint, bool first)
 {
-    QPoint NIFTICoord = (getWindowToNIFTIMatrix() * mouseCoord).toPoint();
+    const auto windowToNIFTIMatrix = getWindowToNIFTIMatrix();
+    const QPoint lastPoint = lastMousePos;
 
-    if (QRect(0, 0, fatImage->getXDim(), fatImage->getYDim()).contains(NIFTICoord))
+    QPoint NIFTICoord = (windowToNIFTIMatrix * newPoint);
+    QPoint lastNIFTICoord = (windowToNIFTIMatrix * lastPoint);
+
+    // Handle adding the first point to the mouse command
+    // This requires a different path because linear interpolation and other methods are not required
+    if (first)
     {
-        // Mouse Command Created is a boolean variable to store whether a TracingPointsAddCommand
-        // was added since the mouse has been clicked down. This is necessary because the user can
-        // mouse down outside of the NIFTI image, move around, and end up outside the NIFTI image
-        // without drawing a single point. Therefore, a boolean is checked and a command is created
-        // whenever the first point is to be added to the list.
-        if (!mouseCommand)
+        mouseCommand->addPoint(NIFTICoord);
+        return;
+    }
+
+    const QRect bounds(0, 0, fatImage->getXDim(), fatImage->getYDim());
+    // If the current and previous NIFTI coordinates are NOT in the bounds of the NIFTI image, then dont add any points
+    if (lastNIFTICoord == NIFTICoord || (!bounds.contains(NIFTICoord) && !bounds.contains(lastNIFTICoord)))
+        return;
+
+    // Clamp the current and previous NIFTI coordinates to the NIFTI image boundary
+    NIFTICoord = util::clamp(NIFTICoord, bounds);
+    lastNIFTICoord = util::clamp(lastNIFTICoord, bounds);
+
+    std::vector<QPoint> points({ lastNIFTICoord });
+
+    // Linear Interpolation between NIFTICoord and lastNIFTICoord to get in between values
+    // ----------------------------------------------------------------------------------------------------------------------------------------
+    // The length approximates how many units are between the two points
+    // Therefore, 1/length should be the approximate step value in percent to get all of the points between currentPoint and lastPoint
+    const float steps = 1 / QVector2D(NIFTICoord - lastNIFTICoord).length();
+    float percent = 0.0f;
+
+    while (percent < 1.0f)
+    {
+        QPoint interPoint = util::lerp(QPointF(lastNIFTICoord), QPointF(NIFTICoord), percent).toPoint();
+
+        // Skip if the previous point equals this point
+        // This will occur when rounding errors happen and return the same point
+        if (interPoint != points.back())
         {
-            mouseCommand = new TracingPointsAddCommand(NIFTICoord, this);
-            undoStack->push(mouseCommand);
+            // Skip if the point is already set to be a fat point. No need to set it twice
+            auto &interVal = (*tracingData)[tracingLayer].at(interPoint.x(), interPoint.y(), location.z());
+            if (interVal != 255)
+            {
+                points.push_back(interPoint);
+                interVal = 255;
+            }
         }
-        else
+
+        percent += steps;
+    }
+
+    // Remove the first element which was lastPoint. This was used with linear interpolation algorithm to easily check if the interpolated point
+    // equals the last point. For the first element, the points vector is empty and so additional checks are required. Instead, the lastPoint is
+    // added so that the first element can be checked
+    points.erase(std::begin(points));
+
+    // Only set the actual given mouse coordinate if it is not already set
+    auto &pointVal = (*tracingData)[tracingLayer].at(NIFTICoord.x(), NIFTICoord.y(), location.z());
+    if (pointVal != 255)
+    {
+        points.push_back(NIFTICoord);
+        pointVal = 255;
+    }
+
+    // Add points to the mouse command so that it can be undone/redone
+    mouseCommand->addPoint(points);
+
+    dirty |= Dirty::Traces;
+    update();
+}
+
+void AxialSliceWidget::erasePoint(QPoint newPoint, bool first)
+{
+    qDebug() << "Point erased...";
+    const auto windowToNIFTIMatrix = getWindowToNIFTIMatrix();
+    const QPoint lastPoint = lastMousePos;
+
+    QPoint NIFTICoord = (windowToNIFTIMatrix * newPoint);
+    QPoint lastNIFTICoord = (windowToNIFTIMatrix * lastPoint);
+
+    const QRect bounds(0, 0, fatImage->getXDim(), fatImage->getYDim());
+
+    // Handle adding the first point to the mouse command
+    // This requires a different path because linear interpolation and other methods are not required
+    if (first)
+    {
+        std::vector<QPoint> points;
+
+        const QRect brushRect(-4, -4, 4, 4); // Maybe QRectF? Nah, round it to QRect
+        int x1, x2, y1, y2;
+
+        auto translated = util::clamp(brushRect.translated(NIFTICoord), bounds);
+        translated.getCoords(&x1, &y1, &x2, &y2);
+
+        for (int x = x1; x <= x2; ++x)
         {
-            mouseCommand->addPoint(NIFTICoord);
+            for (int y = y1; y <= y2; ++y)
+            {
+                // Skip if the point is already set to be a fat point. No need to set it twice
+                auto &pointVal = (*tracingData)[tracingLayer].at(x, y, location.z());
+                if (pointVal != 0)
+                {
+                    points.push_back(QPoint(x, y));
+                    pointVal = 0;
+                }
+            }
+        }
+
+        mouseCommand->addPoint(points);
+        return;
+    }
+
+    // If the current and previous NIFTI coordinates are NOT in the bounds of the NIFTI image, then dont add any points
+    if (lastNIFTICoord == NIFTICoord || (!bounds.contains(NIFTICoord) && !bounds.contains(lastNIFTICoord)))
+        return;
+
+    // Clamp the current and previous NIFTI coordinates to the NIFTI image boundary
+    NIFTICoord = util::clamp(NIFTICoord, bounds.topLeft(), bounds.bottomRight());
+    lastNIFTICoord = util::clamp(lastNIFTICoord, bounds.topLeft(), bounds.bottomRight());
+
+    // This represents a linear interpolation between the last mouse and current mouse point in NIFTI coordinates. It will be the center point
+    // for the circle radius that is erased around it
+    std::vector<QPoint> eraseCenterPoints({ lastNIFTICoord });
+    // This is the actual list of points that was removed
+    std::vector<QPoint> points;
+
+    // Linear Interpolation between NIFTICoord and lastNIFTICoord to get in between values
+    // ----------------------------------------------------------------------------------------------------------------------------------------
+    // The length approximates how many units are between the two points
+    // Therefore, 1/length should be the approximate step value in percent to get all of the points between currentPoint and lastPoint
+    const float steps = 1 / QVector2D(NIFTICoord - lastNIFTICoord).length();
+    float percent = 0.0f;
+
+    while (percent < 1.0f)
+    {
+        QPoint interPoint = util::lerp(QPointF(lastNIFTICoord), QPointF(NIFTICoord), percent).toPoint();
+
+        // Skip if the previous point equals this point
+        // This will occur when rounding errors happen and return the same point
+        if (interPoint != eraseCenterPoints.back())
+            eraseCenterPoints.push_back(interPoint);
+
+        percent += steps;
+    }
+
+    // Remove the first element which was lastPoint. This was used with linear interpolation algorithm to easily check if the interpolated point
+    // equals the last point. For the first element, the points vector is empty and so additional checks are required. Instead, the lastPoint is
+    // added so that the first element can be checked
+    eraseCenterPoints.erase(std::begin(eraseCenterPoints));
+
+    // Add the current NIFTI coord to erase center points
+    eraseCenterPoints.push_back(NIFTICoord);
+
+    // Compute Points to be erased based on eraseCenterPoints
+    // -------------------------------------------------------------------------------------------------------------------------------------
+    // TODO: Set brush width programatically
+    // Left/Top is -brushWidth / 2
+    // Right/Bottom is brushWidth / 2
+    const QRect brushRect(-4, -4, 4, 4); // Maybe QRectF? Nah, round it to QRect
+    int x1, x2, y1, y2;
+
+    for (QPoint eraseCenter : eraseCenterPoints)
+    {
+        auto translated = util::clamp(brushRect.translated(eraseCenter), bounds);
+        translated.getCoords(&x1, &y1, &x2, &y2);
+
+        for (int x = x1; x <= x2; ++x)
+        {
+            for (int y = y1; y <= y2; ++y)
+            {
+                // Skip if the point is already set to be a fat point. No need to set it twice
+                auto &pointVal = (*tracingData)[tracingLayer].at(x, y, location.z());
+                if (pointVal != 0)
+                {
+                    points.push_back(QPoint(x, y));
+                    pointVal = 0;
+                }
+            }
         }
     }
+
+    // Add points to the mouse command so that it can be undone/redone
+    mouseCommand->addPoint(points);
+
+    dirty |= Dirty::Traces;
+    update();
 }
 
 void AxialSliceWidget::mouseMoveEvent(QMouseEvent *eventMove)
@@ -1258,33 +1425,32 @@ void AxialSliceWidget::mouseMoveEvent(QMouseEvent *eventMove)
 
     if (startDraw)
     {
-        addPoint(eventMove->pos());
+        switch (drawMode)
+        {
+            case DrawMode::Points: addPoint(eventMove->pos(), false); break;
+            case DrawMode::Erase: erasePoint(eventMove->pos(), false); break;
+        }
     }
     else if (startPan)
     {
-        // Change in mouse x/y based on last mouse position
-        QPointF curMousePos = eventMove->pos();
-        QPointF lastMousePos_ = lastMousePos;
-
         // Get matrix for converting from window to OpenGL coordinate system
         // Note: Do not apply MVP because we do not want to see movement based on
         // scaling (this means dont flip it either)
         QMatrix4x4 windowToOpenGLMatrix = getWindowToOpenGLMatrix(false, false);
 
         // Apply transformation to current and last mouse position
-        curMousePos = windowToOpenGLMatrix * curMousePos;
-        lastMousePos_ = windowToOpenGLMatrix * lastMousePos_;
+        QPoint curMousePos = windowToOpenGLMatrix * curMousePos;
+        QPoint lastMousePos_ = windowToOpenGLMatrix * lastMousePos_;
 
         // Get the delta
-        QPointF delta = (curMousePos - lastMousePos_);
+        QPoint delta = (curMousePos - lastMousePos_);
 
         // Push a new move command on the undoStack. This will call the command but also keep track
         // of it if an undo or redo action is called. redo function is called immediately.
         undoStack->push(new AxialMoveCommand(delta, this, moveID));
-
-        // Set last mouse position to this one
-        lastMousePos = eventMove->pos();
     }
+
+    lastMousePos = eventMove->pos();
 }
 
 void AxialSliceWidget::mousePressEvent(QMouseEvent *eventPress)
@@ -1305,9 +1471,15 @@ void AxialSliceWidget::mousePressEvent(QMouseEvent *eventPress)
         if (startPan)
             startPan = false;
 
-        startDraw = true;
+        switch (drawMode)
+        {
+            case DrawMode::Points: mouseCommand = new TracingPointsAddCommand(this); addPoint(eventPress->pos(), true); break;
+            case DrawMode::Erase: mouseCommand = new TracingPointsEraseCommand(this); erasePoint(eventPress->pos(), true); break;
+        }
+
+        undoStack->push(mouseCommand);
         drawTimer.start();
-        addPoint(eventPress->pos());
+        startDraw = true;
     }
     else if (eventPress->button() == Qt::MiddleButton)
     {
@@ -1325,8 +1497,14 @@ void AxialSliceWidget::mousePressEvent(QMouseEvent *eventPress)
         // The starting position is stored so to know how much movement has occurred
         startPan = true;
         moveID = (((int)moveID + 1) > (int)CommandID::AxialMoveEnd) ? CommandID::AxialMove : (CommandID)((int)moveID + 1);
-        lastMousePos = eventPress->pos();
     }
+    else if (eventPress->button() == Qt::RightButton)
+    {
+        QPoint NIFTICoord = (getWindowToNIFTIMatrix() * eventPress->pos());
+        qInfo() << "The point clicked is located at: (" << NIFTICoord.x() << ", " << NIFTICoord.y() << ", " << location.z() << ")";
+    }
+
+    lastMousePos = eventPress->pos();
 }
 
 void AxialSliceWidget::mouseReleaseEvent(QMouseEvent *eventRelease)
@@ -1336,10 +1514,15 @@ void AxialSliceWidget::mouseReleaseEvent(QMouseEvent *eventRelease)
 
     if (eventRelease->button() == Qt::LeftButton && startDraw)
     {
-        addPoint(eventRelease->pos());
+        switch (drawMode)
+        {
+            case DrawMode::Points: addPoint(eventRelease->pos(), false); break;
+            case DrawMode::Erase: erasePoint(eventRelease->pos(), false); break;
+        }
+
         (*tracingData)[tracingLayer].time[location.z()] += std::chrono::milliseconds(drawTimer.elapsed());
-        startDraw = false;
         mouseCommand = NULL;
+        startDraw = false;
     }
     else if (eventRelease->button() == Qt::MiddleButton && startPan)
     {

@@ -46,6 +46,64 @@ QVector2D clamp(QVector2D vector, QVector2D min, QVector2D max)
     return vector;
 }
 
+QPoint clamp(QPoint point, QPoint min, QPoint max)
+{
+    point.setX(std::min(std::max(point.x(), min.x()), max.x()));
+    point.setY(std::min(std::max(point.y(), min.y()), max.y()));
+
+    return point;
+}
+
+QPoint clamp(QPoint point, QRect bounds)
+{
+    return clamp(point, bounds.topLeft(), bounds.bottomRight());
+}
+
+QPointF clamp(QPointF point, QPointF min, QPointF max)
+{
+    point.setX(std::min(std::max(point.x(), min.x()), max.x()));
+    point.setY(std::min(std::max(point.y(), min.y()), max.y()));
+
+    return point;
+}
+
+QPointF clamp(QPointF point, QRectF bounds)
+{
+    return clamp(point, bounds.topLeft(), bounds.bottomRight());
+}
+
+QRect clamp(QRect rect, QPoint min, QPoint max)
+{
+    rect.setTopLeft(clamp(rect.topLeft(), min, max));
+    rect.setBottomRight(clamp(rect.bottomRight(), min, max));
+
+    return rect;
+}
+
+QRect clamp(QRect rect, QRect bounds)
+{
+    rect.setTopLeft(clamp(rect.topLeft(), bounds));
+    rect.setBottomRight(clamp(rect.bottomRight(), bounds));
+
+    return rect;
+}
+
+QRectF clamp(QRectF rect, QPointF min, QPointF max)
+{
+    rect.setTopLeft(clamp(rect.topLeft(), min, max));
+    rect.setBottomRight(clamp(rect.bottomRight(), min, max));
+
+    return rect;
+}
+
+QRectF clamp(QRectF rect, QRectF bounds)
+{
+    rect.setTopLeft(clamp(rect.topLeft(), bounds));
+    rect.setBottomRight(clamp(rect.bottomRight(), bounds));
+
+    return rect;
+}
+
 QVector4D lerp(QVector4D start, QVector4D end, float percent)
 {
     return (start + percent * (end - start));

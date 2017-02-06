@@ -5,6 +5,10 @@
 #include <QVector2D>
 #include <QVector3D>
 #include <QVector4D>
+#include <QPoint>
+#include <QPointF>
+#include <QRect>
+#include <QRectF>
 #include <QOpenGLFunctions_3_3_Core>
 #include <QKeySequence>
 #include <QDebug>
@@ -25,6 +29,14 @@ QKeySequence getStandardSequence(QKeySequence::StandardKey standardKey, QKeySequ
 QVector4D clamp(QVector4D vector, QVector4D min, QVector4D max);
 QVector3D clamp(QVector3D vector, QVector3D min, QVector3D max);
 QVector2D clamp(QVector2D vector, QVector2D min, QVector2D max);
+QPoint clamp(QPoint point, QPoint min, QPoint max);
+QPoint clamp(QPoint point, QRect bounds);
+QPointF clamp(QPointF point, QPointF min, QPointF max);
+QPointF clamp(QPointF point, QRectF bounds);
+QRect clamp(QRect rect, QPoint min, QPoint max);
+QRect clamp(QRect rect, QRect bounds);
+QRectF clamp(QRectF rect, QPointF min, QPointF max);
+QRectF clamp(QRectF rect, QRectF bounds);
 
 // Note: percent needs to be in range of [0.0, 1.0]
 // 0.0: Return start, 1.0: Return end
