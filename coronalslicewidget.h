@@ -46,9 +46,6 @@ private:
     QVector<unsigned short> sliceIndices;
     bool sliceTextureInit;
 
-    QPoint lineStart, lineEnd;
-    int lineWidth;
-
     // Location of where the user is viewing.
     // The format is (X, Y, Z, T) where T is time
     QVector4D location;
@@ -99,7 +96,6 @@ public:
     void setDirty(int bit);
 
     void updateTexture();
-    void updateCrosshairLine();
 
 protected:
     void initializeGL();
@@ -107,7 +103,6 @@ protected:
     void paintGL();
 
     void initializeSliceView();
-    void initializeCrosshairLine();
 
     void mouseMoveEvent(QMouseEvent *eventMove);
     void mousePressEvent(QMouseEvent *eventPress);
