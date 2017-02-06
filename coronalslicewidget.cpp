@@ -427,9 +427,14 @@ void CoronalSliceWidget::wheelEvent(QWheelEvent *event)
         // Zoom in 5% every 15 degrees which is one step on most mouses
         float scaleDelta = numDegrees.y() * (0.05f / 15);
 
+        // Clamp the scaleDelta so that the resulting scaling factor is between 0.05f to 3.0f
+        scaleDelta = std::max(std::min((scaling + scaleDelta), 3.0f), 0.05f) - scaling;
+
         // Push a new scale command on the undo stack which will immediately call redo for an action.
         // This keeps track of it if an undo or redo command is called
-        undoStack->push(new CoronalScaleCommand(scaleDelta, this));
+        // Only push to the stack if there is a delta
+        if (scaleDelta != 0.0f)
+            undoStack->push(new CoronalScaleCommand(scaleDelta, this));
     }
 }
 
