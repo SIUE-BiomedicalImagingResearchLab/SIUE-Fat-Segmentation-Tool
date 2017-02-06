@@ -861,8 +861,8 @@ void TracingPointsEraseCommand::redo()
 
 // DrawModeChangeCommand
 // --------------------------------------------------------------------------------------------------------------------
-DrawModeChangeCommand::DrawModeChangeCommand(DrawMode newDrawMode, AxialSliceWidget *widget, QPushButton *oldBtn, QPushButton *newBtn, QString str, QUndoCommand *parent) : QUndoCommand(parent),
-    oldDrawMode(widget->getDrawMode()), newDrawMode(newDrawMode), widget(widget), oldBtn(oldBtn), newBtn(newBtn)
+DrawModeChangeCommand::DrawModeChangeCommand(DrawMode newDrawMode, AxialSliceWidget *widget, QStackedWidget *stackWidget, QPushButton *oldBtn, QPushButton *newBtn, QString str, QUndoCommand *parent) : QUndoCommand(parent),
+    oldDrawMode(widget->getDrawMode()), newDrawMode(newDrawMode), widget(widget), stackWidget(stackWidget), oldBtn(oldBtn), newBtn(newBtn)
 {
     // Updates text that is shown on QUndoView
     setText(QObject::tr("Draw mode set to %1").arg(str));
@@ -878,6 +878,8 @@ void DrawModeChangeCommand::undo()
     bool prev = oldBtn->blockSignals(true);
     oldBtn->setChecked(true);
     oldBtn->blockSignals(prev);
+
+    stackWidget->setCurrentIndex((int)oldDrawMode);
 }
 
 void DrawModeChangeCommand::redo()
@@ -890,4 +892,6 @@ void DrawModeChangeCommand::redo()
     bool prev = newBtn->blockSignals(true);
     newBtn->setChecked(true);
     newBtn->blockSignals(prev);
+
+    stackWidget->setCurrentIndex((int)newDrawMode);
 }

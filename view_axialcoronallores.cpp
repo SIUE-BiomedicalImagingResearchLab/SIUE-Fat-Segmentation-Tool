@@ -322,6 +322,8 @@ void viewAxialCoronalLoRes::setupDefaults()
         case DrawMode::Points: ui->drawPointsBtn->setChecked(true); break;
         case DrawMode::Erase: ui->eraserBtn->setChecked(true); break;
     }
+
+    ui->drawModeStackedWidget->setCurrentIndex((int)ui->glWidgetAxial->getDrawMode());
 }
 
 void viewAxialCoronalLoRes::actionOpen_triggered()
@@ -850,7 +852,7 @@ void viewAxialCoronalLoRes::changeDrawMode(DrawMode newMode)
     }
 
     parentMain()->ui->statusBar->showMessage(QObject::tr("Change draw mode to %1").arg(newModeStr), 4000);
-    undoStack->push(new DrawModeChangeCommand(newMode, ui->glWidgetAxial, oldBtn, newBtn, newModeStr));
+    undoStack->push(new DrawModeChangeCommand(newMode, ui->glWidgetAxial, ui->drawModeStackedWidget, oldBtn, newBtn, newModeStr));
 }
 
 void viewAxialCoronalLoRes::on_drawPointsBtn_toggled(bool checked)
@@ -863,6 +865,19 @@ void viewAxialCoronalLoRes::on_eraserBtn_toggled(bool checked)
 {
     if (checked)
         changeDrawMode(DrawMode::Erase);
+}
+
+void viewAxialCoronalLoRes::on_eraserBrushWidthComboBox_currentIndexChanged(int index)
+{
+    switch (index)
+    {
+        case 0: ui->glWidgetAxial->setEraserBrushWidth(1); break; // 1px
+        case 1: ui->glWidgetAxial->setEraserBrushWidth(2); break; // 2px
+        case 2: ui->glWidgetAxial->setEraserBrushWidth(4); break; // 4px
+        case 3: ui->glWidgetAxial->setEraserBrushWidth(6); break; // 6px
+        case 4: ui->glWidgetAxial->setEraserBrushWidth(8); break; // 8px
+        default: break;
+    }
 }
 
 void viewAxialCoronalLoRes::undoStack_canUndoChanged(bool canUndo)

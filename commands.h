@@ -11,6 +11,7 @@
 #include <QRadioButton>
 #include <QPushButton>
 #include <QCheckBox>
+#include <QStackedWidget>
 
 #include "displayinfo.h"
 
@@ -323,11 +324,12 @@ private:
     DrawMode oldDrawMode;
     DrawMode newDrawMode;
     AxialSliceWidget *widget;
+    QStackedWidget *stackWidget;
     QPushButton *oldBtn;
     QPushButton *newBtn;
 
 public:
-    DrawModeChangeCommand(DrawMode newDrawMode, AxialSliceWidget *widget, QPushButton *oldBtn, QPushButton *newBtn, QString str, QUndoCommand *parent = NULL);
+    DrawModeChangeCommand(DrawMode newDrawMode, AxialSliceWidget *widget, QStackedWidget *stackWidget, QPushButton *oldBtn, QPushButton *newBtn, QString str, QUndoCommand *parent = NULL);
 
     void undo() override;
     void redo() override;

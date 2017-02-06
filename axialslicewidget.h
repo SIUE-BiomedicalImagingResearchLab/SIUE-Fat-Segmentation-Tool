@@ -104,6 +104,8 @@ private:
     bool startDraw;
     QElapsedTimer drawTimer;
 
+    int eraserBrushWidth;
+
     bool startPan;
     QPoint lastMousePos;
     QPoint lastMousePosNIFTI;
@@ -161,6 +163,9 @@ public:
 
     DrawMode getDrawMode() const;
     void setDrawMode(DrawMode mode);
+
+    int getEraserBrushWidth() const;
+    void setEraserBrushWidth(int width);
 
     TracingLayer getTracingLayer() const;
     void setTracingLayer(TracingLayer layer);

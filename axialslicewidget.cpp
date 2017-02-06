@@ -6,7 +6,7 @@ AxialSliceWidget::AxialSliceWidget(QWidget *parent) : QOpenGLWidget(parent),
     tracingLayerColors({ Qt::blue, Qt::darkCyan, Qt::cyan, Qt::magenta, Qt::yellow, Qt::green }), mouseCommand(NULL),
     slicePrimTexture(NULL), sliceSecdTexture(NULL),
     location(0, 0, 0, 0), locationLabel(NULL), primColorMap(ColorMap::Gray), primOpacity(1.0f), secdColorMap(ColorMap::Gray), secdOpacity(1.0f),
-    brightness(0.0f), contrast(1.0f), tracingLayer(TracingLayer::EAT), drawMode(DrawMode::Points),
+    brightness(0.0f), contrast(1.0f), tracingLayer(TracingLayer::EAT), drawMode(DrawMode::Points), eraserBrushWidth(1),
     startDraw(false), startPan(false), moveID(CommandID::AxialMove)
 {
     this->tracingLayerVisible.fill(true);
@@ -235,6 +235,18 @@ DrawMode AxialSliceWidget::getDrawMode() const
 void AxialSliceWidget::setDrawMode(DrawMode mode)
 {
     drawMode = mode;
+
+    update();
+}
+
+int AxialSliceWidget::getEraserBrushWidth() const
+{
+    return eraserBrushWidth;
+}
+
+void AxialSliceWidget::setEraserBrushWidth(int width)
+{
+    eraserBrushWidth = width;
 
     update();
 }
@@ -1161,19 +1173,13 @@ void AxialSliceWidget::paintGL()
     // Then draw a line with a width of 1 from left of screen to right of screen at coronal location
     if (drawMode == DrawMode::Erase && underMouse())
     {
-        //QPainterPath path;
+        QRectF brushRect(-std::ceil(eraserBrushWidth / 2), -std::ceil(eraserBrushWidth / 2), eraserBrushWidth, eraserBrushWidth);
 
-        //path.addRect(QRect(-4, -4, 8, 8).translated(lastMousePosNIFTI));
+        brushRect.translate(-0.5f, -0.5f); // Shift because fill rectangle is shifted by default
+        brushRect.translate(lastMousePosNIFTI); // Translate to where the mouse is in NIFTI coordinates
 
         painter.setTransform(getWindowToNIFTIMatrix().inverted().toTransform());
-        painter.setPen(QPen(Qt::green, 1, Qt::SolidLine, Qt::SquareCap, Qt::MiterJoin));
-        //painter.setPen(QPen(Qt::red, 1, Qt::SolidLine, Qt::RoundCap));
-        painter.fillRect(QRectF(-4-0.5f, -4-0.5f, 8 - 0.0f, 8 - 0.0f).translated(lastMousePosNIFTI), QBrush(QColor(128, 128, 255, 128)));
-        //painter.fillRect(QRect(-4, -4, 8, 8).translated(lastMousePosNIFTI), Qt::red); // Doesnt work
-        //painter.drawRect(QRect(-4, -4, 8, 8).translated(lastMousePosNIFTI)); // Works fine, width/height is 9
-        //painter.fillPath(path, Qt::red);
-        //painter.drawPath(path);
-        //painter.drawLine(QPoint(0, location.y()), QPoint(fatImage->getXDim() - 1, location.y()));
+        painter.fillRect(brushRect, QBrush(QColor(128, 128, 255, 128)));
     }
 }
 
@@ -1267,7 +1273,7 @@ void AxialSliceWidget::erasePoint(QPoint newPoint, bool first)
     {
         std::vector<QPoint> points;
 
-        const QRect brushRect(-4, -4, 8, 8); // Maybe QRectF? Nah, round it to QRect
+        const QRect brushRect(-std::ceil(eraserBrushWidth / 2), -std::ceil(eraserBrushWidth / 2), eraserBrushWidth, eraserBrushWidth);
         int x1, x2, y1, y2;
 
         auto translated = util::clamp(brushRect.translated(NIFTICoord), bounds);
@@ -1334,10 +1340,7 @@ void AxialSliceWidget::erasePoint(QPoint newPoint, bool first)
 
     // Compute Points to be erased based on eraseCenterPoints
     // -------------------------------------------------------------------------------------------------------------------------------------
-    // TODO: Set brush width programatically
-    // Left/Top is -brushWidth / 2
-    // Right/Bottom is brushWidth / 2
-    const QRect brushRect(-4, -4, 8, 8); // Maybe QRectF? Nah, round it to QRect
+    const QRect brushRect(-std::ceil(eraserBrushWidth / 2), -std::ceil(eraserBrushWidth / 2), eraserBrushWidth, eraserBrushWidth);
     int x1, x2, y1, y2;
 
     for (QPoint eraseCenter : eraseCenterPoints)

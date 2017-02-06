@@ -164,6 +164,8 @@ private slots:
     void on_drawPointsBtn_toggled(bool checked);
     void on_eraserBtn_toggled(bool checked);
 
+    void on_eraserBrushWidthComboBox_currentIndexChanged(int index);
+
     void undoStack_canUndoChanged(bool canUndo);
     void undoStack_canRedoChanged(bool canRedo);
 };
