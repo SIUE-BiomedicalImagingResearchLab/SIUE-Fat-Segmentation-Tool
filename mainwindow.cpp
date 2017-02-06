@@ -89,7 +89,16 @@ void MainWindow::on_actionExit_triggered()
 void MainWindow::on_actionAbout_triggered()
 {
     QMessageBox aboutBox(QMessageBox::Information, "About the Program",
-                         QObject::tr("<html><head/><body><p><span style=\" font-weight:600;\">Visceral Fat Validation v%1</span></p><p><span style=\" font-weight:600;\">Creator:</span> Addison Elliott</p><p><span style=\" font-weight:600;\">Release Date: </span>1/19/2017</p><p><span style=\" font-weight:600;\">Advisor:</span> Jon Klingensmith</p><p><span style=\" font-weight:600;\">School:</span> Southern Illinois University Edwardsville</p></body></html>")
+                         QObject::tr("<p><span style=\"font-weight: 600;\">Visceral Fat Validation v%1</span></p>"
+                                     "<p><span style=\"font-weight: 600;\">Creator:</span> Addison Elliott</p>"
+                                     "<p><span style=\"font-weight: 600;\">Release Date: </span>2/06/2017</p>"
+                                     "<p><span style=\"font-weight: 600;\">Advisor:</span> Jon Klingensmith</p>"
+                                     "<p><span style=\"font-weight: 600;\">School:</span> Southern Illinois University Edwardsville</p>"
+                                     "<p><strong>Thanks To:&nbsp;</strong></p>"
+                                     "<ul>"
+                                     "<li><a href=\"https://thenounproject.com/terrence.k.oleary\" data-reactid=\".2.2:$row=10.$hero.0.$hero=1meta=13715.$hero=13715=1meta=1info.0.1.1\">Terrence Kevin Oleary</a>&nbsp;- Eraser icon in Tracing tab</li>"
+                                     "<li><a href=\"https://thenounproject.com/latyshevaanastasia1\" data-reactid=\".3.2:$row=10.$hero.0.$hero=1meta=1811391.$hero=1811391=1meta=1info.0.1.1\">Anastasia Latysheva</a>&nbsp;- Pencil icon in Tracing tab</li>"
+                                     "</ul>")
                          .arg(QCoreApplication::applicationVersion()),
                          QMessageBox::Ok, this);
     aboutBox.setTextFormat(Qt::RichText);

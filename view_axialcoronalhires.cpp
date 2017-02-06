@@ -742,8 +742,7 @@ void viewAxialCoronalHiRes::on_waterFatRadioBtn_toggled(bool checked)
 
 void viewAxialCoronalHiRes::on_resetViewBtn_clicked()
 {
-    ui->glWidgetAxial->resetView();
-    ui->glWidgetCoronal->resetView();
+    undoStack->push(new ResetViewCommand(ui->glWidgetAxial, ui->glWidgetCoronal));
 }
 
 void viewAxialCoronalHiRes::changeTracingLayer(TracingLayer newLayer)

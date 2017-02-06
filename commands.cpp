@@ -199,6 +199,49 @@ bool CoronalScaleCommand::mergeWith(const QUndoCommand *command)
     return true;
 }
 
+// ResetViewCommand
+// --------------------------------------------------------------------------------------------------------------------
+ResetViewCommand::ResetViewCommand(AxialSliceWidget *axialWidget, CoronalSliceWidget *coronalWidget, QUndoCommand *parent) : QUndoCommand(parent),
+    oldAxialTranslate(axialWidget->rtranslation()), oldAxialScaling(axialWidget->rscaling()), oldCoronalTranslate(coronalWidget->rtranslation()),
+    oldCoronalScaling(coronalWidget->rscaling()), axialWidget(axialWidget), coronalWidget(coronalWidget)
+{
+    // Updates text that is shown on QUndoView
+    setText(QObject::tr("Reset view"));
+}
+
+void ResetViewCommand::undo()
+{
+    axialWidget->rtranslation() = oldAxialTranslate;
+    axialWidget->rscaling() = oldAxialScaling;
+
+    coronalWidget->rtranslation() = oldCoronalTranslate;
+    coronalWidget->rscaling() = oldCoronalScaling;
+
+    // Tell the screen to draw itself since the scene changed
+    axialWidget->update();
+    coronalWidget->update();
+}
+
+void ResetViewCommand::redo()
+{
+    // Reset the view for the axial and coronal widget
+    axialWidget->resetView();
+    coronalWidget->resetView();
+
+    // Tell the screen to draw itself since the scene changed
+    axialWidget->update();
+    coronalWidget->update();
+}
+
+bool ResetViewCommand::mergeWith(const QUndoCommand *command)
+{
+    (void)command;
+
+    // Do nothing
+
+    return true;
+}
+
 // LocationChangeCommand
 // --------------------------------------------------------------------------------------------------------------------
 LocationChangeCommand::LocationChangeCommand(QVector4D newLocation, AxialSliceWidget *axialWidget, CoronalSliceWidget *coronalWidget,

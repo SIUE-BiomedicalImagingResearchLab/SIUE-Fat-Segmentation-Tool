@@ -30,6 +30,7 @@ enum class CommandID : int
     CoronalMoveEnd = 20,
     AxialScale,
     CoronalScale,
+    ResetView,
     LocationChange,
     BrightnessChange,
     BrightnessThresChange,
@@ -98,6 +99,27 @@ public:
     void redo() override;
     bool mergeWith(const QUndoCommand *command) override;
     int id() const override { return (int)CommandID::CoronalScale; }
+};
+
+class ResetViewCommand : public QUndoCommand
+{
+private:
+    QVector3D oldAxialTranslate;
+    float oldAxialScaling;
+
+    QVector3D oldCoronalTranslate;
+    float oldCoronalScaling;
+
+    AxialSliceWidget *axialWidget;
+    CoronalSliceWidget *coronalWidget;
+
+public:
+    ResetViewCommand(AxialSliceWidget *axialWidget, CoronalSliceWidget *coronalWidget, QUndoCommand *parent = NULL);
+
+    void undo() override;
+    void redo() override;
+    bool mergeWith(const QUndoCommand *command) override;
+    int id() const override { return (int)CommandID::ResetView; }
 };
 
 class LocationChangeCommand : public QUndoCommand
