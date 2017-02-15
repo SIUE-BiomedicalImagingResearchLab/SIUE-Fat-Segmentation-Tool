@@ -93,6 +93,9 @@ public:
     void setEnableSettings(bool enable);
     void setupDefaults();
 
+    void readSettings();
+    void writeSettings();
+
     void changeSliceView(SliceDisplayType newType);
     void changeTracingLayer(TracingLayer newLayer);
     void changeDrawMode(DrawMode newMode);

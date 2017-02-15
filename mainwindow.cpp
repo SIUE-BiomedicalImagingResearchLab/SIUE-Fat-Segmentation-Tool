@@ -118,8 +118,11 @@ void MainWindow::switchView(WindowViewType type)
             bool prev = this->ui->actionAxialCoronalLoRes->blockSignals(true);
             this->ui->actionAxialCoronalLoRes->setChecked(true);
             this->ui->actionAxialCoronalLoRes->blockSignals(prev);
-            this->setCentralWidget(new viewAxialCoronalLoRes(this, fatImage, waterImage, subConfig, tracingData));
+            auto newView = new viewAxialCoronalLoRes(this, fatImage, waterImage, subConfig, tracingData);
+            this->setCentralWidget(newView);
             ui->actionAxialCoronalLoRes->setChecked(true);
+            newView->readSettings();
+            newView->setupDefaults();
         }
         break;
 
@@ -128,8 +131,11 @@ void MainWindow::switchView(WindowViewType type)
             bool prev = this->ui->actionAxialCoronalHiRes->blockSignals(true);
             this->ui->actionAxialCoronalHiRes->setChecked(true);
             this->ui->actionAxialCoronalHiRes->blockSignals(prev);
-            this->setCentralWidget(new viewAxialCoronalHiRes(this, fatImage, waterImage, subConfig, tracingData));
+            auto newView = new viewAxialCoronalHiRes(this, fatImage, waterImage, subConfig, tracingData);
+            this->setCentralWidget(newView);
             ui->actionAxialCoronalHiRes->setChecked(true);
+            newView->readSettings();
+            newView->setupDefaults();
         }
         break;
     }

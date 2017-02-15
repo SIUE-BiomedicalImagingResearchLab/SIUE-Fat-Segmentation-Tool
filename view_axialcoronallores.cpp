@@ -109,6 +109,22 @@ MainWindow *viewAxialCoronalLoRes::parentMain()
     return static_cast<MainWindow *>(this->parent());
 }
 
+void viewAxialCoronalLoRes::readSettings()
+{
+    QSettings settings;
+
+    ui->glWidgetAxial->readSettings(settings);
+    ui->glWidgetCoronal->readSettings(settings);
+}
+
+void viewAxialCoronalLoRes::writeSettings()
+{
+    QSettings settings;
+
+    ui->glWidgetAxial->writeSettings(settings);
+    ui->glWidgetCoronal->writeSettings(settings);
+}
+
 bool viewAxialCoronalLoRes::loadImage(QString path)
 {
     nifti_image *fatUpperImage = NULL;
@@ -314,7 +330,13 @@ void viewAxialCoronalLoRes::setupDefaults()
     ui->secondaryImageBox->setEnabled((ui->glWidgetAxial->getDisplayType() == SliceDisplayType::FatWater || ui->glWidgetAxial->getDisplayType() == SliceDisplayType::WaterFat));
 
     // ------------------------------------------- Setup Tracing Tab -------------------------------------------
-    // Set the EAT radio button for the default layer to be drawing with
+    ui->EATCheckBox->setChecked(ui->glWidgetAxial->getTracingLayerVisible(TracingLayer::EAT));
+    ui->IMATCheckBox->setChecked(ui->glWidgetAxial->getTracingLayerVisible(TracingLayer::IMAT));
+    ui->PAATCheckBox->setChecked(ui->glWidgetAxial->getTracingLayerVisible(TracingLayer::PAAT));
+    ui->PATCheckBox->setChecked(ui->glWidgetAxial->getTracingLayerVisible(TracingLayer::PAT));
+    ui->SCATCheckBox->setChecked(ui->glWidgetAxial->getTracingLayerVisible(TracingLayer::SCAT));
+    ui->VATCheckBox->setChecked(ui->glWidgetAxial->getTracingLayerVisible(TracingLayer::VAT));
+
     // Set the current radio button based on default layer to be drawing with
     switch (ui->glWidgetAxial->getTracingLayer())
     {
@@ -333,6 +355,17 @@ void viewAxialCoronalLoRes::setupDefaults()
     }
 
     ui->drawModeStackedWidget->setCurrentIndex((int)ui->glWidgetAxial->getDrawMode());
+
+    switch (ui->glWidgetAxial->getEraserBrushWidth())
+    {
+        case 1: ui->eraserBrushWidthComboBox->setCurrentIndex(0); break; // 1px
+        case 2: ui->eraserBrushWidthComboBox->setCurrentIndex(1); break; // 2px
+        case 4: ui->eraserBrushWidthComboBox->setCurrentIndex(2); break; // 4px
+        case 6: ui->eraserBrushWidthComboBox->setCurrentIndex(3); break; // 6px
+        case 8: ui->eraserBrushWidthComboBox->setCurrentIndex(4); break; // 8px
+        default:
+            qWarning() << "Unknown eraser brush width combo selected: " << ui->glWidgetAxial->getEraserBrushWidth();
+    }
 }
 
 void viewAxialCoronalLoRes::actionOpen_triggered()
@@ -910,6 +943,9 @@ void viewAxialCoronalLoRes::undoStack_canRedoChanged(bool canRedo)
 
 viewAxialCoronalLoRes::~viewAxialCoronalLoRes()
 {
+    // Save current window settings for next time
+    writeSettings();
+
     // Remove location status label from the parent main status bar
     // Note: If the user exits the application, then the ui will be nullptr for parent and so
     // we need to not try and remove the widget

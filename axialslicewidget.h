@@ -127,6 +127,9 @@ public:
     AxialSliceWidget(QWidget *parent);
     ~AxialSliceWidget();
 
+    void readSettings(QSettings &settings);
+    void writeSettings(QSettings &settings);
+
     // A value of Location::NoChange(-1) means no change for the location
     void setLocation(QVector4D location);
     QVector4D getLocation() const;

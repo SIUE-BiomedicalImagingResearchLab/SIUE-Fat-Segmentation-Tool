@@ -32,6 +32,16 @@ void CoronalSliceWidget::imageLoaded()
     update();
 }
 
+void CoronalSliceWidget::readSettings(QSettings &settings)
+{
+    (void)settings;
+}
+
+void CoronalSliceWidget::writeSettings(QSettings &settings)
+{
+    (void)settings;
+}
+
 void CoronalSliceWidget::setLocation(QVector4D location)
 {
     // If there is no fat or water image currently loaded then return with doing nothing.

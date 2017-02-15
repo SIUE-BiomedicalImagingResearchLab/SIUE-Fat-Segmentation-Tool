@@ -43,6 +43,65 @@ void AxialSliceWidget::imageLoaded()
     update();
 }
 
+void AxialSliceWidget::readSettings(QSettings &settings)
+{
+    settings.beginGroup("axialSliceWidget");
+    brightness = settings.value("brightness", 0.0f).toFloat();
+    brightnessThreshold = settings.value("brightnessThreshold", 0.0f).toFloat();
+    contrast = settings.value("contrast", 1.0f).toFloat();
+
+    primColorMap = (ColorMap)settings.value("primColorMap", (int)ColorMap::Gray).toInt();
+    primOpacity = settings.value("primOpacity", 1.0f).toFloat();
+
+    secdColorMap = (ColorMap)settings.value("secdColorMap", (int)ColorMap::Gray).toInt();
+    secdOpacity = settings.value("secdOpacity", 1.0f).toFloat();
+
+    displayType = (SliceDisplayType)settings.value("displayType", (int)SliceDisplayType::FatOnly).toInt();
+
+    int size = settings.beginReadArray("tracingLayerVisible");
+    for (int i = 0; i < size; ++i)
+    {
+        settings.setArrayIndex(i);
+        tracingLayerVisible[i] = settings.value("visible", true).toBool();
+    }
+    settings.endArray();
+
+    drawMode = (DrawMode)settings.value("drawMode", (int)DrawMode::Points).toInt();
+    eraserBrushWidth = settings.value("eraserBrushWidth", 1).toInt();
+
+    settings.endGroup();
+}
+
+void AxialSliceWidget::writeSettings(QSettings &settings)
+{
+    settings.beginGroup("axialSliceWidget");
+
+    settings.setValue("brightness", brightness);
+    settings.setValue("brightnessThreshold", brightnessThreshold);
+    settings.setValue("contrast", contrast);
+
+    settings.setValue("primColorMap", (int)primColorMap);
+    settings.setValue("primOpacity", primOpacity);
+
+    settings.setValue("secdColorMap", (int)secdColorMap);
+    settings.setValue("secdOpacity", secdOpacity);
+
+    settings.setValue("displayType", (int)displayType);
+
+    settings.beginWriteArray("tracingLayerVisible");
+    for (int i = 0; i < tracingLayerVisible.size(); ++i)
+    {
+        settings.setArrayIndex(i);
+        settings.setValue("visible", tracingLayerVisible[i]);
+    }
+    settings.endArray();
+
+    settings.setValue("drawMode", (int)drawMode);
+    settings.setValue("eraserBrushWidth", eraserBrushWidth);
+
+    settings.endGroup();
+}
+
 void AxialSliceWidget::setLocation(QVector4D location)
 {
     // If there is no fat or water image currently loaded then return with doing nothing.
