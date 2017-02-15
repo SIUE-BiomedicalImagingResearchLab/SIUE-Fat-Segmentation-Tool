@@ -6,7 +6,7 @@ This program will take in MRI images in the NIFTI format and display them on the
   * I recommend using the offline installer and hand selecting which version of Qt Creator to install. There are binaries for particular versions of compilers such as VS 2015 64-bit, VS 2015 32-bit, MinGW, GCC, etc. 
 2. [Build External Libraries](https://github.com/addisonElliott/VisceralFatValidation/wiki/Building-External-Libraries-in-Windows)
 3. Download VisceralFatValidation
-4. Edit custom.pro to point to the libraries installed in the previous step.
+4. Copy custom.pro.sample to custom.pro.  Edit custom.pro to point to the libraries installed in the previous step.
   * A template for custom.pro is given. Anything in brackets should be adjusted(e.g. <OPENCV-PATH>)
 5. Open Qt Creator
 6. Open VisceralFatValidation.pro project file
