@@ -105,6 +105,7 @@
     </property>
     <addaction name="actionAxialCoronalLoRes"/>
     <addaction name="actionAxialCoronalHiRes"/>
+    <addaction name="action3D"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -225,6 +226,14 @@
    </property>
    <property name="text">
     <string>Axial/Coronal [Lo Res]</string>
+   </property>
+  </action>
+  <action name="action3D">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>3D</string>
    </property>
   </action>
  </widget>

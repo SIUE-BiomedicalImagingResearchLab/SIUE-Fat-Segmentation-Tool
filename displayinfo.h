@@ -88,7 +88,8 @@ namespace Dirty
 enum class WindowViewType : int
 {
     AxialCoronalLoRes = 0,
-    AxialCoronalHiRes
+    AxialCoronalHiRes,
+    ThreeD
 };
 
 enum class DrawMode : int

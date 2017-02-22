@@ -34,7 +34,9 @@ SOURCES += main.cpp\
     numerictype.cpp \
     view_axialcoronalhires.cpp \
     view_axialcoronallores.cpp \
-    tracing.cpp
+    tracing.cpp \
+    view_3D.cpp \
+    threedwidget.cpp
 
 HEADERS  += mainwindow.h \
     application.h \
@@ -51,11 +53,14 @@ HEADERS  += mainwindow.h \
     numerictype.h \
     view_axialcoronalhires.h \
     view_axialcoronallores.h \
-    tracing.h
+    tracing.h \
+    view_3D.h \
+    threedwidget.h
 
 FORMS    += mainwindow.ui \
     view_axialcoronalhires.ui \
-    view_axialcoronallores.ui
+    view_axialcoronallores.ui \
+    view_3D.ui
 
 RESOURCES += \
     resources.qrc

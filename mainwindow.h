@@ -26,6 +26,7 @@
 
 #include "view_axialcoronallores.h"
 #include "view_axialcoronalhires.h"
+#include "view_3D.h"
 
 namespace Ui {
 class MainWindow;
@@ -61,6 +62,7 @@ public:
 
     friend class viewAxialCoronalLoRes;
     friend class viewAxialCoronalHiRes;
+    friend class view3D;
 
 private slots:
     void on_actionExit_triggered();
@@ -69,6 +71,7 @@ private slots:
 
     void on_actionAxialCoronalLoRes_triggered(bool checked);
     void on_actionAxialCoronalHiRes_triggered(bool checked);
+    void on_action3D_triggered(bool checked);
 };
 
 #endif // MAINWINDOW_H

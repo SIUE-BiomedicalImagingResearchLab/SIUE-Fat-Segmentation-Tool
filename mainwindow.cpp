@@ -138,6 +138,19 @@ void MainWindow::switchView(WindowViewType type)
             newView->setupDefaults();
         }
         break;
+
+        case WindowViewType::ThreeD:
+        {
+            bool prev = this->ui->action3D->blockSignals(true);
+            this->ui->action3D->setChecked(true);
+            this->ui->action3D->blockSignals(prev);
+            //auto *newView = new viewThreeD(this, fatImage, waterImage, subConfig, tracingData);
+            //this->setCentralWidget(newView);
+            //ui->action3D->setChecked(true);
+            //newView->readSettings();
+            //newView->setupDefaults();
+        }
+        break;
     }
 
     windowViewType = type;
@@ -157,6 +170,14 @@ void MainWindow::on_actionAxialCoronalHiRes_triggered(bool checked)
         switchView(WindowViewType::AxialCoronalHiRes);
     else // Prevent user from unchecking the box without toggling to something else
         ui->actionAxialCoronalHiRes->setChecked(true);
+}
+
+void MainWindow::on_action3D_triggered(bool checked)
+{
+    if (checked)
+        switchView(WindowViewType::ThreeD);
+    else // Prevent user from unchecking the box without toggling to something else
+        ui->action3D->setChecked(true);
 }
 
 MainWindow::~MainWindow()
