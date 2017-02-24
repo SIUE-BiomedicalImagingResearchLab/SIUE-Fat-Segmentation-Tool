@@ -48,10 +48,10 @@ DISTFILES += \
 
 # Include the NIFTI files and link the dynamic libraries.
 # The DLL files should deploy with the application automatically
-INCLUDEPATH += 'D:/DevelLibs/nifticlib-2.0.0/build/include'
-DEPENDPATH += 'D:/DevelLibs/nifticlib-2.0.0/build/include'
+INCLUDEPATH += 'D:/DevelLibs/nifticlib/buildShared/include'
+DEPENDPATH += 'D:/DevelLibs/nifticlib/buildShared/include'
 
-LIBS += -LD:/DevelLibs/nifticlib-2.0.0/build/lib \
+LIBS += -LD:/DevelLibs/nifticlib/buildShared/lib \
         -lnifticdf \
         -lniftiio \
         -lznz

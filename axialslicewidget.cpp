@@ -32,7 +32,7 @@ void AxialSliceWidget::setImages(NIFTImage *fat, NIFTImage *water)
     fatImage = fat;
     waterImage = water;
 
-    fatImage->setVoids(waterImage, 10.f);
+    fatImage->setVoids(waterImage, 50.0f);
 
     location = QVector4D(0, 0, 0, 0);
 
@@ -248,7 +248,7 @@ void AxialSliceWidget::resetView()
 void AxialSliceWidget::initializeGL()
 {
     initializeOpenGLFunctions();
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
 
     // Setup matrices and view options
     projectionMatrix.setToIdentity();

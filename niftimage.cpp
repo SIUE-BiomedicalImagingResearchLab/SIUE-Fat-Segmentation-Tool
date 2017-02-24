@@ -292,7 +292,8 @@ void NIFTImage::setVoids(NIFTImage *otherImage, float threshold)
         return;
 
     cv::Mat diff;
-    cv::absdiff(data, otherImage->getMat(), diff);
+    //cv::absdiff(data, otherImage->getMat(), diff);
+    cv::add(data, otherImage->getMat(), diff);
     qDebug() << "Type222: " << diff.depth();
     cv::Mat voids = (diff > threshold); // > ?
     cv::Mat convertedVoids;
