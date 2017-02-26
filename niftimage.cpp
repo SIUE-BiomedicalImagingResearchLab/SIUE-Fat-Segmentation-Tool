@@ -151,9 +151,10 @@ bool NIFTImage::checkImage() const
     if (upper->dim[0] != 3 || lower->dim[0] != 3 ||
         upper->dim[1] != lower->dim[1] ||
         upper->dim[2] != lower->dim[2] ||
-        upper->pixdim[1] != lower->pixdim[1] ||
-        upper->pixdim[2] != lower->pixdim[2] ||
-        upper->pixdim[3] != lower->pixdim[3] ||
+        // Note: The pixel dimensions are disabled because Subject 3 initial had different dimensions slightly
+        //upper->pixdim[1] != lower->pixdim[1] ||
+        //upper->pixdim[2] != lower->pixdim[2] ||
+        //upper->pixdim[3] != lower->pixdim[3] ||
         upper->xyz_units != lower->xyz_units ||
         upper->datatype != lower->datatype ||
         upper->nbyper != lower->nbyper)
