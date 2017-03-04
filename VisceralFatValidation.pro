@@ -62,7 +62,3 @@ RESOURCES += \
 exists(custom.pro): include(custom.pro)
 
 DISTFILES +=
-
-QMAKE_CXXFLAGS_WARN_ON += -Wno-reorder
-QMAKE_CXXFLAGS_WARN_ON += -Wno-missing-braces
-QMAKE_CXXFLAGS_WARN_ON += -Wno-switch
