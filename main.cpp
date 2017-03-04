@@ -66,10 +66,16 @@ int main(int argc, char *argv[])
         QCoreApplication::setApplicationVersion(APP_VERSION);
 
         QSurfaceFormat format;
-        format.setMajorVersion(3);
-        format.setMinorVersion(3);
+#ifdef Q_OS_MACOS
+        // Mac OS X only allows core profiles to be used
+        // QPainter is used in this application which is based off OpenGL 2.0
+        // Luckily, Qt 5.9 provides support where it brings QPainter up to date in OpenGL (I think)
+        // To build on Mac, YOU MUST USE AT LEAST Qt 5.9!
         format.setProfile(QSurfaceFormat::CoreProfile);
-        format.setSamples(0);
+#else // Q_OS_MACOS
+        format.setProfile(QSurfaceFormat::CompatibilityProfile);
+#endif // Q_OS_MACOS
+        format.setVersion(3, 3);
         QSurfaceFormat::setDefaultFormat(format);
 
         w = new MainWindow();
