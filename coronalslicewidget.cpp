@@ -323,6 +323,7 @@ void CoronalSliceWidget::paintGL()
 
     painter.beginNativePainting();
     glClear(GL_COLOR_BUFFER_BIT);
+    glCheckError();
 
     // Calculate the ModelViewProjection (MVP) matrix to transform the location of the axial slices
     QMatrix4x4 mvpMatrix = getMVPMatrix();

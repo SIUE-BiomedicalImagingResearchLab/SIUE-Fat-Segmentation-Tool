@@ -1154,30 +1154,23 @@ void AxialSliceWidget::paintGL()
     QPainter painter(this);
 
     // With painter, call beginNativePainting before doing any custom OpenGL commands
-    glCheckError();
     painter.beginNativePainting();
     glCheckError();
 
     // Sets up transparency for the primary and secondary textures
     glEnable(GL_BLEND);
-    glCheckError();
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glCheckError();
 
     // Disable depth testing with blending setup
     glDisable(GL_DEPTH_TEST);
-    glCheckError();
 
     glClear(GL_COLOR_BUFFER_BIT);
-    glCheckError();
 
     // Calculate the ModelViewProjection (MVP) matrix to transform the location of the axial slices
     QMatrix4x4 mvpMatrix = getMVPMatrix();
 
     sliceProgram->bind();
     sliceProgram->setUniformValue("MVP", mvpMatrix);
-    glCheckError();
-
     sliceProgram->setUniformValue("opacity", primOpacity);
     glCheckError();
 
@@ -1223,6 +1216,7 @@ void AxialSliceWidget::paintGL()
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     sliceProgram->release();
+    glCheckError();
 
     painter.endNativePainting();
 
@@ -1235,21 +1229,16 @@ void AxialSliceWidget::paintGL()
     // With painter, call beginNativePainting before doing any custom OpenGL commands
     // This is called again because the crosshair line needs to be after the NIFT image but before the tracing
     // This shows the user if they have placed a trace over the crosshair line
-    glCheckError();
     painter.beginNativePainting();
     glCheckError();
 
     // Sets up transparency for the tracing colors; NOTE: The tracing colors can be set to a transparent value
     // if desired
     glEnable(GL_BLEND);
-    glCheckError();
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glCheckError();
     glDisable(GL_DEPTH_TEST);
-    glCheckError();
 
     traceProgram->bind();
-    glCheckError();
     traceProgram->setUniformValue("MVP", mvpMatrix);
     glCheckError();
 
