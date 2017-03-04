@@ -68,7 +68,8 @@ int main(int argc, char *argv[])
         QSurfaceFormat format;
 #ifdef Q_OS_MACOS
         // Mac OS X only allows core profiles to be used
-        // QPainter is used in this application which is based off OpenGL 2.0
+        // QPainter is used in this application which is based off OpenGL 2.0 but the actual OpenGL used in the shaders
+        // for drawing slices is OpenGL 3.3.
         // Luckily, Qt 5.9 provides support where it brings QPainter up to date in OpenGL (I think)
         // To build on Mac, YOU MUST USE AT LEAST Qt 5.9!
         format.setProfile(QSurfaceFormat::CoreProfile);
