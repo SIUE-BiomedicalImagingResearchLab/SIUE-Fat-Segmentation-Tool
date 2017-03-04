@@ -425,7 +425,7 @@ bool AxialSliceWidget::saveTracingData(QString path, bool promptOnOverwrite)
     // Create timing directory if it does not already exist
     QDir timesDir = QDir(path).filePath(timeDir);
     if (!timesDir.exists())
-        timesDir.mkdir(".");
+        timesDir.mkpath(".");
 
     for (int i = 0; i < (int)TracingLayer::Count; ++i)
     {
