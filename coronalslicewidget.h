@@ -40,8 +40,7 @@ private:
 
     QOpenGLShaderProgram *program;
     GLuint sliceVertexBuf, sliceIndexBuf;
-    //GLuint sliceVertexObject;
-    QOpenGLVertexArrayObject sliceVertexObject;
+    GLuint sliceVertexObject;
     GLuint sliceTexture;
     QVector<VertexPT> sliceVertices;
     QVector<unsigned short> sliceIndices;

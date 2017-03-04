@@ -766,10 +766,8 @@ void AxialSliceWidget::initializeSliceView()
     glCheckError();
 
     // Generate VAO for the axial slice vertices uploaded. Location 0 is the position and location 1 is the texture position
-    sliceVertexObject.create();
-    sliceVertexObject.bind();
-    //glGenVertexArrays(1, &sliceVertexObject);
-    //glBindVertexArray(sliceVertexObject);
+    glGenVertexArrays(1, &sliceVertexObject);
+    glBindVertexArray(sliceVertexObject);
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(0, VertexPT::PosTupleSize, GL_FLOAT, true, VertexPT::stride(), static_cast<const char *>(0) + VertexPT::posOffset());
@@ -784,8 +782,7 @@ void AxialSliceWidget::initializeSliceView()
     // Release (unbind) all
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-    //glBindVertexArray(0);
-    sliceVertexObject.release();
+    glBindVertexArray(0);
 }
 
 void AxialSliceWidget::initializeTracing()
@@ -816,10 +813,8 @@ void AxialSliceWidget::initializeTracing()
     glCheckError();
 
     // Generate VAO for the axial slice vertices uploaded. Location 0 is the position and location 1 is the texture position
-    traceVertexObject.create();
-    traceVertexObject.bind();
-    //glGenVertexArrays(1, &traceVertexObject);
-    //glBindVertexArray(traceVertexObject);
+    glGenVertexArrays(1, &traceVertexObject);
+    glBindVertexArray(traceVertexObject);
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(0, VertexPT::PosTupleSize, GL_FLOAT, true, VertexPT::stride(), static_cast<const char *>(0) + VertexPT::posOffset());
@@ -833,8 +828,7 @@ void AxialSliceWidget::initializeTracing()
     // Release (unbind) all
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-    //glBindVertexArray(0);
-    sliceVertexObject.release();
+    glBindVertexArray(0);
 }
 
 void AxialSliceWidget::initializeColorMaps()
@@ -1188,8 +1182,7 @@ void AxialSliceWidget::paintGL()
     glCheckError();
 
     // Bind the VAO, bind texture to GL_TEXTURE0, bind VBO, bind IBO
-    //glBindVertexArray(sliceVertexObject);
-    sliceVertexObject.bind();
+    glBindVertexArray(sliceVertexObject);
     glBindBuffer(GL_ARRAY_BUFFER, sliceVertexBuf);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, sliceIndexBuf);
     glCheckError();
@@ -1224,8 +1217,7 @@ void AxialSliceWidget::paintGL()
     // Release (unbind) the binded objects in reverse order
     // This is a simple protocol to prevent anything happening to the objects outside of this function without
     // explicitly binding the objects
-    //glBindVertexArray(0);
-    sliceVertexObject.release();
+    glBindVertexArray(0);
     glBindTexture(GL_TEXTURE_2D, 0);
     glBindTexture(GL_TEXTURE_1D, 0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -1262,8 +1254,7 @@ void AxialSliceWidget::paintGL()
     glCheckError();
 
     // Bind the VAO, bind texture to GL_TEXTURE0, bind VBO, bind IBO
-    //glBindVertexArray(traceVertexObject);
-    traceVertexObject.bind();
+    glBindVertexArray(traceVertexObject);
     glBindBuffer(GL_ARRAY_BUFFER, traceVertexBuf);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, traceIndexBuf);
     glCheckError();
@@ -1288,8 +1279,7 @@ void AxialSliceWidget::paintGL()
     // Release (unbind) the binded objects in reverse order
     // This is a simple protocol to prevent anything happening to the objects outside of this function without
     // explicitly binding the objects
-    //glBindVertexArray(0);
-    sliceVertexObject.release();
+    glBindVertexArray(0);
     glBindTexture(GL_TEXTURE_2D, 0);
     glBindTexture(GL_TEXTURE_1D, 0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -1655,14 +1645,12 @@ void AxialSliceWidget::leaveEvent(QEvent *event)
 AxialSliceWidget::~AxialSliceWidget()
 {
     // Destroy the VAO, VBO, and IBO
-    //glDeleteVertexArrays(1, &sliceVertexObject);
-    sliceVertexObject.destroy();
+    glDeleteVertexArrays(1, &sliceVertexObject);
     glDeleteBuffers(1, &sliceVertexBuf);
     glDeleteBuffers(1, &sliceIndexBuf);
     glDeleteTextures(1, &slicePrimTexture);
     glDeleteTextures(1, &sliceSecdTexture);
-    //glDeleteVertexArrays(1, &traceVertexObject);
-    traceVertexObject.destroy();
+    glDeleteVertexArrays(1, &traceVertexObject);
     glDeleteBuffers(1, &traceVertexBuf);
     glDeleteBuffers(1, &traceIndexBuf);
     glDeleteTextures((int)TracingLayer::Count, &traceTextures[0]);

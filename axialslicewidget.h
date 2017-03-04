@@ -66,8 +66,7 @@ private:
 
     QOpenGLShaderProgram *sliceProgram;
     GLuint sliceVertexBuf, sliceIndexBuf;
-    //GLuint sliceVertexObject;
-    QOpenGLVertexArrayObject sliceVertexObject;
+    GLuint sliceVertexObject;
     GLuint slicePrimTexture;
     GLuint sliceSecdTexture;
     QVector<VertexPT> sliceVertices;
@@ -77,8 +76,7 @@ private:
 
     QOpenGLShaderProgram *traceProgram;
     GLuint traceVertexBuf, traceIndexBuf;
-    //GLuint traceVertexObject;
-    QOpenGLVertexArrayObject traceVertexObject;
+    GLuint traceVertexObject;
     GLuint traceTextures[(int)TracingLayer::Count];
     QVector<VertexPT> traceVertices;
     QVector<unsigned short> traceIndices;
