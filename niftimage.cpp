@@ -175,7 +175,7 @@ bool NIFTImage::checkImage() const
     // If there is not a valid OpenGL/OpenCV datatype for the upper image, then return false.
     // Note: The upper and lower have the same datatypes since the above if statement is true
     auto type = NumericType::NIFTI(upper->datatype);
-    if (type == NULL || type->openGLFormat == (int)DataType::None || type->openGLType == (int)DataType::None || type->openCVType == (int)DataType::None)
+    if (type == NULL || type->openGLFormat == (GLenum)DataType::None || type->openGLType == (GLenum)DataType::None || type->openCVType == (int)DataType::None)
     {
         qDebug() << "Unsupported NIFTI datatype in OpenGL: " << upper->datatype;
         return false;

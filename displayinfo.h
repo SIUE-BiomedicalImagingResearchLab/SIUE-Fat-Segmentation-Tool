@@ -34,7 +34,7 @@ enum class ColorMap : int
     Count
 };
 
-static QString colorMapImageName[ColorMap::Count] =
+static QString colorMapImageName[(int)ColorMap::Count] =
 {
     ":/colormaps/MATLAB_autumn.png",
     ":/colormaps/MATLAB_bone.png",

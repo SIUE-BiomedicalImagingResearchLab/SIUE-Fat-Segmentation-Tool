@@ -4,10 +4,11 @@
 AxialSliceWidget::AxialSliceWidget(QWidget *parent) : QOpenGLWidget(parent),
     displayType(SliceDisplayType::FatOnly), fatImage(NULL), waterImage(NULL), tracingData(NULL),
     tracingLayerColors({ Qt::blue, Qt::darkCyan, Qt::cyan, Qt::magenta, Qt::yellow, Qt::green }), mouseCommand(NULL),
-    slicePrimTexture(NULL), sliceSecdTexture(NULL),
+    slicePrimTexture(0), sliceSecdTexture(0),
     location(0, 0, 0, 0), locationLabel(NULL), primColorMap(ColorMap::Gray), primOpacity(1.0f), secdColorMap(ColorMap::Gray), secdOpacity(1.0f),
     brightness(0.0f), brightnessThreshold(0.0f), contrast(1.0f), tracingLayer(TracingLayer::EAT), drawMode(DrawMode::Points), eraserBrushWidth(1),
-    startDraw(false), startPan(false), moveID(CommandID::AxialMove)
+    startDraw(false), startPan(false), moveID(CommandID::AxialMove),
+    frameCount(0), fps(0.0f)
 {
     this->tracingLayerVisible.fill(true);
     this->traceTextureInit.fill(false);
@@ -89,7 +90,7 @@ void AxialSliceWidget::writeSettings(QSettings &settings)
     settings.setValue("displayType", (int)displayType);
 
     settings.beginWriteArray("tracingLayerVisible");
-    for (int i = 0; i < tracingLayerVisible.size(); ++i)
+    for (size_t i = 0; i < tracingLayerVisible.size(); ++i)
     {
         settings.setArrayIndex(i);
         settings.setValue("visible", tracingLayerVisible[i]);
@@ -469,7 +470,7 @@ bool AxialSliceWidget::saveTracingData(QString path, bool promptOnOverwrite)
             sliceStream << "#" << z << endl;
             sliceStream << points.total() << endl;
 
-            for (int i = 0; i < points.total(); ++i)
+            for (size_t i = 0; i < points.total(); ++i)
             {
                 const cv::Vec2i point = points.at<cv::Vec2i>(i);
                 sliceStream << forcepoint << (float)point[1] << " " << (float)point[0] << " " << (float)z << endl;
@@ -679,7 +680,12 @@ void AxialSliceWidget::resetView()
 
 void AxialSliceWidget::initializeGL()
 {
-    initializeOpenGLFunctions();
+    if (!initializeOpenGLFunctions())
+    {
+        qCritical() << "Unable to initialize OpenGL functions for AxialSliceWidget";
+        return;
+    }
+
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
     // Setup matrices and view options
@@ -699,7 +705,7 @@ void AxialSliceWidget::initializeGL()
     glCheckError();
 
     sliceProgram->setUniformValue("tex", 0);
-    sliceProgram->setUniformValue("mappingTexture", 0);
+    sliceProgram->setUniformValue("mappingTexture", 1);
 
     traceProgram = new QOpenGLShaderProgram();
     traceProgram->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/shaders/fattraces.vert");
@@ -715,6 +721,9 @@ void AxialSliceWidget::initializeGL()
     initializeSliceView();
     initializeTracing();
     initializeColorMaps();
+
+    fpsTimer.start();
+    frameCount = 0;
 }
 
 void AxialSliceWidget::initializeSliceView()
@@ -757,8 +766,10 @@ void AxialSliceWidget::initializeSliceView()
     glCheckError();
 
     // Generate VAO for the axial slice vertices uploaded. Location 0 is the position and location 1 is the texture position
-    glGenVertexArrays(1, &sliceVertexObject);
-    glBindVertexArray(sliceVertexObject);
+    sliceVertexObject.create();
+    sliceVertexObject.bind();
+    //glGenVertexArrays(1, &sliceVertexObject);
+    //glBindVertexArray(sliceVertexObject);
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(0, VertexPT::PosTupleSize, GL_FLOAT, true, VertexPT::stride(), static_cast<const char *>(0) + VertexPT::posOffset());
@@ -773,7 +784,8 @@ void AxialSliceWidget::initializeSliceView()
     // Release (unbind) all
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
+    //glBindVertexArray(0);
+    sliceVertexObject.release();
 }
 
 void AxialSliceWidget::initializeTracing()
@@ -804,8 +816,10 @@ void AxialSliceWidget::initializeTracing()
     glCheckError();
 
     // Generate VAO for the axial slice vertices uploaded. Location 0 is the position and location 1 is the texture position
-    glGenVertexArrays(1, &traceVertexObject);
-    glBindVertexArray(traceVertexObject);
+    traceVertexObject.create();
+    traceVertexObject.bind();
+    //glGenVertexArrays(1, &traceVertexObject);
+    //glBindVertexArray(traceVertexObject);
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(0, VertexPT::PosTupleSize, GL_FLOAT, true, VertexPT::stride(), static_cast<const char *>(0) + VertexPT::posOffset());
@@ -819,13 +833,12 @@ void AxialSliceWidget::initializeTracing()
     // Release (unbind) all
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
+    //glBindVertexArray(0);
+    sliceVertexObject.release();
 }
 
 void AxialSliceWidget::initializeColorMaps()
 {
-    // Width of the 1D texture map. The larger the number the more points in the 1D texture and the smoother the colors
-    const int width = 256;
     // Internal format is how the data will be stored in the GPU. Format/type is how the data is represented
     const GLint internalFormat = GL_RGBA32F;
     const GLenum format = GL_RGBA;
@@ -867,10 +880,10 @@ void AxialSliceWidget::initializeColorMaps()
         // since it will not be linearly interpolated like GL_LINEAR
         glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
         // This parameter will clamp points to [0.0, 1.0]. This means that anything above 1.0 will become 1.0
         // and anything below 0.0 will become 0.0
-        glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+        //glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+        glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glCheckError();
 
         glTexImage1D(GL_TEXTURE_1D, 0, internalFormat, image.width(), 0, format, type, image.bits());
@@ -1124,6 +1137,13 @@ void AxialSliceWidget::resizeGL(int w, int h)
 
 void AxialSliceWidget::paintGL()
 {
+    ++frameCount;
+    if (fpsTimer.elapsed() >= 1000)
+    {
+        fps = frameCount / (fpsTimer.restart() / 1000.0f);
+        frameCount = 0;
+    }
+
     // Do nothing if fat/water images are not loaded
     if (!isLoaded())
         return;
@@ -1137,17 +1157,22 @@ void AxialSliceWidget::paintGL()
             updateTrace((TracingLayer)i);
 
     // After updating, begin rendering
-    QPainter painter(this);
+    //QPainter painter(this);
 
     // With painter, call beginNativePainting before doing any custom OpenGL commands
-    painter.beginNativePainting();
+    glCheckError();
+    //painter.beginNativePainting();
+    glCheckError();
 
     // Sets up transparency for the primary and secondary textures
     glEnable(GL_BLEND);
+    glCheckError();
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glCheckError();
 
     // Disable depth testing with blending setup
     glDisable(GL_DEPTH_TEST);
+    glCheckError();
 
     glClear(GL_COLOR_BUFFER_BIT);
     glCheckError();
@@ -1163,13 +1188,15 @@ void AxialSliceWidget::paintGL()
     glCheckError();
 
     // Bind the VAO, bind texture to GL_TEXTURE0, bind VBO, bind IBO
-    glBindVertexArray(sliceVertexObject);
+    //glBindVertexArray(sliceVertexObject);
+    sliceVertexObject.bind();
     glBindBuffer(GL_ARRAY_BUFFER, sliceVertexBuf);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, sliceIndexBuf);
     glCheckError();
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, slicePrimTexture);
+    glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_1D, colorMapTexture[(int)primColorMap]);
     glCheckError();
 
@@ -1184,6 +1211,7 @@ void AxialSliceWidget::paintGL()
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, sliceSecdTexture);
+        glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_1D, colorMapTexture[(int)secdColorMap]);
         glCheckError();
 
@@ -1196,14 +1224,15 @@ void AxialSliceWidget::paintGL()
     // Release (unbind) the binded objects in reverse order
     // This is a simple protocol to prevent anything happening to the objects outside of this function without
     // explicitly binding the objects
-    glBindVertexArray(0);
+    //glBindVertexArray(0);
+    sliceVertexObject.release();
     glBindTexture(GL_TEXTURE_2D, 0);
     glBindTexture(GL_TEXTURE_1D, 0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     sliceProgram->release();
 
-    painter.endNativePainting();
+    /*painter.endNativePainting();
 
     // Draw Crosshair Line (Set matrix to transform NIFTI coordinates -> Window coordinates)
     // Then draw a line with a width of 1 from left of screen to right of screen at coronal location
@@ -1214,20 +1243,27 @@ void AxialSliceWidget::paintGL()
     // With painter, call beginNativePainting before doing any custom OpenGL commands
     // This is called again because the crosshair line needs to be after the NIFT image but before the tracing
     // This shows the user if they have placed a trace over the crosshair line
-    painter.beginNativePainting();
+    glCheckError();
+    painter.beginNativePainting();*/
+    glCheckError();
 
     // Sets up transparency for the tracing colors; NOTE: The tracing colors can be set to a transparent value
     // if desired
     glEnable(GL_BLEND);
+    glCheckError();
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glCheckError();
     glDisable(GL_DEPTH_TEST);
+    glCheckError();
 
     traceProgram->bind();
+    glCheckError();
     traceProgram->setUniformValue("MVP", mvpMatrix);
     glCheckError();
 
     // Bind the VAO, bind texture to GL_TEXTURE0, bind VBO, bind IBO
-    glBindVertexArray(traceVertexObject);
+    //glBindVertexArray(traceVertexObject);
+    traceVertexObject.bind();
     glBindBuffer(GL_ARRAY_BUFFER, traceVertexBuf);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, traceIndexBuf);
     glCheckError();
@@ -1252,14 +1288,15 @@ void AxialSliceWidget::paintGL()
     // Release (unbind) the binded objects in reverse order
     // This is a simple protocol to prevent anything happening to the objects outside of this function without
     // explicitly binding the objects
-    glBindVertexArray(0);
+    //glBindVertexArray(0);
+    sliceVertexObject.release();
     glBindTexture(GL_TEXTURE_2D, 0);
     glBindTexture(GL_TEXTURE_1D, 0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     traceProgram->release();
 
-    painter.endNativePainting();
+    /*painter.endNativePainting();
 
     // Draw Crosshair Line (Set matrix to transform NIFTI coordinates -> Window coordinates)
     // Then draw a line with a width of 1 from left of screen to right of screen at coronal location
@@ -1272,7 +1309,7 @@ void AxialSliceWidget::paintGL()
 
         painter.setTransform(getWindowToNIFTIMatrix().inverted().toTransform());
         painter.fillRect(brushRect, QBrush(QColor(128, 128, 255, 128)));
-    }
+    }*/
 }
 
 void AxialSliceWidget::addPoint(QPoint newPoint, bool first)
@@ -1618,12 +1655,14 @@ void AxialSliceWidget::leaveEvent(QEvent *event)
 AxialSliceWidget::~AxialSliceWidget()
 {
     // Destroy the VAO, VBO, and IBO
-    glDeleteVertexArrays(1, &sliceVertexObject);
+    //glDeleteVertexArrays(1, &sliceVertexObject);
+    sliceVertexObject.destroy();
     glDeleteBuffers(1, &sliceVertexBuf);
     glDeleteBuffers(1, &sliceIndexBuf);
     glDeleteTextures(1, &slicePrimTexture);
     glDeleteTextures(1, &sliceSecdTexture);
-    glDeleteVertexArrays(1, &traceVertexObject);
+    //glDeleteVertexArrays(1, &traceVertexObject);
+    traceVertexObject.destroy();
     glDeleteBuffers(1, &traceVertexBuf);
     glDeleteBuffers(1, &traceIndexBuf);
     glDeleteTextures((int)TracingLayer::Count, &traceTextures[0]);

@@ -2,6 +2,7 @@
 
 uniform sampler2D tex;
 uniform sampler1D mappingTexture;
+
 in vec2 texCoord;
 
 uniform float opacity;

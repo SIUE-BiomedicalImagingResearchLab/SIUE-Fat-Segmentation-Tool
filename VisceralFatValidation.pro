@@ -9,7 +9,7 @@ QT       += core gui opengl xml
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 CONFIG += c++11
-CONFIG -= app_bundle
+!macx: CONFIG -= app_bundle
 
 win32:VERSION = 1.0.1.0 # major.minor.patch.build
 else:VERSION = 1.0.1    # major.minor.patch
@@ -24,7 +24,6 @@ CONFIG(release, debug|release): DEFINES += QT_NO_DEBUG_OUTPUT QT_MESSAGELOGCONTE
 SOURCES += main.cpp\
     mainwindow.cpp \
     util.cpp \
-    vertex.cpp \
     niftimage.cpp \
     axialslicewidget.cpp \
     commands.cpp \
@@ -63,3 +62,7 @@ RESOURCES += \
 exists(custom.pro): include(custom.pro)
 
 DISTFILES +=
+
+QMAKE_CXXFLAGS_WARN_ON += -Wno-reorder
+QMAKE_CXXFLAGS_WARN_ON += -Wno-missing-braces
+QMAKE_CXXFLAGS_WARN_ON += -Wno-switch

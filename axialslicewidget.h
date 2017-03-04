@@ -66,7 +66,8 @@ private:
 
     QOpenGLShaderProgram *sliceProgram;
     GLuint sliceVertexBuf, sliceIndexBuf;
-    GLuint sliceVertexObject;
+    //GLuint sliceVertexObject;
+    QOpenGLVertexArrayObject sliceVertexObject;
     GLuint slicePrimTexture;
     GLuint sliceSecdTexture;
     QVector<VertexPT> sliceVertices;
@@ -76,13 +77,14 @@ private:
 
     QOpenGLShaderProgram *traceProgram;
     GLuint traceVertexBuf, traceIndexBuf;
-    GLuint traceVertexObject;
+    //GLuint traceVertexObject;
+    QOpenGLVertexArrayObject traceVertexObject;
     GLuint traceTextures[(int)TracingLayer::Count];
     QVector<VertexPT> traceVertices;
     QVector<unsigned short> traceIndices;
     std::array<bool, (int)TracingLayer::Count> traceTextureInit;
 
-    GLuint colorMapTexture[ColorMap::Count];
+    GLuint colorMapTexture[(int)ColorMap::Count];
 
     // Location of where the user is viewing.
     // The format is (X, Y, Z, T) where T is time
@@ -120,6 +122,10 @@ private:
 
     TracingLayer tracingLayer;
     std::array<bool, (size_t)TracingLayer::Count> tracingLayerVisible;
+
+    QElapsedTimer fpsTimer;
+    int frameCount;
+    float fps;
 
     QUndoStack *undoStack;
 

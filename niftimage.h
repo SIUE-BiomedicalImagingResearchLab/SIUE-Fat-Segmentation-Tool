@@ -21,13 +21,13 @@ private:
     nifti_image *upper;
     nifti_image *lower;
 
+    SubjectConfig *subConfig;
+
     int xDim;
     int yDim;
     int zDim;
 
     cv::Mat data;
-
-    SubjectConfig *subConfig;
 
 public:
     NIFTImage();

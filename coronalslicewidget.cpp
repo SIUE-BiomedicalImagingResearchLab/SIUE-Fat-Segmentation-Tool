@@ -3,7 +3,7 @@
 
 CoronalSliceWidget::CoronalSliceWidget(QWidget *parent) : QOpenGLWidget(parent),
     displayType(SliceDisplayType::FatOnly), fatImage(NULL), waterImage(NULL),
-    sliceTexture(NULL), location(0, 0, 0, 0), startPan(false), moveID(CommandID::CoronalMove)
+    sliceTexture(0), location(0, 0, 0, 0), startPan(false), moveID(CommandID::CoronalMove)
 {
 
 }
@@ -172,7 +172,12 @@ void CoronalSliceWidget::resetView()
 
 void CoronalSliceWidget::initializeGL()
 {
-    initializeOpenGLFunctions();
+    if (!initializeOpenGLFunctions())
+    {
+        qCritical() << "Unable to initialize OpenGL functions for CoronalSliceWidget";
+        return;
+    }
+
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
     // Setup matrices and view options
@@ -230,8 +235,10 @@ void CoronalSliceWidget::initializeSliceView()
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sliceIndices.size() * sizeof(GLushort), sliceIndices.constData(), GL_STATIC_DRAW);
 
     // Generate VAO for the axial slice vertices uploaded. Location 0 is the position and location 1 is the texture position
-    glGenVertexArrays(1, &sliceVertexObject);
-    glBindVertexArray(sliceVertexObject);
+    sliceVertexObject.create();
+    sliceVertexObject.bind();
+    //glGenVertexArrays(1, &sliceVertexObject);
+    //glBindVertexArray(sliceVertexObject);
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(0, VertexPT::PosTupleSize, GL_FLOAT, true, VertexPT::stride(), static_cast<const char *>(0) + VertexPT::posOffset());
@@ -243,7 +250,8 @@ void CoronalSliceWidget::initializeSliceView()
     // Release (unbind) all
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
+    //glBindVertexArray(0);
+    sliceVertexObject.release();
 }
 
 void CoronalSliceWidget::updateTexture()
@@ -314,9 +322,10 @@ void CoronalSliceWidget::paintGL()
         updateTexture();
 
     // After updating, begin rendering
-    QPainter painter(this);
+    //QPainter painter(this);
 
-    painter.beginNativePainting();
+    //painter.beginNativePainting();
+    glClearColor(0.0f, 1.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
     // Calculate the ModelViewProjection (MVP) matrix to transform the location of the axial slices
@@ -327,7 +336,8 @@ void CoronalSliceWidget::paintGL()
 
     // Bind the VAO, bind texture to GL_TEXTURE0, bind VBO, bind IBO
     // The program that is bound is the index of the curColorMap.
-    glBindVertexArray(sliceVertexObject);
+    sliceVertexObject.bind();
+    //glBindVertexArray(sliceVertexObject);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, sliceTexture);
     glBindBuffer(GL_ARRAY_BUFFER, sliceVertexBuf);
@@ -341,7 +351,8 @@ void CoronalSliceWidget::paintGL()
     // Release (unbind) the binded objects in reverse order
     // This is a simple protocol to prevent anything happening to the objects outside of this function without
     // explicitly binding the objects
-    glBindVertexArray(0);
+    //glBindVertexArray(0);
+    sliceVertexObject.release();
     glBindTexture(GL_TEXTURE_2D, 0);
     glBindTexture(GL_TEXTURE_1D, 0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -349,13 +360,13 @@ void CoronalSliceWidget::paintGL()
     program->release();
     glCheckError();
 
-    painter.endNativePainting();
+    //painter.endNativePainting();
 
-    // Draw Crosshair Line (Set matrix to transform NIFTI coordinates -> Window coordinates)
+    /*// Draw Crosshair Line (Set matrix to transform NIFTI coordinates -> Window coordinates)
     // Then draw a line with a width of 1 from left of screen to right of screen at coronal location
     painter.setTransform(getWindowToNIFTIMatrix().inverted().toTransform());
     painter.setPen(QPen(Qt::red, 1, Qt::SolidLine, Qt::RoundCap));
-    painter.drawLine(QPoint(0, location.z()), QPoint(fatImage->getXDim() - 1, location.z()));
+    painter.drawLine(QPoint(0, location.z()), QPoint(fatImage->getXDim() - 1, location.z()));*/
 }
 
 void CoronalSliceWidget::mouseMoveEvent(QMouseEvent *eventMove)
@@ -451,7 +462,8 @@ void CoronalSliceWidget::wheelEvent(QWheelEvent *event)
 CoronalSliceWidget::~CoronalSliceWidget()
 {
     // Destroy the VAO, VBO, and IBO
-    glDeleteVertexArrays(1, &sliceVertexObject);
+    sliceVertexObject.destroy();
+    //glDeleteVertexArrays(1, &sliceVertexObject);
     glDeleteBuffers(1, &sliceVertexBuf);
     glDeleteBuffers(1, &sliceIndexBuf);
     glDeleteTextures(1, &sliceTexture);

@@ -64,8 +64,15 @@ int main(int argc, char *argv[])
         QCoreApplication::setOrganizationName("Southern Illinois University Edwardsville");
         QCoreApplication::setApplicationName("Visceral Fat Validation");
         QCoreApplication::setApplicationVersion(APP_VERSION);
-        w = new MainWindow();
 
+        QSurfaceFormat format;
+        format.setMajorVersion(3);
+        format.setMinorVersion(3);
+        format.setProfile(QSurfaceFormat::CoreProfile);
+        format.setSamples(0);
+        QSurfaceFormat::setDefaultFormat(format);
+
+        w = new MainWindow();
         w->show();
         ret = app->exec();
     }

@@ -127,7 +127,6 @@ class LocationChangeCommand : public QUndoCommand
 private:
     QVector4D oldLocation;
     QVector4D newLocation;
-    MainWindow *window;
     AxialSliceWidget *axialWidget;
     CoronalSliceWidget *coronalWidget;
 
