@@ -322,10 +322,9 @@ void CoronalSliceWidget::paintGL()
         updateTexture();
 
     // After updating, begin rendering
-    //QPainter painter(this);
+    QPainter painter(this);
 
-    //painter.beginNativePainting();
-    glClearColor(0.0f, 1.0f, 0.0f, 1.0f);
+    painter.beginNativePainting();
     glClear(GL_COLOR_BUFFER_BIT);
 
     // Calculate the ModelViewProjection (MVP) matrix to transform the location of the axial slices
@@ -360,13 +359,13 @@ void CoronalSliceWidget::paintGL()
     program->release();
     glCheckError();
 
-    //painter.endNativePainting();
+    painter.endNativePainting();
 
-    /*// Draw Crosshair Line (Set matrix to transform NIFTI coordinates -> Window coordinates)
+    // Draw Crosshair Line (Set matrix to transform NIFTI coordinates -> Window coordinates)
     // Then draw a line with a width of 1 from left of screen to right of screen at coronal location
     painter.setTransform(getWindowToNIFTIMatrix().inverted().toTransform());
     painter.setPen(QPen(Qt::red, 1, Qt::SolidLine, Qt::RoundCap));
-    painter.drawLine(QPoint(0, location.z()), QPoint(fatImage->getXDim() - 1, location.z()));*/
+    painter.drawLine(QPoint(0, location.z()), QPoint(fatImage->getXDim() - 1, location.z()));
 }
 
 void CoronalSliceWidget::mouseMoveEvent(QMouseEvent *eventMove)

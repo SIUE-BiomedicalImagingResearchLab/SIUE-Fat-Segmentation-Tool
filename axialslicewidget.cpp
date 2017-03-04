@@ -1157,11 +1157,11 @@ void AxialSliceWidget::paintGL()
             updateTrace((TracingLayer)i);
 
     // After updating, begin rendering
-    //QPainter painter(this);
+    QPainter painter(this);
 
     // With painter, call beginNativePainting before doing any custom OpenGL commands
     glCheckError();
-    //painter.beginNativePainting();
+    painter.beginNativePainting();
     glCheckError();
 
     // Sets up transparency for the primary and secondary textures
@@ -1232,7 +1232,7 @@ void AxialSliceWidget::paintGL()
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     sliceProgram->release();
 
-    /*painter.endNativePainting();
+    painter.endNativePainting();
 
     // Draw Crosshair Line (Set matrix to transform NIFTI coordinates -> Window coordinates)
     // Then draw a line with a width of 1 from left of screen to right of screen at coronal location
@@ -1244,7 +1244,7 @@ void AxialSliceWidget::paintGL()
     // This is called again because the crosshair line needs to be after the NIFT image but before the tracing
     // This shows the user if they have placed a trace over the crosshair line
     glCheckError();
-    painter.beginNativePainting();*/
+    painter.beginNativePainting();
     glCheckError();
 
     // Sets up transparency for the tracing colors; NOTE: The tracing colors can be set to a transparent value
@@ -1296,10 +1296,10 @@ void AxialSliceWidget::paintGL()
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     traceProgram->release();
 
-    /*painter.endNativePainting();
+    painter.endNativePainting();
 
-    // Draw Crosshair Line (Set matrix to transform NIFTI coordinates -> Window coordinates)
-    // Then draw a line with a width of 1 from left of screen to right of screen at coronal location
+    // If we are in erasing mode and the mouse is hovering over this widget, we draw a transparent square
+    // the size of the eraser brush width to show what will be erased.
     if (drawMode == DrawMode::Erase && underMouse())
     {
         QRectF brushRect(-std::ceil(eraserBrushWidth / 2), -std::ceil(eraserBrushWidth / 2), eraserBrushWidth, eraserBrushWidth);
@@ -1309,7 +1309,7 @@ void AxialSliceWidget::paintGL()
 
         painter.setTransform(getWindowToNIFTIMatrix().inverted().toTransform());
         painter.fillRect(brushRect, QBrush(QColor(128, 128, 255, 128)));
-    }*/
+    }
 }
 
 void AxialSliceWidget::addPoint(QPoint newPoint, bool first)
