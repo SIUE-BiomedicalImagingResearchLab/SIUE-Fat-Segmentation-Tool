@@ -46,6 +46,9 @@ QVector2D lerp(QVector2D start, QVector2D end, float percent);
 QPointF lerp(QPointF start, QPointF end, float percent);
 QPoint lerp(QPoint start, QPoint end, float percent);
 
+QString execCommand(const char *cmd);
+QString execCommand(QString cmd);
+
 }
 
 #endif // UTIL_H

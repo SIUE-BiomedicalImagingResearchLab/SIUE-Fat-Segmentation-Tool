@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "application.h"
+#include "stacktrace.h"
 
 #include <opencv2/opencv.hpp>
 
@@ -60,6 +61,11 @@ int main(int argc, char *argv[])
 
         qInstallMessageHandler(messageLogger);
         qSetMessagePattern("[%{time MM/dd/yyyy h:mm:ss}] [%{if-debug}Debug%{endif}%{if-info}Info%{endif}%{if-warning}Warn%{endif}%{if-critical}Crit%{endif}%{if-fatal}Fatal%{endif}] %{function}:%{line} - %{message}");
+
+        // Set globalProgramName for stack trace retriever. Set signal handler to print stack trace on exception
+        globalProgramName = argv[0];
+        setSignalHandler();
+
         app = new Application(argc, argv);
         QCoreApplication::setOrganizationName("Southern Illinois University Edwardsville");
         QCoreApplication::setApplicationName("Visceral Fat Validation");
@@ -81,27 +87,28 @@ int main(int argc, char *argv[])
 
         w = new MainWindow();
         w->show();
+
         ret = app->exec();
     }
     catch (const std::logic_error &e)
     {
-        qCritical() << "Logic Error: " << e.what();
+        qCritical().nospace().noquote() << "Logic Error: " << e.what() << "\n" << printStackTrace();
     }
     catch (const std::runtime_error &e)
     {
-        qCritical() << "Runtime Error: " << e.what();
+        qCritical().nospace().noquote() << "Runtime Error: " << e.what() << "\n" << printStackTrace();
     }
     catch (const Exception &e)
     {
-        qCritical() << "Error " << e.title() << " : " << e.message();
+        qCritical().nospace().noquote() << "Error " << e.title() << " : " << e.message() << "\n" << printStackTrace();
     }
     catch (const cv::Exception &e)
     {
-        qCritical() << "OpenCV Error: " << e.what();
+        qCritical().nospace().noquote() << "OpenCV Error: " << e.what() << "\n" << printStackTrace();
     }
     catch (...)
     {
-        qCritical() << "An unknown error was thrown";
+        qCritical().nospace().noquote() << "An unknown error was thrown\n" << printStackTrace();
     }
 
     // Only delete the pointers if they were allocated in the first place,

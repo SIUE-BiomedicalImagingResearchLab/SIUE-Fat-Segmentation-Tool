@@ -33,7 +33,8 @@ SOURCES += main.cpp\
     numerictype.cpp \
     view_axialcoronalhires.cpp \
     view_axialcoronallores.cpp \
-    tracing.cpp
+    tracing.cpp \
+    stacktrace.cpp
 
 HEADERS  += mainwindow.h \
     application.h \
@@ -50,7 +51,8 @@ HEADERS  += mainwindow.h \
     numerictype.h \
     view_axialcoronalhires.h \
     view_axialcoronallores.h \
-    tracing.h
+    tracing.h \
+    stacktrace.h
 
 FORMS    += mainwindow.ui \
     view_axialcoronalhires.ui \

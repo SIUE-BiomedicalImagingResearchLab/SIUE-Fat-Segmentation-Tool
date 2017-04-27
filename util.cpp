@@ -132,4 +132,36 @@ QPoint lerp(QPoint start, QPoint end, float percent)
     return lerp(start_, end_, percent).toPoint();
 }
 
+QString execCommand(const char *cmd)
+{
+    char buffer[128];
+    QString result;
+#ifdef Q_OS_WIN
+    FILE *pipe = _popen(cmd, "r");
+#else // Q_OS_WIN
+    FILE *pipe = popen(cmd, "r");
+#endif // Q_OS_WIN
+
+    if (!pipe)
+        return QString();
+
+    while (!feof(pipe))
+    {
+        if (fgets(&buffer[0], 128, pipe) != NULL)
+            result += &buffer[0];
+    }
+
+#ifdef Q_OS_WIN
+    _pclose(pipe);
+#else // Q_OS_WIN
+    pclose(pipe);
+#endif // Q_OS_WIN
+    return result;
+}
+
+QString execCommand(QString cmd)
+{
+    return execCommand(cmd.toStdString().c_str());
+}
+
 }
