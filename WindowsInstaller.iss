@@ -8,8 +8,9 @@
 #define MyAppPublisher "Addison Elliott"
 #define MyAppURL "https://github.com/addisonElliott/VisceralFatValidation"
 #define MyAppExeName "VisceralFatValidation.exe"
-#define OutputFilename "VisceralFatValidation-v1.0.1.0-Debug-Win_x64"
-#define SrcDir "D:\Users\addis\Desktop\VisceralFatValidation-v1.0.1.0-Debug"
+#define OutputFilename "VisceralFatValidation-v1.0.1.0-Release-Win_x64"
+#define OutputDirectory "D:\Users\addis\Desktop\Output"
+#define SrcDir "D:\Users\addis\Desktop\VisceralFatValidation-v1.0.1.0-Release"
 
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application.
@@ -25,9 +26,12 @@ AppSupportURL={#MyAppURL}
 AppUpdatesURL={#MyAppURL}
 DefaultDirName={pf}\{#MyAppName}
 DisableProgramGroupPage=yes
+OutputDir={#OutputDirectory}
 OutputBaseFilename={#OutputFilename}
 Compression=lzma
 SolidCompression=yes
+ArchitecturesInstallIn64BitMode=x64
+ArchitecturesAllowed=x64
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
@@ -44,7 +48,7 @@ Name: {app}\translations\; Permissions: users-modify
 
 [Files]
 Source: "{#SrcDir}\*.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#SrcDir}\*.pdb"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#SrcDir}\*.pdb"; DestDir: "{app}"; Flags: ignoreversion skipifsourcedoesntexist
 Source: "{#SrcDir}\VisceralFatValidation.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#SrcDir}\VisceralFatValidation_resource.res"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#SrcDir}\iconengines\*"; DestDir: "{app}\iconengines"; Flags: ignoreversion recursesubdirs createallsubdirs skipifsourcedoesntexist
@@ -62,5 +66,84 @@ Name: "{commondesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: 
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
 
 Filename: {tmp}\vcredist_x64.exe; \
-    Parameters: "/q /passive /Q:a /c:""msiexec /q /i vcredist.msi"""; \
-    StatusMsg: "Installing VC++ 2015 Redistributables..."
+	Parameters: "/q /passive /norestart /Q:a /c:""msiexec /q /i vcredist.msi"""; \
+	Check: VCRedistNeedsInstall; \
+	StatusMsg: "Installing VC++ 2015 Redistributables..."
+
+[Code]
+function IsX64: boolean;
+begin
+	Result := Is64BitInstallMode and (ProcessorArchitecture = paX64);
+end;
+
+procedure Explode(var Dest: TArrayOfString; Text: String; Separator: String);
+var i, p: Integer;
+begin
+  i := 0;
+  repeat
+    SetArrayLength(Dest, i+1);
+    p := Pos(Separator,Text);
+    if p > 0 then begin
+      Dest[i] := Copy(Text, 1, p-1);
+      Text := Copy(Text, p + Length(Separator), Length(Text));
+      i := i + 1;
+    end else begin
+      Dest[i] := Text;
+      Text := '';
+    end;
+  until Length(Text)=0;
+end;
+
+function IsVcRedistInstalled(version: String; build: cardinal): boolean;
+var
+  regBuildNumber: cardinal;
+  regKey: String;
+  regInstalled: cardinal;
+  regStringBuildNumber: String;
+  strArrayBuildNumber: TArrayOfString;
+begin
+  Log('Check for VC Redist ' + version + ' with build ' + IntToStr(build));
+  if(IsX64()) then begin
+    regKey := 'SOFTWARE\WOW6432Node\Microsoft\VisualStudio\'+ version +'\VC\Runtimes\x64';
+  end else begin
+    regKey := 'SOFTWARE\Microsoft\VisualStudio\'+ version +'\VC\VCRedist\x86';
+  end;
+  RegQueryDWordValue(HKLM, regKey, 'Installed', regInstalled);
+   //Normal version installed, compare buildNumber
+  if(regInstalled = 1) then begin
+    Log('VC Redist ' + version + ' Installed');
+    RegQueryDWordValue(HKLM, regKey, 'Bld', regBuildNumber);
+    Result:= (regBuildNumber >= build);
+    Log('Detected VC Redist Build ' + IntToStr(regBuildNumber));
+    Exit;
+  end;
+    Log('VC Redist ' + version + ' not in default directory registry.')
+
+  //Check developer version
+  if(IsX64()) then begin
+    regKey := 'SOFTWARE\Wow6432Node\Microsoft\DevDiv\vc\Servicing\'+ version +'\RuntimeAdditional';
+  end else begin
+    regKey := 'SOFTWARE\Microsoft\DevDiv\vc\Servicing\'+ version +'\VC\VCRedist\x86';
+  end;
+  RegQueryDWordValue(HKLM, regKey, 'Install', regInstalled);
+  if(regInstalled <> 1) then begin
+    Result := false;
+    Exit;
+  end;
+
+  RegQueryStringValue(HKLM, regKey, 'Version', regStringBuildNumber);
+  Explode(strArrayBuildNumber, regStringBuildNumber, '.');
+  regBuildNumber := StrToInt(strArrayBuildNumber[2]);
+  Result:= (regBuildNumber >= build);  
+end;
+
+function VCRedistNeedsInstall: Boolean;
+begin
+  { here the Result must be True when you need to install your VCRedist }
+  { or False when you don't need to, so now it's upon you how you build }
+  { this statement, the following won't install your VC redist only when }
+  { the Visual C++ 2010 Redist (x86) and Visual C++ 2010 SP1 Redist(x86) }
+  { are installed for the current user }
+
+  Result := not IsVcRedistInstalled('14.0', 24215);
+end;
