@@ -182,13 +182,13 @@ QString posixPrintStackTrace()
     // stackStr contains the string with stack information
     QString stackStr;
 
-    // WEIRD BUG: If I don't give this it's own variable and instead imbed it into the .arg(XXX) part, it will
-    // cause a segmentation fault? No idea why but whatever.
-    quintptr address = (quintptr)stackTraces[i];
-
     // Skip first couple stack frames because they are this function and our handler, also skip the last frame as it's (always?) junk
-    for (int i = 0; i < trace_size; ++i) // we'll use this for now so you can see what's going on
+    for (int i = 0; i < traceSize; ++i) // we'll use this for now so you can see what's going on
     {
+        // WEIRD BUG: If I don't give this it's own variable and instead imbed it into the .arg(XXX) part, it will
+        // cause a segmentation fault? No idea why but whatever.
+        quintptr address = (quintptr)stackTraces[i];
+
         // Use addr2line command to get the symbol, file name, and line number in one
         QString stackLine = addr2line(globalProgramName, (void *)stackTraces[i]);
         if (stackLine.isNull())
@@ -261,11 +261,13 @@ void setSignalHandler()
     ss.ss_size = SIGSTKSZ;
     ss.ss_flags = 0;
 
-    if (!sigaltstack(&ss, NULL))
-        qCritical() << "Error calling sigaltstack";
+    if (sigaltstack(&ss, NULL) != 0)
+        qCritical() << "Error calling sigaltstack: " << errno;
 
     // Register our signal handlers
     struct sigaction sigAction = {};
+    memset(&sigAction, 0, sizeof(sigAction));
+
     sigAction.sa_sigaction = posixSignalHandler;
     sigemptyset(&sigAction.sa_mask);
 
@@ -276,23 +278,23 @@ void setSignalHandler()
     sigAction.sa_flags = SA_SIGINFO | SA_ONSTACK;
 #endif // Q_OS_MACOS
 
-    if (!sigaction(SIGSEGV, &sigAction, NULL))
-        qCritical() << "Error calling sigaction for SIGSEGV";
+    if (sigaction(SIGSEGV, &sigAction, NULL) != 0)
+        qCritical() << "Error calling sigaction for SIGSEGV" << errno;
 
-    if (!sigaction(SIGFPE,  &sigAction, NULL))
-        qCritical() << "Error calling sigaction for SIGFPE";
+    if (sigaction(SIGFPE,  &sigAction, NULL) != 0)
+        qCritical() << "Error calling sigaction for SIGFPE" << errno;
 
-    if (!sigaction(SIGINT,  &sigAction, NULL))
-        qCritical() << "Error calling sigaction for SIGINT";
+    if (sigaction(SIGINT,  &sigAction, NULL) != 0)
+        qCritical() << "Error calling sigaction for SIGINT" << errno;
 
-    if (!sigaction(SIGILL,  &sigAction, NULL))
-        qCritical() << "Error calling sigaction for SIGILL";
+    if (sigaction(SIGILL,  &sigAction, NULL) != 0)
+        qCritical() << "Error calling sigaction for SIGILL" << errno;
 
-    if (!sigaction(SIGTERM, &sigAction, NULL))
-        qCritical() << "Error calling sigaction for SIGTERM";
+    if (sigaction(SIGTERM, &sigAction, NULL) != 0)
+        qCritical() << "Error calling sigaction for SIGTERM" << errno;
 
-    if (!sigaction(SIGABRT, &sigAction, NULL))
-        qCritical() << "Error calling sigaction for SIGABRT";
+    if (sigaction(SIGABRT, &sigAction, NULL) != 0)
+        qCritical() << "Error calling sigaction for SIGABRT" << errno;
 }
 #endif // Q_OS_WIN
 

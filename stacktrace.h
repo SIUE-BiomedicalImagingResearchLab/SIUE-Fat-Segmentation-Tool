@@ -12,6 +12,8 @@
 #else // Q_OS_WIN
 #include <err.h>
 #include <execinfo.h>
+#include <signal.h>
+#include <cerrno>
 #endif // Q_OS_WIN
 
 extern QString globalProgramName;
