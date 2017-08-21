@@ -40,3 +40,8 @@ CMakeLists.txt.user
 # Mac OS X Specific
 .DS_Store
 
+error.log
+
+# Installation Scripts, ignore these since they contain path dependent scripts that will be different from computer to computer
+MacDeployScript
+WindowsInstaller.iss
