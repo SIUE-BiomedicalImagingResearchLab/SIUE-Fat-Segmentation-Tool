@@ -11,12 +11,12 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 CONFIG += c++11
 !macx: CONFIG -= app_bundle
 
-win32:VERSION = 1.0.1.0 # major.minor.patch.build
-else:VERSION = 1.0.1    # major.minor.patch
+win32:VERSION = 1.0.2.0 # major.minor.patch.build
+else:VERSION = 1.0.2    # major.minor.patch
 
 DEFINES += APP_VERSION=\\\"$$VERSION\\\"
 
-TARGET = VisceralFatValidation
+TARGET = "SIUE Fat Segmentation Tool"
 TEMPLATE = app
 
 CONFIG(release, debug|release): DEFINES += QT_NO_DEBUG_OUTPUT QT_MESSAGELOGCONTEXT

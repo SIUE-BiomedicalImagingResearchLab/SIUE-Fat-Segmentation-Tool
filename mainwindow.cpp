@@ -89,9 +89,9 @@ void MainWindow::on_actionExit_triggered()
 void MainWindow::on_actionAbout_triggered()
 {
     QMessageBox aboutBox(QMessageBox::Information, "About the Program",
-                         QObject::tr("<p><span style=\"font-weight: 600;\">Visceral Fat Validation v%1</span></p>"
+                         QObject::tr("<p><span style=\"font-weight: 600;\">SIUE Fat Segmentation Tool v%1</span></p>"
                                      "<p><span style=\"font-weight: 600;\">Creator:</span> Addison Elliott</p>"
-                                     "<p><span style=\"font-weight: 600;\">Release Date: </span>2/06/2017</p>"
+                                     "<p><span style=\"font-weight: 600;\">Release Date: </span>8/21/2017</p>"
                                      "<p><span style=\"font-weight: 600;\">Advisor:</span> Jon Klingensmith</p>"
                                      "<p><span style=\"font-weight: 600;\">School:</span> Southern Illinois University Edwardsville</p>"
                                      "<p><strong>Thanks To:&nbsp;</strong></p>"

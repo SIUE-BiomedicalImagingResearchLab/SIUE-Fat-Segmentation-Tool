@@ -68,7 +68,7 @@ int main(int argc, char *argv[])
 
         app = new Application(argc, argv);
         QCoreApplication::setOrganizationName("Southern Illinois University Edwardsville");
-        QCoreApplication::setApplicationName("Visceral Fat Validation");
+        QCoreApplication::setApplicationName("SIUE Fat Segmentation Tool");
         QCoreApplication::setApplicationVersion(APP_VERSION);
 
         QSurfaceFormat format;

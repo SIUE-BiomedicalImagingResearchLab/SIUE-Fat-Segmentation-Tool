@@ -3,14 +3,31 @@
 
 ; MAKE SURE TO CHANGE THIS INFORMATION BEFORE BUILDING A NEW RELEASE
 ; MUST UPDATE VERSION NUMBER AND SOURCE DIRECTORY AT A MINIMUM
-#define MyAppName "Visceral Fat Validation"
-#define MyAppVersion "1.0.1.0"
+#define MyAppName "SIUE Fat Segmentation Tool"
+#define MyAppVersion "1.0.2.0"
 #define MyAppPublisher "Addison Elliott"
-#define MyAppURL "https://github.com/addisonElliott/VisceralFatValidation"
-#define MyAppExeName "VisceralFatValidation.exe"
-#define OutputFilename "VisceralFatValidation-v1.0.1.0-Release-Win_x64"
+#define MyAppURL "https://github.com/addisonElliott/SIUE-Fat-Segmentation-Tool"
+#define MyAppExeName "SIUE Fat Segmentation Tool.exe"
+#define MyAppRelease "Release"
+
+; Output filename and directory for the installer
+#define OutputFilename "SIUE-Fat-Segmentation-Tool-v" + MyAppVersion + "-" + MyAppRelease + "-Win_x64"
 #define OutputDirectory "D:\Users\addis\Desktop\Output"
-#define SrcDir "D:\Users\addis\Desktop\VisceralFatValidation-v1.0.1.0-Release"
+
+; Source directory of the build. This should be the folder that Qt Creator generates when building
+#define SrcDir "D:\Users\addis\Documents\QtProjects\build-SIUE-Fat-Segmentation-Tool-Desktop_Qt_5_8_0_MSVC2015_64bit_Custom-" + MyAppRelease + "\" + LowerCase(MyAppRelease)
+
+; Location of the binary directories for the external libraries: NIFTI, ZLIB, OpenCV Debug & Release
+#define NiftiBin "D:\DevelLibs\nifticlib\buildShared\bin"
+#define ZlibBin "D:\DevelLibs\zlib-1.2.8\build\bin"
+#define OpenCVBinDebug "D:\DevelLibs\opencv\build\\bin\Debug"
+#define OpenCVBinRelease "D:\DevelLibs\opencv\build\\bin\Release"
+
+#define WinDeployQt "D:\DevelLibs\Qt\qt5-build\qtbase\bin\windeployqt.exe"
+
+; Run WinDeployQt when compiling script to get Qt DLLs to directory
+; Add --debug or --release depending on MyAppRelease macro
+#expr Exec(WinDeployQt, SrcDir + " --" + LowerCase(MyAppRelease))
 
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application.
@@ -47,15 +64,35 @@ Name: {app}\platforms\; Permissions: users-modify
 Name: {app}\translations\; Permissions: users-modify
 
 [Files]
-Source: "{#SrcDir}\*.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#NiftiBin}/niftiio.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#NiftiBin}/nifticdf.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#NiftiBin}/znz.dll"; DestDir: "{app}"; Flags: ignoreversion
+
+Source: "{#ZlibBin}/zlib.dll"; DestDir: "{app}"; Flags: ignoreversion
+
+#if MyAppRelease == "Debug"
+Source: "{#OpenCVBinDebug}/opencv_core310d.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#OpenCVBinDebug}/opencv_imgproc310d.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#OpenCVBinDebug}/opencv_highgui310d.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#OpenCVBinDebug}/opencv_ml310d.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#OpenCVBinDebug}/opencv_video310d.dll"; DestDir: "{app}"; Flags: ignoreversion
+#else
+Source: "{#OpenCVBinRelease}/opencv_core310.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#OpenCVBinRelease}/opencv_imgproc310.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#OpenCVBinRelease}/opencv_highgui310.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#OpenCVBinRelease}/opencv_ml310.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#OpenCVBinRelease}/opencv_video310.dll"; DestDir: "{app}"; Flags: ignoreversion
+#endif
+
+Source: "{#SrcDir}\*.dll"; DestDir: "{app}"; Flags: ignoreversion skipifsourcedoesntexist
 Source: "{#SrcDir}\*.pdb"; DestDir: "{app}"; Flags: ignoreversion skipifsourcedoesntexist
-Source: "{#SrcDir}\VisceralFatValidation.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#SrcDir}\VisceralFatValidation_resource.res"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#SrcDir}\{#MyAppName}.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#SrcDir}\{#MyAppName}_resource.res"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#SrcDir}\iconengines\*"; DestDir: "{app}\iconengines"; Flags: ignoreversion recursesubdirs createallsubdirs skipifsourcedoesntexist
 Source: "{#SrcDir}\imageformats\*"; DestDir: "{app}\imageformats"; Flags: ignoreversion recursesubdirs createallsubdirs skipifsourcedoesntexist
 Source: "{#SrcDir}\platforms\*"; DestDir: "{app}\platforms"; Flags: ignoreversion recursesubdirs createallsubdirs skipifsourcedoesntexist
 Source: "{#SrcDir}\translations\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs skipifsourcedoesntexist
-Source: "{#SrcDir}\vcredist_x64.exe"; DestDir: {tmp}; Flags: deleteafterinstall
+Source: "{#SrcDir}\vcredist_x64.exe"; DestDir: {tmp}; Flags: deleteafterinstall skipifsourcedoesntexist
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
