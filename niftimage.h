@@ -56,6 +56,9 @@ public:
     cv::Mat getSaggitalSlice(int x, bool clone = false);
 
     const NumericType *getType() const;
+
+private:
+    void orientImage(nifti_image *image, cv::Mat &mat);
 };
 
 #endif // NIFTIMAGE_H

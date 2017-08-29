@@ -85,6 +85,11 @@ bool NIFTImage::setImage(nifti_image *upper, nifti_image *lower, SubjectConfig *
     cv::Mat upperROI = data({cv::Range(lowerLength, zDim), cv::Range::all(), cv::Range::all()});
 
     cv::Mat upperMat({upper->dim[3], upper->dim[2], upper->dim[1]}, datatype, upper->data);
+
+    // Read orientation field for the NIFTI image. If the orientation field is not RAS (+X -> Right, +Y -> Anterior, +Z -> Superior),
+    // then correct it by flipping the image
+    orientImage(upper, upperMat);
+
     // Copy imageUpperInferior to imageUpperSuperior to upperMatROI
     cv::Mat upperMatROI = upperMat({cv::Range(subConfig->imageUpperInferior, subConfig->imageUpperSuperior + 1), cv::Range::all(), cv::Range::all()});
 
@@ -94,6 +99,10 @@ bool NIFTImage::setImage(nifti_image *upper, nifti_image *lower, SubjectConfig *
     cv::Mat lowerROI = data({cv::Range(0, lowerLength), cv::Range::all(), cv::Range::all()});
 
     cv::Mat lowerMat({lower->dim[3], lower->dim[2], lower->dim[1]}, datatype, lower->data);
+
+    // Read orientation field for the NIFTI image. If the orientation field is not RAS (+X -> Right, +Y -> Anterior, +Z -> Superior),
+    // then correct it by flipping the image
+    orientImage(lower, lowerMat);
 
     // Copy imageLowerInferior to imageLowerSuperior to lowerMatROI
     cv::Mat lowerMatROI = lowerMat({cv::Range(subConfig->imageLowerInferior, subConfig->imageLowerSuperior + 1), cv::Range::all(), cv::Range::all()});
@@ -108,6 +117,42 @@ bool NIFTImage::setImage(nifti_image *upper, nifti_image *lower, SubjectConfig *
     opencv::flip(dataFlipped, data, 1);
 
     return true;
+}
+
+// Orient NIFTI image so the coordinate system is RAS
+void NIFTImage::orientImage(nifti_image *image, cv::Mat &mat)
+{
+    // Read orientation field for the NIFTI image. If the orientation field is not RAS (+X -> Right, +Y -> Anterior, +Z -> Superior),
+    // then correct it by flipping the image
+    int xOrienCode, yOrienCode, zOrienCode;
+    nifti_mat44_to_orientation(image->sto_xyz, &xOrienCode, &yOrienCode, &zOrienCode);
+
+    // If +X -> L (R2L), then flip by Z-axis
+    if (xOrienCode == NIFTI_R2L)
+    {
+        cv::Mat dataFlipped;
+
+        opencv::flip(mat, dataFlipped, 2);
+        mat = dataFlipped;
+    }
+
+    // If +Y -> P (A2P), then flip by X-axis
+    if (yOrienCode == NIFTI_A2P)
+    {
+        cv::Mat dataFlipped;
+
+        opencv::flip(mat, dataFlipped, 0);
+        mat = dataFlipped;
+    }
+
+    // If +Z -> I (S2I), then flip by Y-axis
+    if (zOrienCode == NIFTI_S2I)
+    {
+        cv::Mat dataFlipped;
+
+        opencv::flip(mat, dataFlipped, 1);
+        mat = dataFlipped;
+    }
 }
 
 /* setSubjectConfig sets the configuration data for the subject.
