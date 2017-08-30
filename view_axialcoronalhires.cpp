@@ -385,58 +385,120 @@ void viewAxialCoronalHiRes::actionOpen_triggered()
 
 void viewAxialCoronalHiRes::actionSave_triggered()
 {
-    if (parentMain()->saveTracingResultsPath.isNull())
+    if (!parentMain()->tracingResultsZip)
+    {
         actionSaveAs_triggered();
-    else if (ui->glWidgetAxial->saveTracingData(parentMain()->saveTracingResultsPath, false))
-        parentMain()->ui->statusBar->showMessage(QObject::tr("Successfully saved file at %1").arg(parentMain()->saveTracingResultsPath), 4000);
+        return;
+    }
+
+    // TODO: Make sure overwriting and use mdCreate is okay!
+    if (!parentMain()->tracingResultsZip->open(QuaZip::mdCreate))
+    {
+        qWarning() << "Unable to open zip file at " << parentMain()->tracingResultsZip->getZipName()
+                   << ": " << parentMain()->tracingResultsZip->getZipError();
+        return;
+    }
+
+    if (ui->glWidgetAxial->saveTracingData(parentMain()->tracingResultsZip))
+        parentMain()->ui->statusBar->showMessage(QObject::tr("Successfully saved file in %1").arg(parentMain()->tracingResultsZip->getZipName()), 4000);
+
+    parentMain()->tracingResultsZip->close();
 }
 
 void viewAxialCoronalHiRes::actionSaveAs_triggered()
 {
-    // Start dialog to select existing directory to save the tracing results
-    QString path = QFileDialog::getExistingDirectory(this, "Save File in Directory", parentMain()->defaultSaveDir);
-    if (path.isNull())
+    // Start dialog to select location to save the tracing results
+    QString filename = QFileDialog::getSaveFileName(this, "Save File As", parentMain()->defaultSavePath, "Tracing Results (*.sdi)");
+    if (filename.isNull())
         return; // If they hit cancel, do nothing
 
-    QFileInfo fileInfo(path);
-    if (!fileInfo.exists() || !fileInfo.isDir())
+    QFileInfo fileInfo(filename);
+
+    // If the file exists and is not a file, then throw an error
+    if (fileInfo.exists())
     {
-        qWarning() << "Selected directory to save tracing results either does not exist or is not a directory: " << path;
+        if (!fileInfo.isFile())
+        {
+            qWarning() << filename << "is not a valid file";
+            return;
+        }
+
+        // If file already exists, show prompt asking if they want to overwrite. If they click no, then return and do nothing
+        if (QMessageBox::warning((QWidget *)parent(), "Confirm Save As", "Tracing data already exists here.\nDo you want to replace it?",
+                QMessageBox::Yes, QMessageBox::No) != QMessageBox::Yes)
+                return;
+    }
+
+    // Open QuaZip file with the specified filename
+    QuaZip *tracingResultsZip = new QuaZip(filename);
+
+    // TODO: Make sure overwriting and use mdCreate is okay!
+    if (!tracingResultsZip->open(QuaZip::mdCreate))
+    {
+        qWarning() << "Unable to open zip file at " << filename << ": " << tracingResultsZip->getZipError();
         return;
     }
 
-    if (ui->glWidgetAxial->saveTracingData(path))
+    if (ui->glWidgetAxial->saveTracingData(tracingResultsZip))
     {
         // Since the NIFTI files were successfully saved, the default path in the dialog next time will be this path
-        parentMain()->defaultSaveDir = path;
-        parentMain()->saveTracingResultsPath = path;
-        parentMain()->ui->statusBar->showMessage(QObject::tr("Successfully saved file at %1").arg(path), 4000);
+        parentMain()->defaultSavePath = fileInfo.absolutePath();
+
+        // Since save was successful, if there was existing tracing data zip, delete it
+        // Note: The user already approved this since a confirm prompt occurs in saveTracingData
+        if (parentMain()->tracingResultsZip)
+            delete parentMain()->tracingResultsZip;
+
+        // Set new tracing results zip
+        parentMain()->tracingResultsZip = tracingResultsZip;
+        parentMain()->ui->statusBar->showMessage(QObject::tr("Successfully saved file at %1").arg(tracingResultsZip->getZipName()), 4000);
     }
     else
-        qWarning() << "Unable to save tracing data in path: " << path;
+        qWarning() << "Unable to save tracing data in path: " << filename;
+
+    tracingResultsZip->close();
 }
 
 void viewAxialCoronalHiRes::actionImportTracingData_triggered()
 {
-    // Start dialog to select existing directory to save the tracing results
-    QString path = QFileDialog::getExistingDirectory(this, "Import Data in Directory", parentMain()->defaultSaveDir);
-    if (path.isNull())
+    // Start dialog to select location to load the tracing results
+    QString filename = QFileDialog::getOpenFileName(this, "Import Tracing Data", parentMain()->defaultSavePath, "Tracing Results (*.sdi)");
+    if (filename.isNull())
         return; // If they hit cancel, do nothing
 
-    QFileInfo fileInfo(path);
-    if (!fileInfo.exists() || !fileInfo.isDir())
+    QFileInfo fileInfo(filename);
+
+    if (!fileInfo.exists() || !fileInfo.isFile())
     {
-        qWarning() << "Selected directory to save tracing results either does not exist or is not a directory: " << path;
+        qWarning() << "Selected file for saving the tracing results either does not exist or is not a file: " << filename;
         return;
     }
 
-    if (ui->glWidgetAxial->loadTracingData(path))
+    // Open QuaZip file with the specified filename
+    QuaZip *tracingResultsZip = new QuaZip(filename);
+
+    // TODO: Make sure overwriting and use mdCreate is okay!
+    if (!tracingResultsZip->open(QuaZip::mdUnzip))
+    {
+        qWarning() << "Unable to open zip file at " << filename << ": " << tracingResultsZip->getZipError();
+        return;
+    }
+
+    if (ui->glWidgetAxial->loadTracingData(tracingResultsZip))
     {
         // Since the NIFTI files were successfully loaded, the default path in the dialog next time will be this path
-        parentMain()->defaultSaveDir = path;
-        parentMain()->saveTracingResultsPath = path;
-        parentMain()->ui->statusBar->showMessage(QObject::tr("Successfully loaded tracing results in %1").arg(path), 4000);
+        parentMain()->defaultSavePath = fileInfo.absolutePath();
+
+        // Since load was successful, if there was existing tracing data zip, delete it
+        // Note: The user already approved this since a confirm prompt occurs in loadTracingData
+        if (parentMain()->tracingResultsZip)
+            delete parentMain()->tracingResultsZip;
+
+        parentMain()->tracingResultsZip = tracingResultsZip;
+        parentMain()->ui->statusBar->showMessage(QObject::tr("Successfully loaded tracing results in %1").arg(filename), 4000);
     }
+
+    tracingResultsZip->close();
 }
 
 void viewAxialCoronalHiRes::actionUndo_triggered()

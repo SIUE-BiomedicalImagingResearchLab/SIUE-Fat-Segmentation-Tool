@@ -31,6 +31,8 @@
 #include "view_axialcoronallores.h"
 #include "view_axialcoronalhires.h"
 
+#include "quazip.h"
+
 namespace Ui {
 class MainWindow;
 }
@@ -45,14 +47,15 @@ protected:
     QDateTime lastUpdateCheck;
 
     QString defaultOpenDir;
-    QString defaultSaveDir;
+    QString defaultSavePath;
 
     NIFTImage *fatImage;
     NIFTImage *waterImage;
     SubjectConfig *subConfig;
     TracingData *tracingData;
 
-    QString saveTracingResultsPath;
+    QuaZip *imageZip;
+    QuaZip *tracingResultsZip;
 
     WindowViewType windowViewType;
 

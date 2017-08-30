@@ -393,61 +393,28 @@ QVector3D &AxialSliceWidget::rtranslation()
     return translation;
 }
 
-bool AxialSliceWidget::saveTracingData(QString path, bool promptOnOverwrite)
+bool AxialSliceWidget::saveTracingData(QuaZip *zip)
 {
     const QString layerFilename[(int)TracingLayer::Count] = {"EAT.txt", "IMAT.txt", "PAAT.txt", "PAT.txt", "SCAT.txt", "VAT.txt"};
     const QString timeDir = "times";
-    QString layerFullPath[(int)TracingLayer::Count];
-    QString layerTimeFullPath[(int)TracingLayer::Count];
+    QString layerTimePath[(int)TracingLayer::Count];
 
-    // Create absolute path to each of the layer filenames by joining directory path (path) with each filename (layerFilename)
+    // Prepend timeDir to the layer filename to store the times
     for (int i = 0; i < (int)TracingLayer::Count; ++i)
-    {
-        layerFullPath[i] = QDir(path).filePath(layerFilename[i]);
-        layerTimeFullPath[i] = QDir(path).filePath(timeDir + "/" + layerFilename[i]); // TODO: Better solution? Not platform independent
-    }
-
-    if (promptOnOverwrite)
-    {
-        for (QString fullPath : layerFullPath)
-        {
-            if (QFileInfo(fullPath).exists())
-            {
-                // Not a fan of the prompt option
-                if (QMessageBox::warning((QWidget *)parent(), "Confirm Save As", "Tracing data already exists in folder.\nDo you want to replace it?", QMessageBox::Yes, QMessageBox::No)
-                        != QMessageBox::Yes)
-                    return false;
-                break;
-            }
-        }
-    }
-
-    // Create timing directory if it does not already exist
-    QDir timesDir = QDir(path).filePath(timeDir);
-    if (!timesDir.exists())
-        timesDir.mkpath(".");
+        layerTimePath[i] = QDir(timeDir).filePath(layerFilename[i]);
 
     for (int i = 0; i < (int)TracingLayer::Count; ++i)
     {
-        QFile sliceFile(layerFullPath[i]);
-        if (!sliceFile.open(QIODevice::WriteOnly | QIODevice::Truncate))
+        // Begin by saving trace points
+        QuaZipFile sliceFile(zip);
+        if (!sliceFile.open(QIODevice::WriteOnly | QIODevice::Truncate, QuaZipNewInfo(layerFilename[i])))
         {
-            qWarning() << "Error opening file to save tracing data. Skipping layer: " << layerFullPath[i];
+            qWarning() << "Error while creating tracing data file for " << layerFilename[i];
             continue;
         }
 
         QTextStream sliceStream(&sliceFile);
         sliceStream << fatImage->getZDim() << endl;
-
-        QFile timeFile(layerTimeFullPath[i]);
-        if (!timeFile.open(QIODevice::WriteOnly | QIODevice::Truncate))
-        {
-            qWarning() << "Error opening file to save tracing data. Skipping layer: " << layerTimeFullPath[i];
-            continue;
-        }
-
-        QTextStream timeStream(&timeFile);
-        timeStream << fatImage->getZDim() << endl;
 
         const int zDim = fatImage->getZDim();
         for (int z = 0; z < zDim; ++z)
@@ -475,6 +442,26 @@ bool AxialSliceWidget::saveTracingData(QString path, bool promptOnOverwrite)
                 const cv::Vec2i point = points.at<cv::Vec2i>(i);
                 sliceStream << forcepoint << (float)point[1] << " " << (float)point[0] << " " << (float)z << endl;
             }
+        }
+
+        // Close slice file now that we are done with it
+        // Note: YOU CANNNOT HAVE TWO ZIP FILES OPENED AT ONCE SO BE CAREFUL
+        sliceFile.close();
+
+        // Save tracing time data next
+        QuaZipFile timeFile(zip);
+        if (!timeFile.open(QIODevice::WriteOnly | QIODevice::Truncate, QuaZipNewInfo(layerTimePath[i])))
+        {
+            qWarning() << "Error opening file to save time tracing data. Skipping layer: " << layerTimePath[i];
+            continue;
+        }
+
+        QTextStream timeStream(&timeFile);
+        timeStream << fatImage->getZDim() << endl;
+
+        for (int z = 0; z < zDim; ++z)
+        {
+            auto &traceLayer = (*tracingData)[i];
 
             auto time = traceLayer.time[z];
             auto h = std::chrono::duration_cast<std::chrono::hours>(time);
@@ -491,8 +478,7 @@ bool AxialSliceWidget::saveTracingData(QString path, bool promptOnOverwrite)
     return true;
 }
 
-
-bool AxialSliceWidget::loadTracingData(QString path)
+bool AxialSliceWidget::loadTracingData(QuaZip *zip)
 {
     if (!isLoaded())
     {
@@ -521,42 +507,30 @@ bool AxialSliceWidget::loadTracingData(QString path)
 
     const QString layerFilename[(int)TracingLayer::Count] = {"EAT.txt", "IMAT.txt", "PAAT.txt", "PAT.txt", "SCAT.txt", "VAT.txt"};
     const QString timeDir = "times";
-    QString layerFullPath[(int)TracingLayer::Count];
-    QString layerTimeFullPath[(int)TracingLayer::Count];
+    QString layerTimePath[(int)TracingLayer::Count];
 
-    // Create absolute path to each of the layer filenames by joining directory path (path) with each filename (layerFilename)
+    // Prepend timeDir to the layer filename to store the times
     for (int i = 0; i < (int)TracingLayer::Count; ++i)
-    {
-        layerFullPath[i] = QDir(path).filePath(layerFilename[i]);
-        layerTimeFullPath[i] = QDir(path).filePath(timeDir + "/" + layerFilename[i]); // TODO: Better solution? Not platform independent
-    }
+        layerTimePath[i] = QDir(timeDir).filePath(layerFilename[i]);
 
     for (int i = 0; i < (int)TracingLayer::Count; ++i)
     {
-        QFile sliceFile(layerFullPath[i]);
+        // Set current file to the current layer to load
+        zip->setCurrentFile(layerFilename[i]);
+
+        // Begin by loading trace points
+        QuaZipFile sliceFile(zip);
         if (!sliceFile.open(QIODevice::ReadOnly))
         {
-            qWarning() << "Error opening file to load tracing data. Skipping layer: " << layerFullPath[i];
+            qWarning() << "Error while creating tracing data file for " << layerFilename[i];
             continue;
         }
 
         QTextStream sliceStream(&sliceFile);
-
-        QFile timeFile(layerTimeFullPath[i]);
-        if (!timeFile.open(QIODevice::ReadOnly))
-        {
-            qWarning() << "Error opening file to load tracing data. Skipping layer: " << layerTimeFullPath[i];
-            continue;
-        }
-
-        QTextStream timeStream(&timeFile);
-
         int zDim, zDim_;
         sliceStream >> zDim;
-        timeStream >> zDim_;
 
-
-        if (zDim != fatImage->getZDim() || zDim_ != fatImage->getZDim())
+        if (zDim != fatImage->getZDim())
         {
             qWarning() << "Number of axial slices in the data does not match the NIFTI image loaded.";
             return false; // Note: Return false because the other layers should be mismatched as well
@@ -572,7 +546,6 @@ bool AxialSliceWidget::loadTracingData(QString path)
             // Skip the #Z where Z is the axial slice
             sliceStream.skipWhiteSpace();
             sliceStream.readLine();
-            timeStream.skipWhiteSpace();
 
             // Get the number of points on the slices
             int numPoints = 0;
@@ -591,6 +564,37 @@ bool AxialSliceWidget::loadTracingData(QString path)
 
                 layer.set(x, y, z);
             }
+        }
+
+        // Close slice file now that we are done with it
+        // Note: YOU CANNOT HAVE TWO ZIP FILES OPENED AT ONCE SO BE CAREFUL
+        sliceFile.close();
+
+        // Load tracing time data next
+        // Set current file to the current time layer to load
+        zip->setCurrentFile(layerTimePath[i]);
+
+        QuaZipFile timeFile(zip);
+        if (!timeFile.open(QIODevice::ReadOnly))
+        {
+            qWarning() << "Error opening file to save time tracing data. Skipping layer: " << layerTimePath[i];
+            continue;
+        }
+
+        QTextStream timeStream(&timeFile);
+
+        timeStream >> zDim;
+
+        if (zDim != fatImage->getZDim())
+        {
+            qWarning() << "Number of axial slices in the time data does not match the NIFTI image loaded.";
+            return false; // Note: Return false because the other layers should be mismatched as well
+        }
+
+        for (int z = 0; z < zDim; ++z)
+        {
+            // Skip the #Z where Z is the axial slice
+            timeStream.skipWhiteSpace();
 
             // Read timing
             char dummy;

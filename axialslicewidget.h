@@ -31,6 +31,9 @@
 #include "commands.h"
 #include "tracing.h"
 #include "displayinfo.h"
+#include "quazip.h"
+#include "quazipfile.h"
+#include "quazipfileinfo.h"
 
 struct FatLayer
 {
@@ -191,8 +194,8 @@ public:
     float &rscaling();
     QVector3D &rtranslation();
 
-    bool saveTracingData(QString path, bool promptOnOverwrite = true);
-    bool loadTracingData(QString path);
+    bool saveTracingData(QuaZip *zip);
+    bool loadTracingData(QuaZip *zip);
 
     void addPoint(QPoint newPoint, bool first);
     void erasePoint(QPoint newPoint, bool first);

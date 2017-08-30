@@ -4,7 +4,8 @@
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
-    fatImage(new NIFTImage()), waterImage(new NIFTImage()), subConfig(new SubjectConfig()), tracingData(new TracingData())
+    fatImage(new NIFTImage()), waterImage(new NIFTImage()), subConfig(new SubjectConfig()), tracingData(new TracingData()),
+    imageZip(NULL), tracingResultsZip(NULL)
 {  
     this->fatImage->setSubjectConfig(subConfig);
     this->waterImage->setSubjectConfig(subConfig);
@@ -67,7 +68,7 @@ void MainWindow::readSettings()
     }
 
     defaultOpenDir = settings.value("defaultOpenDir", QDir::homePath()).toString();
-    defaultSaveDir = settings.value("defaultSaveDir", QDir::homePath()).toString();
+    defaultSavePath = settings.value("defaultSavePath", QDir::homePath()).toString();
 
     lastUpdateCheck = settings.value("lastUpdateCheck", QDateTime::fromSecsSinceEpoch(1)).toDateTime();
 }
@@ -83,7 +84,7 @@ void MainWindow::writeSettings()
     settings.setValue("windowViewType", (int)windowViewType);
 
     settings.setValue("defaultOpenDir", defaultOpenDir);
-    settings.setValue("defaultSaveDir", defaultSaveDir);
+    settings.setValue("defaultSavePath", defaultSavePath);
 
     settings.setValue("lastUpdateCheck", lastUpdateCheck);
 }
@@ -306,6 +307,9 @@ MainWindow::~MainWindow()
     delete waterImage;
     delete subConfig;
     delete tracingData;
+
+//    delete imageZip;
+    delete tracingResultsZip;
 
     delete ui;
     ui = nullptr;
