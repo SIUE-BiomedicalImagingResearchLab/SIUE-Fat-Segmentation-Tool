@@ -91,6 +91,7 @@
     <property name="toolTipsVisible">
      <bool>true</bool>
     </property>
+    <addaction name="actionCheckForUpdates"/>
     <addaction name="actionAbout"/>
    </widget>
    <widget class="QMenu" name="menuView">
@@ -225,6 +226,11 @@
    </property>
    <property name="text">
     <string>Axial/Coronal [Lo Res]</string>
+   </property>
+  </action>
+  <action name="actionCheckForUpdates">
+   <property name="text">
+    <string>Check for Updates</string>
    </property>
   </action>
  </widget>

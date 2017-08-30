@@ -6,6 +6,10 @@
 #include <QDir>
 #include <QDebug>
 #include <QMessageBox>
+#include <QNetworkRequest>
+#include <QNetworkReply>
+#include <QUrl>
+#include <QDesktopServices>
 #include <QSettings>
 #include <QDesktopWidget>
 #include <QUndoStack>
@@ -38,6 +42,8 @@ class MainWindow : public QMainWindow
 protected:
     Ui::MainWindow *ui;
 
+    QDateTime lastUpdateCheck;
+
     QString defaultOpenDir;
     QString defaultSaveDir;
 
@@ -50,6 +56,9 @@ protected:
 
     WindowViewType windowViewType;
 
+    const QString updateURLString = "https://api.github.com/repos/addisonElliott/SIUE-Fat-Segmentation-Tool/releases/latest";
+    const QString manualURLString = "https://github.com/addisonElliott/SIUE-Fat-Segmentation-Tool/releases/latest";
+
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
@@ -59,13 +68,18 @@ public:
 
     void switchView(WindowViewType type);
 
+    void checkForUpdates();
+
     friend class viewAxialCoronalLoRes;
     friend class viewAxialCoronalHiRes;
 
 private slots:
+    void networkManager_replyFinished(QNetworkReply *reply);
+
     void on_actionExit_triggered();
 
     void on_actionAbout_triggered();
+    void on_actionCheckForUpdates_triggered();
 
     void on_actionAxialCoronalLoRes_triggered(bool checked);
     void on_actionAxialCoronalHiRes_triggered(bool checked);

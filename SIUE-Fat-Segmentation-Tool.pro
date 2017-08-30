@@ -4,15 +4,14 @@
 #
 #-------------------------------------------------
 
-QT       += core gui opengl xml
+QT       += core gui opengl xml network
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 CONFIG += c++11
 !macx: CONFIG -= app_bundle
 
-win32:VERSION = 2.0.0.0 # major.minor.patch.build
-else:VERSION = 2.0.0    # major.minor.patch
+VERSION = 2.0.0.0 # major.minor.patch.build
 
 DEFINES += APP_VERSION=\\\"$$VERSION\\\"
 

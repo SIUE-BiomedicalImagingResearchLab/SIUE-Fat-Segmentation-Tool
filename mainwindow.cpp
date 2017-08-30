@@ -17,6 +17,10 @@ MainWindow::MainWindow(QWidget *parent) :
     // Setup the initial view
     this->switchView(windowViewType);
 
+    // If updates have not been checked within the last day, then check for updates
+    if (QDateTime::currentDateTime() >= lastUpdateCheck.addDays(1))
+        this->checkForUpdates();
+
     // Apply keyboard shortcuts to the menu items. The benefit of using a predefined
     // key sequence is that it has the list of valid shortcuts for each platform and
     // is applied appropiately. This cannot be done through the Qt GUI Designer
@@ -64,6 +68,8 @@ void MainWindow::readSettings()
 
     defaultOpenDir = settings.value("defaultOpenDir", QDir::homePath()).toString();
     defaultSaveDir = settings.value("defaultSaveDir", QDir::homePath()).toString();
+
+    lastUpdateCheck = settings.value("lastUpdateCheck", QDateTime::fromSecsSinceEpoch(1)).toDateTime();
 }
 
 void MainWindow::writeSettings()
@@ -78,6 +84,8 @@ void MainWindow::writeSettings()
 
     settings.setValue("defaultOpenDir", defaultOpenDir);
     settings.setValue("defaultSaveDir", defaultSaveDir);
+
+    settings.setValue("lastUpdateCheck", lastUpdateCheck);
 }
 
 void MainWindow::on_actionExit_triggered()
@@ -104,6 +112,11 @@ void MainWindow::on_actionAbout_triggered()
     aboutBox.setTextFormat(Qt::RichText);
 
     aboutBox.exec();
+}
+
+void MainWindow::on_actionCheckForUpdates_triggered()
+{
+    checkForUpdates();
 }
 
 void MainWindow::switchView(WindowViewType type)
@@ -141,6 +154,131 @@ void MainWindow::switchView(WindowViewType type)
     }
 
     windowViewType = type;
+}
+
+void MainWindow::checkForUpdates()
+{
+    qDebug() << "Checking for updates...";
+
+    // Send API request to update URL string to retrieve the latest release
+    QNetworkAccessManager *manager = new QNetworkAccessManager(this);
+
+    // Connect a slot to be called when the request is finished
+    connect(manager, SIGNAL(finished(QNetworkReply *)),
+            this, SLOT(networkManager_replyFinished(QNetworkReply *)));
+
+    // Call GET request at the specified URL
+    manager->get(QNetworkRequest(QUrl(updateURLString)));
+}
+
+void MainWindow::networkManager_replyFinished(QNetworkReply *reply)
+{
+    // If there was an error, print it, otherwise parse the JSON and determine if an update is needed
+    if (reply->error())
+    {
+        qInfo() << "Error while attempting to check for new updates";
+        qInfo() << reply->errorString();
+        reply->deleteLater();
+        return;
+    }
+
+    QJsonDocument document = QJsonDocument::fromJson(reply->readAll());
+
+    // Delete reply now since we read data from it
+    reply->deleteLater();
+
+    if (document.isNull())
+    {
+        qInfo() << "Error while attempting to check for new updates. Failed to parse JSON response";
+        return;
+    }
+
+    // Get object from document (only meant for reading/writing) while object allows you to read/write the data
+    QJsonObject response = document.object();
+
+    // Get version tag and remove the preceding v in front.
+    QString versionTag = response["tag_name"].toString().remove(0, 1);
+    QVersionNumber latestVersion = QVersionNumber::fromString(versionTag);
+
+    // Get current version from APP_VERSION macro
+    QVersionNumber currentVersion = QVersionNumber::fromString(APP_VERSION);
+
+    // If latest version was not valid, then throw error and return
+    if (latestVersion.isNull())
+    {
+        qInfo() << "Error while attempting to check for new updates. Unable to parse the version tag" << versionTag;
+        return;
+    }
+
+    // Check if latest release is greater than current release
+    if (latestVersion > currentVersion)
+    {
+        // Create regex pattern to find correct installation
+        // I follow this general file naming guideline for uploading releases:
+        // [Program Name]-[Version]-[Debug/Release]-[Win/OSX]_[x64/x86]
+        QString pattern = "^.*-.*-";
+
+        // For auto-update, just have user keep on Release binaries
+//                    #ifdef QT_DEBUG
+//                        pattern += "Debug-";
+//                    #elif
+            pattern += "Release-";
+//                    #endif
+
+        #ifdef Q_OS_MACOS
+            // For MacOSX, we are going to use any DMG file that is present. Most processors are 64-bit so becoming less of an issue
+            pattern += "OSX_.*$"
+        #elif defined(Q_OS_WIN64)
+            pattern += "Win_x64.*$";
+        #elif defined(Q_OS_WIN32)
+            pattern += "Win_x86.*$";
+        #endif
+
+        // Construct regex from the pattern
+        QRegularExpression re(pattern);
+
+        // Loop through each 'asset' which is the available downloads from URL
+        QJsonArray assets = response["assets"].toArray();
+        for (int i = 0; i < assets.size(); ++i)
+        {
+            QJsonObject asset = assets[i].toObject();
+
+            // Get asset filename
+            QString assetName = asset["name"].toString();
+
+            // If the file name does not match, then continue
+            if (!re.match(assetName).hasMatch())
+                continue;
+
+            // Ask user if they want to install the update
+            if (QMessageBox::information(this, "Update Available", QString("Version %1 is available.\nDo you want to install it now?\n\n"
+                    "A browser will pop up with the download. Double-click the installer to install the new version.")
+                    .arg(versionTag), QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
+            {
+                // If there was an error while opening URL then inform user
+                if (!QDesktopServices::openUrl(QUrl(asset["browser_download_url"].toString())))
+                {
+                    QMessageBox::information(this, "Error Occurred", QString("Unable to open the URL in your default browser. Please manually "
+                        "install the new update by going here: %1").arg(manualURLString), QMessageBox::Ok);
+                }
+            }
+            else
+            {
+                // User said they do not want to update now, update timestamp so we don't annoy them for a little bit
+                lastUpdateCheck = QDateTime::currentDateTime();
+                return;
+            }
+
+            // We tried to download the new update, so break the loop
+            break;
+        }
+    }
+
+    // Since the user is downloading update, close this instance
+    this->close();
+
+    // Update the timestamp that keeps track of last time update was checked
+    lastUpdateCheck = QDateTime::currentDateTime();
 }
 
 void MainWindow::on_actionAxialCoronalLoRes_triggered(bool checked)
