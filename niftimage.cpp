@@ -111,10 +111,10 @@ bool NIFTImage::setImage(nifti_image *upper, nifti_image *lower, SubjectConfig *
 
     // Flip the matrix once it is loaded
     // Flip along Z-axis and Y-axis
-    cv::Mat dataFlipped;
+//    cv::Mat dataFlipped;
 
-    opencv::flip(data, dataFlipped, 0);
-    opencv::flip(dataFlipped, data, 1);
+//    opencv::flip(data, dataFlipped, 0);
+//    opencv::flip(dataFlipped, data, 1);
 
     return true;
 }

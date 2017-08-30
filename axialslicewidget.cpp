@@ -690,7 +690,6 @@ void AxialSliceWidget::initializeGL()
 
     // Setup matrices and view options
     projectionMatrix.setToIdentity();
-    projectionMatrix.scale(1.0f, -1.0f, 1.0f);
     viewMatrix.setToIdentity();
     scaling = 1.0f;
     translation = QVector3D(0.0f, 0.0f, 0.0f);
