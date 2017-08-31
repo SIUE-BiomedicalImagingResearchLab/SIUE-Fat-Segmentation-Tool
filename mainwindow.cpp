@@ -229,7 +229,7 @@ void MainWindow::networkManager_replyFinished(QNetworkReply *reply)
 
         #ifdef Q_OS_MACOS
             // For MacOSX, we are going to use any DMG file that is present. Most processors are 64-bit so becoming less of an issue
-            pattern += "OSX_.*$"
+            pattern += "OSX_.*$";
         #elif defined(Q_OS_WIN64)
             pattern += "Win_x64.*$";
         #elif defined(Q_OS_WIN32)
