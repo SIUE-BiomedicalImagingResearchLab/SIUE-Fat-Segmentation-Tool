@@ -6,13 +6,14 @@
 #-------------------------------------------------
 
 # Include NIFTI files and link dynamic libraries
-INCLUDEPATH += '<PATH-TO-NIFTICLIB>/include'
-DEPENDPATH += '<PATH-TO-NIFTICLIB>/include'
+INCLUDEPATH += '<PATH-TO-LIBNIFTI>/include'
+DEPENDPATH += '<PATH-TO-LIBNIFTI>/include'
 
-LIBS += -L<PATH-TO-NIFTICLIB>/lib \
-        -lnifticdf \
-        -lniftiio \
-        -lznz
+CONFIG(debug, debug|release): LIBS += -L<PATH-TO-LIBNIFTI>/lib \
+        -llibNIFTId
+
+CONFIG(release, debug|release): LIBS += -L<PATH-TO-LIBNIFTI>/lib \
+        -llibNIFTI
 
 # Include ZLIB files and link dynamic libraries
 # (This is used in NIFTI library)
@@ -37,3 +38,13 @@ CONFIG(release, debug|release): LIBS += -L<PATH-TO-OPENCV>/lib/Release \
         -lopencv_highgui310 \
         -lopencv_ml310 \
         -lopencv_video310
+
+# Include QuaZip files for handling Zip files
+INCLUDEPATH += '<PATH-TO_QUAZIP>/include'
+DEPENDPATH += '<PATH-TO_QUAZIP>/include'
+
+CONFIG(debug, debug|release): LIBS += -L<PATH-TO_QUAZIP>/lib \
+        -lquazipd
+
+CONFIG(release, debug|release): LIBS += -L<PATH-TO_QUAZIP>/lib \
+        -lquazip
