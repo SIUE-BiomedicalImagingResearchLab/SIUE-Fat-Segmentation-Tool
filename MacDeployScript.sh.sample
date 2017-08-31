@@ -37,28 +37,39 @@ MACDEPLOYQT=<PATH-TO-MACDEPLOYQT>/macdeployqt
 # needs to be changed. Include all of the libraries dependencies in the LIBS list too. (Only if it is new and not already included in list).
 # This is recursive. So for each new library, you MUST run otool on it to get dependencies for THAT library then.
 LIBS=(
-	"libnifticdf.2.dylib"
-	"libniftiio.2.dylib"
 	"libopencv_core.3.2.dylib"
 	"libopencv_imgproc.3.2.dylib"
 	"libopencv_highgui.3.2.dylib"
 	"libopencv_video.3.2.dylib"
-	"libznz.2.dylib"
 	"libopencv_videoio.3.2.dylib"
 	"libopencv_imgcodecs.3.2.dylib"
 )
 	
+if [ $RELEASE == "Debug" ]
+then
+LIBS+=(
+	"liblibNIFTI_debug.1.dylib"
+	"libquazip_debug.1.dylib"
+)
+else
+LIBS+=(
+	"liblibNIFTI.1.dylib"
+	"libquazip.1.dylib"
+)		
+fi
+	
 # When replacing the old path name to the new one, use these directory prefixes. Should NOT need to be changed. This changes any directories beginning with @rpath or $LIB_DIR
-OLD_PATH_DIRS=($LIB_DIR "@rpath")
+OLD_PATH_DIRS=("" "$LIB_DIR/" "@rpath/")
 
 # Contains a multidimensional array of dependencies between libraries. First value indicates the dependency and the second value is the library that contains the dependency.
 # 
 # As specified above in LIBS documentation, run otool -L LIB_NAME for each library and note the dependencies. If any third-party dependencies are present, include them below
 # so they are changed upon running of script.
 DEPS=(
-	"libznz.2.dylib" "libniftiio.2.dylib"
+	"libquazip_debug.1.dylib" "liblibNIFTI_debug.1.dylib"
+	"libquazip.1.dylib" "liblibNIFTI.1.dylib"
 	
-	"libopencv_imgproc.3.2.dylib" "libopencv_imgproc.3.2.dylib"
+	"libopencv_core.3.2.dylib" "libopencv_imgproc.3.2.dylib"
 	
 	"libopencv_videoio.3.2.dylib" "libopencv_highgui.3.2.dylib"
 	"libopencv_imgcodecs.3.2.dylib" "libopencv_highgui.3.2.dylib"
@@ -88,7 +99,7 @@ do
 	
 	for j in "${OLD_PATH_DIRS[@]}"
 	do
-		install_name_tool -change $j/$i @executable_path/../Frameworks/$i "$APP_DIR/$APP_BIN"
+		install_name_tool -change $j$i @executable_path/../Frameworks/$i "$APP_DIR/$APP_BIN"
 	done
 done
 
@@ -98,7 +109,7 @@ for i in "${OLD_PATH_DIRS[@]}"
 do
 	for ((j=0; j<$ARR_SIZE; j = j + 2))
 	do
-		install_name_tool -change $i/${DEPS[$j]} @executable_path/../Frameworks/${DEPS[$j]} "$APP_DIR/Contents/Frameworks/${DEPS[$j+1]}"
+		install_name_tool -change $i${DEPS[$j]} @executable_path/../Frameworks/${DEPS[$j]} "$APP_DIR/Contents/Frameworks/${DEPS[$j+1]}"
 	done
 done
 
