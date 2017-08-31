@@ -29,8 +29,8 @@ enum class DataType : int
 #endif // NUMERIC_TYPE_NO_OPENCV
 
 #ifndef NUMERIC_TYPE_NO_NIFTI
-#include <nifti/nifti1.h>
-#include <nifti/nifti1_io.h>
+#include <nifti1.h>
+#include <nifti1_io.h>
 #endif // NUMERIC_TYPE_NO_NIFTI
 
 struct NumericType

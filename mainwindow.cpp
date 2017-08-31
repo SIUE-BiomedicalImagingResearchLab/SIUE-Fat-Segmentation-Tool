@@ -67,7 +67,7 @@ void MainWindow::readSettings()
         windowViewType = WindowViewType::AxialCoronalLoRes;
     }
 
-    defaultOpenDir = settings.value("defaultOpenDir", QDir::homePath()).toString();
+    defaultOpenPath = settings.value("defaultOpenPath", QDir::homePath()).toString();
     defaultSavePath = settings.value("defaultSavePath", QDir::homePath()).toString();
 
     lastUpdateCheck = settings.value("lastUpdateCheck", QDateTime::fromSecsSinceEpoch(1)).toDateTime();
@@ -83,7 +83,7 @@ void MainWindow::writeSettings()
 
     settings.setValue("windowViewType", (int)windowViewType);
 
-    settings.setValue("defaultOpenDir", defaultOpenDir);
+    settings.setValue("defaultOpenPath", defaultOpenPath);
     settings.setValue("defaultSavePath", defaultSavePath);
 
     settings.setValue("lastUpdateCheck", lastUpdateCheck);
@@ -308,7 +308,7 @@ MainWindow::~MainWindow()
     delete subConfig;
     delete tracingData;
 
-//    delete imageZip;
+    delete imageZip;
     delete tracingResultsZip;
 
     delete ui;

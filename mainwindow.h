@@ -18,8 +18,8 @@
 #include <QWhatsThis>
 #include <QShortcut>
 
-#include <nifti/nifti1.h>
-#include <nifti/nifti1_io.h>
+#include <nifti1.h>
+#include <nifti1_io.h>
 
 #include "displayinfo.h"
 #include "niftimage.h"
@@ -46,7 +46,7 @@ protected:
 
     QDateTime lastUpdateCheck;
 
-    QString defaultOpenDir;
+    QString defaultOpenPath;
     QString defaultSavePath;
 
     NIFTImage *fatImage;

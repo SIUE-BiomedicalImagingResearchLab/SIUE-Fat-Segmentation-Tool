@@ -26,12 +26,25 @@ bool SubjectConfig::load(QString filename)
     }
 
     QFile file(filename);
-    QDomDocument doc;
 
     // Open the file and load the XML document
-    if (!file.open(QIODevice::ReadOnly) || !doc.setContent(&file))
+    if (!file.open(QIODevice::ReadOnly))
     {
         qDebug() << "There was an issue opening the config file " << filename;
+        return false;
+    }
+
+    return load(&file);
+}
+
+bool SubjectConfig::load(QIODevice *file)
+{
+    QDomDocument doc;
+
+    // Load the XML document
+    if (!doc.setContent(file))
+    {
+        qDebug() << "There was an issue opening the config file";
         return false;
     }
 
@@ -39,7 +52,6 @@ bool SubjectConfig::load(QString filename)
     if (list.count() != 1)
     {
         qDebug() << "Multiple imageUpper tags in config file";
-        file.close();
         return false;
     }
 
@@ -50,7 +62,6 @@ bool SubjectConfig::load(QString filename)
     if (imageUpperInferior < 0 || imageUpperSuperior < 0)
     {
         qDebug() << "Invalid inferior or superior slice value for upper NIFTI image: " << imageUpperInferior << " " << imageUpperSuperior;
-        file.close();
         return false;
     }
 
@@ -58,7 +69,6 @@ bool SubjectConfig::load(QString filename)
     if (list.count() != 1)
     {
         qDebug() << "Multiple imageLower tags in config file";
-        file.close();
         return false;
     }
 
@@ -69,10 +79,8 @@ bool SubjectConfig::load(QString filename)
     if (imageLowerInferior < 0 || imageLowerSuperior < 0)
     {
         qDebug() << "Invalid inferior or superior slice value for lower NIFTI image: " << imageLowerInferior << " " << imageLowerSuperior;
-        file.close();
         return false;
     }
 
-    file.close();
     return true;
 }

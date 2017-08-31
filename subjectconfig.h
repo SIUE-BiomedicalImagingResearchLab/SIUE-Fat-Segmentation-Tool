@@ -24,6 +24,7 @@ public:
     SubjectConfig(QString filename);
 
     bool load(QString filename);
+    bool load(QIODevice *file);
 };
 
 #endif // SUBJECTCONFIG_H

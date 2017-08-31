@@ -92,7 +92,7 @@ void AxialSliceWidget::writeSettings(QSettings &settings)
     settings.beginWriteArray("tracingLayerVisible");
     for (size_t i = 0; i < tracingLayerVisible.size(); ++i)
     {
-        settings.setArrayIndex(i);
+        settings.setArrayIndex((int)i);
         settings.setValue("visible", tracingLayerVisible[i]);
     }
     settings.endArray();
@@ -439,7 +439,7 @@ bool AxialSliceWidget::saveTracingData(QuaZip *zip)
 
             for (size_t i = 0; i < points.total(); ++i)
             {
-                const cv::Vec2i point = points.at<cv::Vec2i>(i);
+                const cv::Vec2i point = points.at<cv::Vec2i>((int)i);
                 sliceStream << forcepoint << (float)point[1] << " " << (float)point[0] << " " << (float)z << endl;
             }
         }
@@ -527,7 +527,7 @@ bool AxialSliceWidget::loadTracingData(QuaZip *zip)
         }
 
         QTextStream sliceStream(&sliceFile);
-        int zDim, zDim_;
+        int zDim;
         sliceStream >> zDim;
 
         if (zDim != fatImage->getZDim())

@@ -125,7 +125,7 @@ void viewAxialCoronalHiRes::writeSettings()
     ui->glWidgetCoronal->writeSettings(settings);
 }
 
-bool viewAxialCoronalHiRes::loadImage(QString path)
+bool viewAxialCoronalHiRes::loadImage(QuaZip *zip)
 {
     nifti_image *fatUpperImage = NULL;
     nifti_image *fatLowerImage = NULL;
@@ -135,38 +135,31 @@ bool viewAxialCoronalHiRes::loadImage(QString path)
     try
     {
         // Load NIFTI file
-        QString fatUpperPath = QDir(path).filePath("fatUpper.nii");
-        QString fatLowerPath = QDir(path).filePath("fatLower.nii");
-        QString waterUpperPath = QDir(path).filePath("waterUpper.nii");
-        QString waterLowerPath = QDir(path).filePath("waterLower.nii");
+        QString fatUpperPath = "fatUpper.nii";
+        QString fatLowerPath = "fatLower.nii";
+        QString waterUpperPath = "waterUpper.nii";
+        QString waterLowerPath = "waterLower.nii";
 
-        // Loops through each of the four paths and check if the .nii OR .nii.gz file exists. If not, an error is thrown and the function is returned.
-        auto arr = {&fatUpperPath, &fatLowerPath, &waterUpperPath, &waterLowerPath};
-        for (QString *path : arr)
-        {
-            if (!util::fileExists(*path) && !util::fileExists((*path).append(".gz")))
-            {
-                QString basePath = QFileInfo(*path).baseName();
-                EXCEPTION("File does not exist", "Unable to find the file " + basePath + ".nii or " + basePath + ".nii.gz in the selected folder.");
-            }
-        }
+        // Load the NIFTI files
+        fatUpperImage = nifti_image_read_qt(zip, fatUpperPath);
+        fatLowerImage = nifti_image_read_qt(zip, fatLowerPath);
+        waterUpperImage = nifti_image_read_qt(zip, waterUpperPath);
+        waterLowerImage = nifti_image_read_qt(zip, waterLowerPath);
 
-        // Since the four files exist, load the NIFTI files.
-        fatUpperImage = nifti_image_read(fatUpperPath.toStdString().c_str(), true);
-        fatLowerImage = nifti_image_read(fatLowerPath.toStdString().c_str(), true);
-        waterUpperImage = nifti_image_read(waterUpperPath.toStdString().c_str(), true);
-        waterLowerImage = nifti_image_read(waterLowerPath.toStdString().c_str(), true);
+//        fatUpperImage = nifti_image_read("D:/Users/addis/Desktop/SubjectData_DixonAbdomen_2016/Subject0001_Initial/fatUpper.nii", true);
+//        fatLowerImage = nifti_image_read("D:/Users/addis/Desktop/SubjectData_DixonAbdomen_2016/Subject0001_Initial/fatLower.nii", true);
+//        waterUpperImage = nifti_image_read("D:/Users/addis/Desktop/SubjectData_DixonAbdomen_2016/Subject0001_Initial/waterUpper.nii", true);
+//        waterLowerImage = nifti_image_read("D:/Users/addis/Desktop/SubjectData_DixonAbdomen_2016/Subject0001_Initial/waterLower.nii", true);
 
-        QString configPath = QDir(path).filePath("config.xml");
-        if (!util::fileExists(configPath))
-            EXCEPTION("File does not exist", "Unable to find the config file config.xml");
-
-        if (!subConfig->load(configPath))
-            EXCEPTION("Error loading subject configuration", "There was an error while loading the subject configuration at " + configPath);
-
-        // If an error occurred loading one of the NIFTI files, show an error box and return
         if (!fatUpperImage || !fatLowerImage || !waterUpperImage || !waterLowerImage)
-            EXCEPTION("Unable to load NIFTI file", "An error occurred while loading one of the four NIFTI images.");
+            EXCEPTION("Unable to load SDI image", "The SDI image you are trying to load may be corrupted. One of the NIFTI images is missing.");
+
+        QuaZipFile configFile(zip);
+        if (!zip->setCurrentFile("config.xml"))
+            EXCEPTION("Unable to load SDI image", "The SDI image you are trying to load may be corrupted. Unable to find the config file.");
+
+        if (!configFile.open(QIODevice::ReadOnly) || !subConfig->load(&configFile))
+            EXCEPTION("Unable to load SDI image", "The SDI image you are trying to load may be corrupted. Unable to open and load config file.");
 
         if (!fatImage->setImage(fatUpperImage, fatLowerImage))
             EXCEPTION("Unable to merge upper and lower image", "Unable to merge upper and lower fat images in NIFTImage class.");
@@ -177,7 +170,7 @@ bool viewAxialCoronalHiRes::loadImage(QString path)
         if (!fatImage->compatible(waterImage))
             EXCEPTION("Fat and water image are incompatible", "The fat and water image are incompatible in some way. Please check the NIFTI file format of the files and try again.");
 
-        parentMain()->setWindowTitle(QCoreApplication::applicationName() + " - " + path);
+        parentMain()->setWindowTitle(QCoreApplication::applicationName() + " - " + zip->getZipName());
 
         // The settings box is disabled to prevent moving stuff before anything is loaded
         setEnableSettings(true);
@@ -370,17 +363,46 @@ void viewAxialCoronalHiRes::setupDefaults()
 
 void viewAxialCoronalHiRes::actionOpen_triggered()
 {
-    // Start "Select folder" dialog at user's home path.
-    QString path = QFileDialog::getExistingDirectory(this, "Open Directory", parentMain()->defaultOpenDir, QFileDialog::ShowDirsOnly);
-    if (path.isNull())
+    // Start dialog to select location to load the subject image
+    QString filename = QFileDialog::getOpenFileName(this, "Open Subject Image", parentMain()->defaultOpenPath, "Subject Image (*.sdi)");
+    if (filename.isNull())
         return; // If they hit cancel, do nothing
 
-    if (loadImage(path))
+    QFileInfo fileInfo(filename);
+
+    if (!fileInfo.exists() || !fileInfo.isFile())
+    {
+        qWarning() << "Selected file for opening subject image either does not exist or is not a file: " << filename;
+        return;
+    }
+
+    // Open QuaZip file with the specified filename
+    QuaZip *imageZip = new QuaZip(filename);
+
+    if (!imageZip->open(QuaZip::mdUnzip))
+    {
+        qWarning() << "Unable to open SDI file at " << filename << ": " << imageZip->getZipError();
+        delete imageZip;
+        return;
+    }
+
+    if (loadImage(imageZip))
     {
         // Since the NIFTI files were successfully opened, the default path in the FileChooser dialog next time will be this path
-        parentMain()->defaultOpenDir = path;
-        parentMain()->ui->statusBar->showMessage(QObject::tr("Successfully loaded file in %1").arg(path), 4000);
+        parentMain()->defaultOpenPath = fileInfo.absolutePath();
+
+        // Since load was successful, if there was existing tracing data zip, delete it
+        // Note: The user already approved this since a confirm prompt occurs in loadTracingData
+        if (parentMain()->imageZip)
+            delete parentMain()->imageZip;
+
+        parentMain()->imageZip = imageZip;
+        parentMain()->ui->statusBar->showMessage(QObject::tr("Successfully loaded file in %1").arg(imageZip->getZipName()), 4000);
+
+        imageZip->close();
     }
+    else
+        delete imageZip;
 }
 
 void viewAxialCoronalHiRes::actionSave_triggered()
@@ -391,10 +413,9 @@ void viewAxialCoronalHiRes::actionSave_triggered()
         return;
     }
 
-    // TODO: Make sure overwriting and use mdCreate is okay!
     if (!parentMain()->tracingResultsZip->open(QuaZip::mdCreate))
     {
-        qWarning() << "Unable to open zip file at " << parentMain()->tracingResultsZip->getZipName()
+        qWarning() << "Unable to open SDT file at " << parentMain()->tracingResultsZip->getZipName()
                    << ": " << parentMain()->tracingResultsZip->getZipError();
         return;
     }
@@ -408,34 +429,26 @@ void viewAxialCoronalHiRes::actionSave_triggered()
 void viewAxialCoronalHiRes::actionSaveAs_triggered()
 {
     // Start dialog to select location to save the tracing results
-    QString filename = QFileDialog::getSaveFileName(this, "Save File As", parentMain()->defaultSavePath, "Tracing Results (*.sdi)");
+    QString filename = QFileDialog::getSaveFileName(this, "Save File As", parentMain()->defaultSavePath, "Tracing Results (*.sdt)");
     if (filename.isNull())
         return; // If they hit cancel, do nothing
 
     QFileInfo fileInfo(filename);
 
     // If the file exists and is not a file, then throw an error
-    if (fileInfo.exists())
+    if (fileInfo.exists() && !fileInfo.isFile())
     {
-        if (!fileInfo.isFile())
-        {
-            qWarning() << filename << "is not a valid file";
-            return;
-        }
-
-        // If file already exists, show prompt asking if they want to overwrite. If they click no, then return and do nothing
-        if (QMessageBox::warning((QWidget *)parent(), "Confirm Save As", "Tracing data already exists here.\nDo you want to replace it?",
-                QMessageBox::Yes, QMessageBox::No) != QMessageBox::Yes)
-                return;
+        qWarning() << filename << "is not a valid file";
+        return;
     }
 
     // Open QuaZip file with the specified filename
     QuaZip *tracingResultsZip = new QuaZip(filename);
 
-    // TODO: Make sure overwriting and use mdCreate is okay!
     if (!tracingResultsZip->open(QuaZip::mdCreate))
     {
-        qWarning() << "Unable to open zip file at " << filename << ": " << tracingResultsZip->getZipError();
+        qWarning() << "Unable to open SDT file at " << filename << ": " << tracingResultsZip->getZipError();
+        delete tracingResultsZip;
         return;
     }
 
@@ -452,17 +465,20 @@ void viewAxialCoronalHiRes::actionSaveAs_triggered()
         // Set new tracing results zip
         parentMain()->tracingResultsZip = tracingResultsZip;
         parentMain()->ui->statusBar->showMessage(QObject::tr("Successfully saved file at %1").arg(tracingResultsZip->getZipName()), 4000);
+
+        tracingResultsZip->close();
     }
     else
+    {
         qWarning() << "Unable to save tracing data in path: " << filename;
-
-    tracingResultsZip->close();
+        delete tracingResultsZip;
+    }
 }
 
 void viewAxialCoronalHiRes::actionImportTracingData_triggered()
 {
     // Start dialog to select location to load the tracing results
-    QString filename = QFileDialog::getOpenFileName(this, "Import Tracing Data", parentMain()->defaultSavePath, "Tracing Results (*.sdi)");
+    QString filename = QFileDialog::getOpenFileName(this, "Import Tracing Data", parentMain()->defaultSavePath, "Tracing Results (*.sdt)");
     if (filename.isNull())
         return; // If they hit cancel, do nothing
 
@@ -477,10 +493,10 @@ void viewAxialCoronalHiRes::actionImportTracingData_triggered()
     // Open QuaZip file with the specified filename
     QuaZip *tracingResultsZip = new QuaZip(filename);
 
-    // TODO: Make sure overwriting and use mdCreate is okay!
     if (!tracingResultsZip->open(QuaZip::mdUnzip))
     {
-        qWarning() << "Unable to open zip file at " << filename << ": " << tracingResultsZip->getZipError();
+        qWarning() << "Unable to open SDT file at " << filename << ": " << tracingResultsZip->getZipError();
+        delete tracingResultsZip;
         return;
     }
 
@@ -496,9 +512,11 @@ void viewAxialCoronalHiRes::actionImportTracingData_triggered()
 
         parentMain()->tracingResultsZip = tracingResultsZip;
         parentMain()->ui->statusBar->showMessage(QObject::tr("Successfully loaded tracing results in %1").arg(filename), 4000);
-    }
 
-    tracingResultsZip->close();
+        tracingResultsZip->close();
+    }
+    else
+        delete tracingResultsZip;
 }
 
 void viewAxialCoronalHiRes::actionUndo_triggered()

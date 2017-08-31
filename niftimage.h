@@ -12,8 +12,8 @@
 
 #include <QOpenGLFunctions_3_3_Core>
 
-#include <nifti/nifti1.h>
-#include <nifti/nifti1_io.h>
+#include <nifti1.h>
+#include <nifti1_io.h>
 
 class NIFTImage
 {

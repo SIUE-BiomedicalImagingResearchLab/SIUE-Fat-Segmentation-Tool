@@ -15,8 +15,9 @@
 
 #include <opencv2/opencv.hpp>
 
-#include <nifti/nifti1.h>
-#include <nifti/nifti1_io.h>
+#include <nifti1.h>
+#include <nifti1_io.h>
+#include <libnifti.h>
 
 #include "displayinfo.h"
 #include "niftimage.h"
@@ -24,6 +25,7 @@
 #include "tracing.h"
 #include "exception.h"
 #include "subjectconfig.h"
+#include "quazip.h"
 
 namespace Ui {
 class viewAxialCoronalHiRes;
@@ -89,7 +91,7 @@ public:
 
     MainWindow *parentMain();
 
-    bool loadImage(QString path);
+    bool loadImage(QuaZip *zip);
     void setEnableSettings(bool enable);
     void setupDefaults();
 

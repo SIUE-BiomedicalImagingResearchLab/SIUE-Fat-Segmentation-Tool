@@ -42,6 +42,20 @@ bool NIFTImage::setImage(nifti_image *upper, nifti_image *lower, SubjectConfig *
     {
         nifti_image_free(this->upper);
         nifti_image_free(this->lower);
+
+//        if (this->lower->data != NULL)
+//            free(this->lower->data);
+
+//        free(this->lower);
+
+//        nifti_image *img = this->upper;
+//        nifti_image &img2 = *img;
+//        void *ptr = img2.data;
+
+//       if (this->upper->data != NULL)
+//           free(this->upper->data);
+
+//       free(this->upper);
     }
 
     // Set the upper and lower images to the ones given

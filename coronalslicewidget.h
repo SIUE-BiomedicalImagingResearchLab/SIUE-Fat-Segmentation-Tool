@@ -15,8 +15,8 @@
 #include <QUndoStack>
 #include <QPainter>
 
-#include <nifti/nifti1.h>
-#include <nifti/nifti1_io.h>
+#include <nifti1.h>
+#include <nifti1_io.h>
 
 #include <opencv2/opencv.hpp>
 

@@ -16,8 +16,9 @@
 #include <QShortcut>
 #include <QLabel>
 
-#include <nifti/nifti1.h>
-#include <nifti/nifti1_io.h>
+#include <nifti1.h>
+#include <nifti1_io.h>
+#include <libnifti.h>
 
 #include "displayinfo.h"
 #include "niftimage.h"
@@ -89,7 +90,7 @@ public:
 
     MainWindow *parentMain();
 
-    bool loadImage(QString path);
+    bool loadImage(QuaZip *zip);
     void setEnableSettings(bool enable);
     void setupDefaults();
 
