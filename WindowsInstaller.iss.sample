@@ -22,6 +22,7 @@
 #define ZlibBin "<ZLIB-BIN-PATH>"
 #define OpenCVBinDebug "<OPENCV-DEBUG-BIN-PATH>"
 #define OpenCVBinRelease "<OPENCV-RELEASE-BIN-PATH>"
+#define QuazipBin "<QUAZIP-BIN-PATH>"
 
 #define WinDeployQt "<WINDEPLOYQT-BIN>"
 
@@ -64,9 +65,11 @@ Name: {app}\platforms\; Permissions: users-modify
 Name: {app}\translations\; Permissions: users-modify
 
 [Files]
-Source: "{#NiftiBin}/niftiio.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#NiftiBin}/nifticdf.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#NiftiBin}/znz.dll"; DestDir: "{app}"; Flags: ignoreversion
+#if MyAppRelease == "Debug"
+Source: "{#NiftiBin}/libniftid.dll"; DestDir: "{app}"; Flags: ignoreversion
+#else
+Source: "{#NiftiBin}/libnifti.dll"; DestDir: "{app}"; Flags: ignoreversion
+#endif
 
 Source: "{#ZlibBin}/zlib.dll"; DestDir: "{app}"; Flags: ignoreversion
 
@@ -82,6 +85,12 @@ Source: "{#OpenCVBinRelease}/opencv_imgproc310.dll"; DestDir: "{app}"; Flags: ig
 Source: "{#OpenCVBinRelease}/opencv_highgui310.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#OpenCVBinRelease}/opencv_ml310.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#OpenCVBinRelease}/opencv_video310.dll"; DestDir: "{app}"; Flags: ignoreversion
+#endif
+
+#if MyAppRelease == "Debug"
+Source: "{#QuazipBin}/quazipd.dll"; DestDir: "{app}"; Flags: ignoreversion
+#else
+Source: "{#QuazipBin}/quazip.dll"; DestDir: "{app}"; Flags: ignoreversion
 #endif
 
 Source: "{#SrcDir}\*.dll"; DestDir: "{app}"; Flags: ignoreversion skipifsourcedoesntexist

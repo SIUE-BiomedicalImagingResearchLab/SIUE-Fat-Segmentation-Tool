@@ -117,7 +117,7 @@ void MainWindow::on_actionAbout_triggered()
 
 void MainWindow::on_actionCheckForUpdates_triggered()
 {
-    checkForUpdates();
+    checkForUpdates(true);
 }
 
 void MainWindow::switchView(WindowViewType type)
@@ -157,9 +157,10 @@ void MainWindow::switchView(WindowViewType type)
     windowViewType = type;
 }
 
-void MainWindow::checkForUpdates()
+void MainWindow::checkForUpdates(bool userRequestedUpdate)
 {
     qDebug() << "Checking for updates...";
+    this->userRequestedUpdate = userRequestedUpdate;
 
     // Send API request to update URL string to retrieve the latest release
     QNetworkAccessManager *manager = new QNetworkAccessManager(this);
@@ -273,10 +274,12 @@ void MainWindow::networkManager_replyFinished(QNetworkReply *reply)
             // We tried to download the new update, so break the loop
             break;
         }
-    }
 
-    // Since the user is downloading update, close this instance
-    this->close();
+        // Since the user is downloading update, close this instance
+        this->close();
+    }
+    else if (userRequestedUpdate)
+        QMessageBox::information(this, "No New Updates", "You currently have the latest version of the software.", QMessageBox::Ok);
 
     // Update the timestamp that keeps track of last time update was checked
     lastUpdateCheck = QDateTime::currentDateTime();

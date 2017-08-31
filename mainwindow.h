@@ -44,6 +44,7 @@ class MainWindow : public QMainWindow
 protected:
     Ui::MainWindow *ui;
 
+    bool userRequestedUpdate;
     QDateTime lastUpdateCheck;
 
     QString defaultOpenPath;
@@ -71,7 +72,7 @@ public:
 
     void switchView(WindowViewType type);
 
-    void checkForUpdates();
+    void checkForUpdates(bool userRequestedUpdate = false);
 
     friend class viewAxialCoronalLoRes;
     friend class viewAxialCoronalHiRes;
