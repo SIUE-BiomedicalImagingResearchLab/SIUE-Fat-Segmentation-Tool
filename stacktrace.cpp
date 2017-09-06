@@ -17,9 +17,9 @@ QString addr2line(QString programName, const void *addr)
     // Second arg, the field width needs to be double the pointer size, base 16 for hex, and pad with 0s
     // OS X is different and uses atos instead of addr2line like Linux & Windows
 #ifdef Q_OS_MACOS
-    cmdStr = QString("atos -o %1 %2").arg(programName).arg(address, QT_POINTER_SIZE * 2, 16, QChar('0'));
+    cmdStr = QString("atos -o \"%1\" %2").arg(programName).arg(address, QT_POINTER_SIZE * 2, 16, QChar('0'));
 #else // Q_OS_MACOS
-    cmdStr = QString("addr2line -f -p -e %1 %2").arg(programName).arg(address, QT_POINTER_SIZE * 2, 16, QChar('0'));
+    cmdStr = QString("addr2line -f -p -e \"%1\" %2").arg(programName).arg(address, QT_POINTER_SIZE * 2, 16, QChar('0'));
 #endif // Q_OS_MACOS
 
     return util::execCommand(cmdStr);

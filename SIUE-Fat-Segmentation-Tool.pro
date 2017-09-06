@@ -11,7 +11,7 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 CONFIG += c++11
 !macx: CONFIG -= app_bundle
 
-VERSION = 2.0.0.0 # major.minor.patch.build
+VERSION = 2.0.1.0 # major.minor.patch.build
 
 DEFINES += APP_VERSION=\\\"$$VERSION\\\"
 

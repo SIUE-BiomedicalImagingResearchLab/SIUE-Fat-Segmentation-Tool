@@ -23,6 +23,7 @@
 #define OpenCVBinDebug "<OPENCV-DEBUG-BIN-PATH>"
 #define OpenCVBinRelease "<OPENCV-RELEASE-BIN-PATH>"
 #define QuazipBin "<QUAZIP-BIN-PATH>"
+#define OpenSSLBin "<OPENSSL-WIN64-BIN-PATH>"
 
 #define WinDeployQt "<WINDEPLOYQT-BIN>"
 
@@ -92,6 +93,10 @@ Source: "{#QuazipBin}/quazipd.dll"; DestDir: "{app}"; Flags: ignoreversion
 #else
 Source: "{#QuazipBin}/quazip.dll"; DestDir: "{app}"; Flags: ignoreversion
 #endif
+
+Source: "{#OpenSSLBin}/libeay32.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#OpenSSLBin}/libssl32.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#OpenSSLBin}/ssleay32.dll"; DestDir: "{app}"; Flags: ignoreversion
 
 Source: "{#SrcDir}\*.dll"; DestDir: "{app}"; Flags: ignoreversion skipifsourcedoesntexist
 Source: "{#SrcDir}\*.pdb"; DestDir: "{app}"; Flags: ignoreversion skipifsourcedoesntexist
