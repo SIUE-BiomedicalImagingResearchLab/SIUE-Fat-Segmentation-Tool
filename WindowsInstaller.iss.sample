@@ -2,20 +2,22 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 ; MAKE SURE TO CHANGE THIS INFORMATION BEFORE BUILDING A NEW RELEASE
-; MUST UPDATE VERSION NUMBER AND SOURCE DIRECTORY AT A MINIMUM
+; MUST UPDATE SOURCE DIRECTORY AT A MINIMUM
 #define MyAppName "SIUE Fat Segmentation Tool"
-#define MyAppVersion "1.0.2.0"
 #define MyAppPublisher "Addison Elliott"
 #define MyAppURL "https://github.com/addisonElliott/SIUE-Fat-Segmentation-Tool"
 #define MyAppExeName "SIUE Fat Segmentation Tool.exe"
 #define MyAppRelease "Release"
 
+; Source directory of the build. This should be the folder that Qt Creator generates when building
+#define SrcDir "<SOURCE-DIRECTORY>-" + MyAppRelease + "\" + LowerCase(MyAppRelease)
+
+; Get application version based on the metadata from the executable
+#define MyAppVersion GetFileVersion(SrcDir + "\" + MyAppExeName)
+
 ; Output filename and directory for the installer
 #define OutputFilename "SIUE-Fat-Segmentation-Tool-v" + MyAppVersion + "-" + MyAppRelease + "-Win_x64"
 #define OutputDirectory "<DESIRED-OUTPUT-DIRECTORY-HERE>"
-
-; Source directory of the build. This should be the folder that Qt Creator generates when building
-#define SrcDir "<SOURCE-DIRECTORY>-" + MyAppRelease + "\" + LowerCase(MyAppRelease)
 
 ; Location of the binary directories for the external libraries: NIFTI, ZLIB, OpenCV Debug & Release
 #define NiftiBin "<NIFTI-BIN-PATH>"
