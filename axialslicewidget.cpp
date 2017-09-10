@@ -1503,7 +1503,7 @@ void AxialSliceWidget::mouseMoveEvent(QMouseEvent *eventMove)
         // Get matrix for converting from window to OpenGL coordinate system
         // Note: Do not apply MVP because we do not want to see movement based on
         // scaling (this means dont flip it either)
-        QMatrix4x4 windowToOpenGLMatrix = getWindowToOpenGLMatrix(false, false);
+        QMatrix4x4 windowToOpenGLMatrix = getWindowToOpenGLMatrix(false, true);
 
         // Apply transformation to current and last mouse position
         curMousePos = windowToOpenGLMatrix * curMousePos;

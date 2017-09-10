@@ -146,11 +146,6 @@ bool viewAxialCoronalHiRes::loadImage(QuaZip *zip)
         waterUpperImage = nifti_image_read_qt(zip, waterUpperPath);
         waterLowerImage = nifti_image_read_qt(zip, waterLowerPath);
 
-//        fatUpperImage = nifti_image_read("D:/Users/addis/Desktop/SubjectData_DixonAbdomen_2016/Subject0001_Initial/fatUpper.nii", true);
-//        fatLowerImage = nifti_image_read("D:/Users/addis/Desktop/SubjectData_DixonAbdomen_2016/Subject0001_Initial/fatLower.nii", true);
-//        waterUpperImage = nifti_image_read("D:/Users/addis/Desktop/SubjectData_DixonAbdomen_2016/Subject0001_Initial/waterUpper.nii", true);
-//        waterLowerImage = nifti_image_read("D:/Users/addis/Desktop/SubjectData_DixonAbdomen_2016/Subject0001_Initial/waterLower.nii", true);
-
         if (!fatUpperImage || !fatLowerImage || !waterUpperImage || !waterLowerImage)
             EXCEPTION("Unable to load SDI image", "The SDI image you are trying to load may be corrupted. One of the NIFTI images is missing.");
 

@@ -205,7 +205,7 @@ void CoronalSliceWidget::initializeSliceView()
     qDebug() << "Context valid: " << context()->isValid();
     qDebug() << "Really used OpenGL: " << context()->format().majorVersion() << "." << context()->format().minorVersion();
     qDebug() << "OpenGL information: VENDOR:       " << (const char*)glGetString(GL_VENDOR);
-    qDebug() << "                    RENDERDER:    " << (const char*)glGetString(GL_RENDERER);
+    qDebug() << "                    RENDERER:    " << (const char*)glGetString(GL_RENDERER);
     qDebug() << "                    VERSION:      " << (const char*)glGetString(GL_VERSION);
     qDebug() << "                    GLSL VERSION: " << (const char*)glGetString(GL_SHADING_LANGUAGE_VERSION);
     qDebug() << "";
@@ -377,7 +377,7 @@ void CoronalSliceWidget::mouseMoveEvent(QMouseEvent *eventMove)
         // Get matrix for converting from window to OpenGL coordinate system
         // Note: Do not apply MVP because we do not want to see movement based on
         // scaling (this means dont flip it either)
-        QMatrix4x4 windowToOpenGLMatrix = this->getWindowToOpenGLMatrix(false, false);
+        QMatrix4x4 windowToOpenGLMatrix = this->getWindowToOpenGLMatrix(false, true);
 
         // Apply transformation to current and last mouse position
         curMousePos = windowToOpenGLMatrix * curMousePos;
