@@ -1444,6 +1444,9 @@
        <property name="mouseTracking">
         <bool>true</bool>
        </property>
+       <property name="focusPolicy">
+        <enum>Qt::ClickFocus</enum>
+       </property>
        <property name="whatsThis">
         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Axial Slice View&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Contains the axial slice of the MRI data. The currently displayed axial slice is the Z component of the location. &lt;/p&gt;&lt;p&gt;Tracing the various layers of fat occurs at this level&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
