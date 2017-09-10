@@ -12,6 +12,14 @@ void messageLogger(QtMsgType type, const QMessageLogContext &context, const QStr
 {
     QString formattedMsg = qFormatLogMessage(type, context, msg);
 
+#if defined(Q_OS_MAC)
+    // Odd bug in Qt, best to make it a debug message so it doesnt annoy the user
+    if (type == QtWarningMsg && msg.contains(QStringLiteral("Error receiving trust for a CA certificate")))
+    {
+        type = QtDebugMsg;
+    }
+#endif
+
     // Open the log file and write the formatted log message
     QTextStream out(logFh, QIODevice::WriteOnly);
     out << formattedMsg << endl;
