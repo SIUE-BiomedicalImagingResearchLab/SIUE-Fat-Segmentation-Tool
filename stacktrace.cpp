@@ -84,7 +84,7 @@ QString windowsPrintStackTrace(CONTEXT *context, bool walkStack)
 
     // If walk the stack, then use StackWalk64 to go through each entry
     while (StackWalk64(image, curProcess, GetCurrentThread(),
-                     &frame, context, 0, SymFunctionTableAccess, SymGetModuleBase, 0))
+                     &frame, context, 0, SymFunctionTableAccess64, SymGetModuleBase64, 0))
     {
         // WEIRD BUG: If I don't give this it's own variable and instead imbed it into the .arg(XXX) part, it will
         // cause a segmentation fault? No idea why but whatever.

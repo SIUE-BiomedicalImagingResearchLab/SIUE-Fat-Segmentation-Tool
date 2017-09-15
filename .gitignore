@@ -19,6 +19,8 @@
 *.qbs.user
 *.qbs.user.*
 custom.pro
+customx86.pro
+customx64.pro
 *.moc
 moc_*.cpp
 qrc_*.cpp
@@ -45,3 +47,4 @@ error.log
 # Installation Scripts, ignore these since they contain path dependent scripts that will be different from computer to computer
 MacDeployScript.sh
 WindowsInstaller.iss
+WindowsInstallerx86.iss

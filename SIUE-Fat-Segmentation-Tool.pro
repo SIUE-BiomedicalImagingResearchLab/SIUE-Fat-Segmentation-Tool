@@ -60,4 +60,14 @@ FORMS    += mainwindow.ui \
 RESOURCES += \
     resources.qrc
 
-exists(custom.pro): include(custom.pro)
+contains(QT_ARCH, x86_64) {
+    message('Building 64-bit binaries')
+
+    exists(customx64.pro): include(customx64.pro)
+    else:exists(custom.pro): include(custom.pro)
+    else:exists(customx86.pro): include(customx86.pro)
+} else:contains(QT_ARCH, i386) {
+    message('Building 32-bit binaries')
+    exists(customx86.pro): include(customx86.pro)
+    else:exists(custom.pro): include(custom.pro)
+}
